@@ -1,0 +1,78 @@
+<?php
+
+$data = []; // Definicia premennej pre ukladanie obsahu csv
+
+// Ak bol odoslany formular, a vo formulari sa nachadza subor s klucom csv_file, spracujeme ho.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
+
+    $file = $_FILES['csv_file'];  // Ziskame subor zo superglobal pola
+    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);  // Zistime pripomu suboru...
+
+    if (strtolower($ext) !== 'csv') {  // ...a skontrolujeme, ci ide o csv subor.
+        die("Povolené sú iba CSV súbory.");  // Ak nie, skript sa ukonci.
+    }
+
+    if ($file['error'] === 0) {  // Ak bol subor nacitany bez chyby...
+        $data = parseCsvToAssocArray($file['tmp_name'], ";");  // ...spracujeme ho pomocou funkcie.
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV Upload</title>
+</head>
+<body>
+
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="csv_file" accept=".csv" required>
+    <br><br>
+    <button type="submit">Nahrať a spracovať</button>
+</form>
+
+<?php if (!empty($data)): ?>
+    <h3>Obsah súboru:</h3>
+    <pre><?php print_r($data); ?></pre>
+<?php endif; ?>
+
+</body>
+</html>
+
+<?php
+function parseCsvToAssocArray(string $filePath, string $delimiter = ";"): array
+{
+    $result = [];
+    // TODO: kontrola, ci subor na danej ceste existuje.
+    if (!file_exists($filePath)) {
+        die("Súbor neexistuje: " . $filePath);
+    }
+
+    $handle = fopen($filePath, 'r');
+
+    // TODO: kontrola, ci sa subor podarilo otvorit.
+    if (!$handle) {
+        die("Nepodarilo sa otvoriť súbor: " . $filePath);
+    }
+
+    $headers = fgetcsv($handle, 0, $delimiter); // Nacitanie hlavicky - prveho riadku suboru. Nazvy v hlavicke sa pouziju ako kluce asoc. pola.
+    
+    // TODO: kontrola, ak hlavicka neexistuje.
+    if (!$headers) {
+        fclose($handle);
+        die("Súbor nemá hlavičku alebo je prázdny.");
+    }
+
+    // Parsovanie riadkov
+    while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+        if (count($row) === count($headers)) {
+            $data[] = array_combine($headers, $row);
+        }
+    }
+
+    // Korektne ukoncenie prace so suborom a vratenie spracovanych dat.
+    fclose($handle);
+    return $data;
+}
+?>
