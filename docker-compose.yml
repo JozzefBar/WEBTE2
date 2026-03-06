@@ -16,6 +16,8 @@ services:
     container_name: dev_php
     volumes:
       - ./src:/var/www/html
+    depends_on:
+      - db
 
   db:
     image: mariadb:11
