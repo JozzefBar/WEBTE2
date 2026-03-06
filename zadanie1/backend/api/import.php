@@ -59,7 +59,7 @@ if ($ext !== "csv"){
 }
 
 //parsing
-$data = parseToAssocArray($file["tmp_name"], ";");
+$data = parseCsvToAssocArray($file["tmp_name"], ";");
 
 if(empty($data)){
     http_response_code(400);

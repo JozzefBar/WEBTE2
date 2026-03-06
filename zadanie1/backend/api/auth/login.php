@@ -23,6 +23,12 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST"){
 
 session_start();
 
+//If user is already registered, we can skip this whole part
+if (isset($_SESSION['user_id'])) {
+    echo json_encode(['already_logged_in' => true]);
+    exit();
+}
+
 $body = json_decode(file_get_contents("php://input"), true);
 
 $email = isset($body["email"]) ? trim($body["email"])   : "";
@@ -50,6 +56,21 @@ if(!$pdo){
     exit();
 }
 
-$stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND auth_type = 'local' LIMIT1");
+$stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND auth_type = 'local' LIMIT 1");
 $stmt->execute([":email" => $email]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+//warning with specific wrong input
+if(!$user || !password_verify($password, $user["password_hash"])){
+    http_response_code(401);
+    echo json_encode(["error" => "Incorrect email or password"]);
+    exit();
+}
+
+//If password is okay, we can do to 2FA step
+$_SESSION["pending_2fa_user_id"] = $user["id"];
+
+echo json_encode([
+    "required_2fa" => true,
+    "message"  => "Enter the code from the Google Authenticator app",
+], JSON_UNESCAPED_UNICODE);

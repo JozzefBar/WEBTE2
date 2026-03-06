@@ -51,7 +51,7 @@ $sql = "
         c_birth.name AS birth_country,
         og.year,
         og.type AS games_type,
-        og.city AS gmaes_city,
+        og.city AS games_city,
         c_games.name AS games_country,
         d.name AS discipline,
         d.category,
@@ -123,7 +123,7 @@ $yearsStmt = $pdo->query("SELECT DISTINCT year FROM olympic_games ORDER BY year 
 $years = $yearsStmt->fetchAll(PDO::FETCH_COLUMN);
 
 // categories
-$categoriesStmt = $pdo->query("SELECT DISTINCT category FROM disciplines ORDER BY year ASC");
+$categoriesStmt = $pdo->query("SELECT DISTINCT category FROM disciplines ORDER BY category ASC");
 $categories = $categoriesStmt->fetchAll(PDO::FETCH_COLUMN);
 
 echo json_encode([

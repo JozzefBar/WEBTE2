@@ -1,8 +1,12 @@
 <?php
 
-//Registration of new user 
+//Registration of new user
 
 require_once(__DIR__ . "/../../../config.php");
+require_once(__DIR__ . '/../../../vendor/autoload.php');
+
+use RobThree\Auth\Providers\Qr\BaconQrCodeProvider;
+use RobThree\Auth\TwoFactorAuth;
 
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: http://localhost:5173");
@@ -71,18 +75,28 @@ if($stmt->fetchColumn()){
 //Password hashing - PASSWORD_BCRYPT is an algorithm designed for hashing passwords
 $hashedPassword = password_hash($password, PASSWORD_ARGON2ID);
 
-//Save user
+//Generate 2FA secret and QR code
+$tfa = new TwoFactorAuth(new BaconQrCodeProvider(4, '#ffffff', '#000000', 'svg'));
+$tfaSecret = $tfa->createSecret();
+$qrCode = $tfa->getQRCodeImageAsDataUri('Olympic Games APP', $tfaSecret);
 
+//Save user
 $stmt = $pdo->prepare("
-    INSERT INTO users (first_name, last_name, email, password, auth_type, created_at)
-    VALUES (:fn, :ln, :email, :pass, 'local', NOW())
+    INSERT INTO users (first_name, last_name, email, password_hash, auth_type, tfa_secret)
+    VALUES (:fn, :ln, :email, :pass, 'local', :tfa)
 ");
 $stmt->execute([
-    ":fn"       => $firstName
-    ":ln"       => $lastName
-    ":email"    => $email
-    ":pass"     => $hashedPassword
+    ":fn"       => $firstName,
+    ":ln"       => $lastName,
+    ":email"    => $email,
+    ":pass"     => $hashedPassword,
+    ":tfa"      => $tfaSecret,
 ]);
 
 http_response_code(201);
-echo json_encode(["success" => true, "message" => "Registration successful"], JSON_UNESCAPED_UNICODE);
+echo json_encode([
+    'success'    => true,
+    'message'    => 'Registration successful. Scan the QR code into the Google Authenticator app.',
+    'tfa_secret' => $tfaSecret, 
+    'qr_code'    => $qrCode,  
+], JSON_UNESCAPED_UNICODE);
