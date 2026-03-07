@@ -210,7 +210,7 @@ try{
 
         if(!$checkStmt->fetchColumn()){
             $insertStmt = $pdo->prepare("
-                INSERT INTO athlete_medals (athlete_id, olympic_id, discipline_id, medals_type_id)
+                INSERT INTO athlete_medals (athlete_id, olympic_games_id, discipline_id, medals_type_id)
                 VALUES (:aid, :gid, :did, :mid)
             ");
 

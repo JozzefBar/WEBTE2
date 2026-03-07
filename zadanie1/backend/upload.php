@@ -11,7 +11,9 @@ function insertCountry(PDO $pdo, string $name, ?string $code = null): int {
 }
 
 function insertOlympicGames(PDO $pdo, int $year, string $type, string $city, int $countryId): int {
-    // TODO: kontrola, ci argument type splna podmienky ENUM typu (LOH,ZOH)
+    if (!in_array($type, ['LOH', 'ZOH'])) {
+        throw new InvalidArgumentException("Invalid type '$type'. Must be 'LOH' or 'ZOH'.");
+    }
 
     $sql = "INSERT INTO olympic_games (year, type, city, country_id) VALUES (:year, :type, :city, :country_id)";
     $stmt = $pdo->prepare($sql);
@@ -91,7 +93,9 @@ function getOrCreateGames(PDO $pdo, int $year, string $type, string $city, int $
         return (int) $id;
     }
 
-    // TODO: kontrola, ci argument type splna podmienky ENUM typu (LOH,ZOH)
+    if (!in_array($type, ['LOH', 'ZOH'])) {
+        throw new InvalidArgumentException("Invalid type '$type'. Must be 'LOH' or 'ZOH'.");
+    }
 
     // Ak neexistuje, vytvor novy zaznam.
     $stmt = $pdo->prepare("INSERT INTO olympic_games (year, type, city, country_id) VALUES (:year, :type, :city, :country_id)");

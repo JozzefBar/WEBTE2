@@ -44,21 +44,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
 function parseCsvToAssocArray(string $filePath, string $delimiter = ";"): array
 {
     $result = [];
-    // TODO: kontrola, ci subor na danej ceste existuje.
     if (!file_exists($filePath)) {
         die("Súbor neexistuje: " . $filePath);
     }
 
     $handle = fopen($filePath, 'r');
 
-    // TODO: kontrola, ci sa subor podarilo otvorit.
     if (!$handle) {
         die("Nepodarilo sa otvoriť súbor: " . $filePath);
     }
 
     $headers = fgetcsv($handle, 0, $delimiter); // Nacitanie hlavicky - prveho riadku suboru. Nazvy v hlavicke sa pouziju ako kluce asoc. pola.
-    
-    // TODO: kontrola, ak hlavicka neexistuje.
+
     if (!$headers) {
         fclose($handle);
         die("Súbor nemá hlavičku alebo je prázdny.");
