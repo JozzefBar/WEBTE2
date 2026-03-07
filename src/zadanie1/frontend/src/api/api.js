@@ -1,9 +1,9 @@
 //Central part for all HTTP request on PHP backend
 
-const BASE_URL = "http://localhost:8080/backend/api";
+const BASE_URL = "http://localhost:8080/zadanie1/backend/api";
 
 async function request(path, options = {}) {
-    const res = await fetch("${BASE_URL}${path}", {
+    const res = await fetch(`${BASE_URL}${path}`, {
         ...options,
         credentials: "include",
         headers: {
@@ -27,7 +27,7 @@ export function getAthletes(params = {}) {
     Object.entries(params).forEach(([k, v]) => {
         if(v !== undefined && v !== "") query.set(k, String(v));
     });
-    return request("/athletes.php?${query.toString()}");
+    return request(`/athletes.php?${query.toString()}`);
 }
 
 export function getAthlete(id) {
@@ -77,9 +77,13 @@ export function importCSV(file) {
     const formData = new FormData();
     formData.append("csv_file", file)
 
-    return fetch("${BASE_URL}/import.php", {
+    return fetch(`${BASE_URL}/import.php`, {
         method: "POST",
         credentials: "include",
         body: formData,
     }).then(res => res.json());
+}
+
+export function clearData() {
+  return request('/clear-data.php', { method: 'POST' });
 }

@@ -11,15 +11,22 @@ import ProfilePage from './pages/ProfilePage';
 //safety for private zone -> login
 function PrivateRoute({ children }){
   const { user, loading } = useAuth();
-  if(loading)
-    return <div className = "loading-screen">Načítavam...</div>
+  if (loading) return (
+    <div className="loading-screen">
+      <div className="spinner-border text-danger"></div>
+    </div>
+  );
   return user ? children : <Navigate to="/login" replace />;
 }
 
 //Page for user that are not logged in /dashboard
 function PublicOnlyRoute({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="loading-screen">Načítavam...</div>;
+  if (loading) return (
+    <div className="loading-screen">
+      <div className="spinner-border text-danger"></div>
+    </div>
+  );
   return !user ? children : <Navigate to="/dashboard" replace />;
 }
 

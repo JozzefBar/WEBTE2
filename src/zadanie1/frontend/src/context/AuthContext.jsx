@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react"
-import { getMe, logout as apiLogout } from "/..api/api"
+import { getMe, logout as apiLogout } from "../api/api"
 
 const AuthContext = createContext(null)
-export function AuthProvide({ children }) {
+export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
 
