@@ -2,8 +2,8 @@
 
 //Registration of new user
 
-require_once(__DIR__ . "/../../../config.php");
-require_once(__DIR__ . '/../../../vendor/autoload.php');
+require_once(__DIR__ . "/../../config.php");
+require_once(__DIR__ . '/../../../../vendor/autoload.php');
 
 use RobThree\Auth\Providers\Qr\BaconQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
@@ -33,7 +33,7 @@ $errors = [];
 $firstName = isset($body["first_name"]) ? trim($body["first_name"]) : "";
 $lastName = isset($body["last_name"]) ? trim($body["last_name"]) : "";
 $email = isset($body["email"]) ? trim($body["email"]) : "";
-$password = isset($body["password"]) ? $body["password"] : "";
+$userPassword = isset($body["password"]) ? $body["password"] : "";   // renamed to avoid conflict with DB credentials
 
 if (empty($firstName))
     $errors["first_name"] = "First name is required";
@@ -46,9 +46,9 @@ if (empty($email))
 elseif (!filter_var($email, FILTER_VALIDATE_EMAIL))
     $errors["email"] = "Invalid email format";
 
-if(empty($password))
+if(empty($userPassword))
     $errors["password"] = "Password is required";
-else if (strlen($password) < 8)
+else if (strlen($userPassword) < 8)
     $errors["password"] = "Password must be at least 8 characters long";
 
 if (!empty($errors)){
@@ -57,6 +57,7 @@ if (!empty($errors)){
     exit();
 }
 
+// $password is the DB password defined in config.php; do not overwrite it with user input.
 $pdo = connectDatabase($hostname, $database, $username, $password);
 if(!$pdo){
     http_response_code(500);
@@ -73,7 +74,7 @@ if($stmt->fetchColumn()){
 }
 
 //Password hashing - PASSWORD_BCRYPT is an algorithm designed for hashing passwords
-$hashedPassword = password_hash($password, PASSWORD_ARGON2ID);
+$hashedPassword = password_hash($userPassword, PASSWORD_ARGON2ID);
 
 //Generate 2FA secret and QR code
 $tfa = new TwoFactorAuth(new BaconQrCodeProvider(4, '#ffffff', '#000000', 'svg'));

@@ -7,15 +7,15 @@
 
 session_start();
 
-require_once(__DIR__ . '/../../../config.php');
-require_once(__DIR__ . '/../../../vendor/autoload.php');
+require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/../../../../vendor/autoload.php');
 
 use Google\Client;
 use Google\Service\Oauth2;
 
 $client = new Client();
 
-$client->setAuthConfig(__DIR__ . '/../../../client_secret.json');
+$client->setAuthConfig(__DIR__ . '/../../../../client_secret.json');
 
 $redirectUri = 'http://localhost:8080/backend/api/auth/oauth2callback.php';
 $client->setRedirectUri($redirectUri);

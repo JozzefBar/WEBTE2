@@ -2,7 +2,7 @@
 
 //calling this endpoint during the start of application, if the user is already logged in
 
-require_once(__DIR__ . "/../../../config.php");
+require_once(__DIR__ . "/../../config.php");
 
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: http://localhost:5173");

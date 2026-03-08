@@ -3,11 +3,12 @@
 // endpoint for athletes with medals
 // filtering is supported
 
-require_once(__DIR__ . "/../../../config.php");
+require_once(__DIR__ . "/../config.php");
 
 header("Content-Type: application/json; charset=utf-8");
 //CORS headers
 header("Access-Control-Allow-Origin: http://localhost:5173");
+header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-type");
 

@@ -11,12 +11,28 @@ class ComposerStaticInit017c5201b421d99f90b020e446d1b958
         array (
             'RobThree\\Auth\\' => 14,
         ),
+        'D' =>
+        array (
+            'DASPRiD\\Enum\\' => 13,
+        ),
+        'B' =>
+        array (
+            'BaconQrCode\\' => 12,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
         'RobThree\\Auth\\' =>
         array (
             0 => __DIR__ . '/..' . '/robthree/twofactorauth/lib',
+        ),
+        'DASPRiD\\Enum\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/dasprid/enum/src',
+        ),
+        'BaconQrCode\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/bacon/bacon-qr-code/src',
         ),
     );
 

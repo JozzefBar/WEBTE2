@@ -3,7 +3,7 @@
 //endpoint will handle the upload of the CSV file and insert the data into the database.
 // only for logged users
 
-require_once(__DIR__ . "/../../../config.php");
+require_once(__DIR__ . "/../config.php");
 require_once(__DIR__ . "/../parser.php");
 require_once(__DIR__ . "/../upload.php");
 

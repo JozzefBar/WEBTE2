@@ -2,7 +2,7 @@
 
 //Login user - with email verification
 
-require_once(__DIR__ . "/../../../config.php");
+require_once(__DIR__ . "/../../config.php");
 
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: http://localhost:5173");
@@ -32,7 +32,7 @@ if (isset($_SESSION['user_id'])) {
 $body = json_decode(file_get_contents("php://input"), true);
 
 $email = isset($body["email"]) ? trim($body["email"])   : "";
-$password = isset($body["password"]) ? trim($body["password"])   : "";
+$userPassword = isset($body["password"]) ? trim($body["password"])   : "";
 
 //backend validation
 
@@ -40,7 +40,7 @@ $errors = [];
 if(empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL))
     $errors["email"] = "Invalid email";
 
-if(empty($password))
+if(empty($userPassword))
     $errors["password"] = "Heslo is required";
 
 if(!empty($errors)){
@@ -61,7 +61,7 @@ $stmt->execute([":email" => $email]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 //warning with specific wrong input
-if(!$user || !password_verify($password, $user["password_hash"])){
+if(!$user || !password_verify($userPassword, $user["password_hash"])){
     http_response_code(401);
     echo json_encode(["error" => "Incorrect email or password"]);
     exit();
