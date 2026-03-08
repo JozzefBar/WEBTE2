@@ -55,7 +55,7 @@ export default function Navbar() {
                 </li>
                 <li className="nav-item">
                   <button className="btn btn-outline-light btn-sm ms-2" onClick={handleLogout}>
-                    <i className="bi bi-box-arrow-right me-1"></i>Odhlásiť
+                    <i className="bi bi-box-arrow-right me-2"></i>Odhlásiť
                   </button>
                 </li>
               </>

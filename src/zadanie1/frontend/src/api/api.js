@@ -73,15 +73,23 @@ export function getLoginHistory() {
 
 //Import
 
-export function importCSV(file) {
+export async function importCSV(file) {
     const formData = new FormData();
-    formData.append("csv_file", file)
+    formData.append("csv_file", file);
 
-    return fetch(`${BASE_URL}/import.php`, {
+    const res = await fetch(`${BASE_URL}/import.php`, {
         method: "POST",
         credentials: "include",
         body: formData,
-    }).then(res => res.json());
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw { status: res.status, ...data };
+    }
+
+    return data;
 }
 
 export function clearData() {

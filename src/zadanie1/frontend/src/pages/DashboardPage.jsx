@@ -38,8 +38,8 @@ export default function DashboardPage() {
       setImportResult(result);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setSelectedFile(null);
-    } catch {
-      setImportError('Chyba pri importe. Skontroluj formát súboru.');
+    } catch (err) {
+      setImportError(err?.error ?? 'Chyba pri importe. Skontroluj formát súboru.');
     } finally {
       setImporting(false);
     }
@@ -107,7 +107,7 @@ export default function DashboardPage() {
           </div>
           <div className="card-body">
             <p className="text-muted small mb-3">
-              Nahraj CSV súbor s olympionikmi. Oddeľovač stĺpcov: <code>;</code>
+              Nahraj CSV súbor s olympionikmi. Oddeľovač stĺpcov musí byť: <code>;</code>
             </p>
             <div className="mb-3">
               <input

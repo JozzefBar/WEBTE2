@@ -3,9 +3,13 @@
 //endpoint will handle the upload of the CSV file and insert the data into the database.
 // only for logged users
 
+ob_start();
+
 require_once(__DIR__ . "/../config.php");
 require_once(__DIR__ . "/../parser.php");
 require_once(__DIR__ . "/../upload.php");
+
+ob_end_clean();
 
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: http://localhost:5173");
@@ -81,6 +85,15 @@ $inserted = 0;
 $skipped = 0;
 $errors = [];
 
+$parseDate = function(?string $val): ?string {
+    if (!$val) return null;
+    // if not right format, return null
+    if (str_contains($val, '#')) return null;
+    // date parsing
+    $d = DateTime::createFromFormat('d.m.Y', $val);
+    return $d ? $d->format('Y-m-d') : null;
+};
+
 try{
     foreach($data as $row){
         //Expected columns in CSV, based on instructions/oh_v2.csv
@@ -91,14 +104,14 @@ try{
         };
 
         //Countries
-        $birthCountryId = $get("KrajinaNarodenia") ? getOrCreateCountry($pdo, $get("KrajinaNarodenia")) : null;
-        $deathCountryId = $get("KrajinaUmrtia") ? getOrCreateCountry($pdo, $get("KrajinaUmrtia")) : null;
-        $gamesCountryId = $get("KrajinaOH") ? getOrCreateCountry($pdo, $get("KrajinaOH")) : null;
+        $birthCountryId = $get("birth_country") ? getOrCreateCountry($pdo, $get("birth_country")) : null;
+        $deathCountryId = $get("death_country") ? getOrCreateCountry($pdo, $get("death_country")) : null;
+        $gamesCountryId = $get("oh_country") ? getOrCreateCountry($pdo, $get("oh_country")) : null;
 
         //olympic games
-        $year = $get("RokOH") ? (int)$get("RokOH") : null;
-        $type = $get('TypOH');
-        $city = $get('MestoOH');
+        $year = $get("oh_year") ? (int)$get("oh_year") : null;
+        $type = $get('oh_type');
+        $city = $get('oh_city');
 
         if(!$year || !$type || !$city || !$gamesCountryId){
             $skipped++;
@@ -117,8 +130,8 @@ try{
 
         //Athlete
 
-        $firstName = $get("Meno");
-        $lastName = $get("Priezvisko");
+        $firstName = $get("name");
+        $lastName = $get("surname");
 
         if(!$firstName || !$lastName){
             $skipped++;
@@ -137,7 +150,7 @@ try{
         $findStmt->execute([
             ":fn" => $firstName,
             ":ln" => $lastName,
-            ":bd" => $get("DatumNarodenia"),
+            ":bd" => $parseDate($get("birth_day")),
         ]);
 
         $athleteId = $findStmt->fetchColumn();
@@ -147,18 +160,18 @@ try{
                 $pdo,
                 $firstName,
                 $lastName,
-                $get("DatumNarodenia"),
-                $get("MiestoNarodenia"),
+                $parseDate($get("birth_day")),
+                $get("birth_place"),
                 $birthCountryId,
-                $get("DatumUmrtia"),
-                $get("MiestoUmrtia"),
+                $parseDate($get("death_day")),
+                $get("death_place"),
                 $deathCountryId
             );
         }
 
         //discipline
-        $disciplineName = $get("Disciplina");
-        $category = $get("Kategoria");
+        $disciplineName = $get("discipline");
+        $category = null;
 
         if(!$disciplineName){
             $skipped++;
@@ -177,27 +190,19 @@ try{
         }
 
         //medail type
-        $medalName = $get("Medaila");
+        $placing = $get("placing") ? (int)$get("placing") : null;
 
-        if(!$medalName){
+        if(!$placing){
             $skipped++;
-            $errors[] = "Skip line - missing medal type";
+            $errors[] = "Skip line - missing placing";
             continue;
         }
-
-        $medalStmt = $pdo->prepare("SELECT id FROM medal_types WHERE name = :name LIMIT 1");
-        $medalStmt->execute([":name" => $medalName]);
-        $medalTypeId = $medalStmt->fetchColumn();
-
-        if(!$medalTypeId){
-            $skipped++;
-            $errors[] = "Unknown medal type: $medalName";
-            continue;
-        }
+        
+        $medalTypeId = getOrCreateMedalType($pdo, $placing);
 
         $checkStmt = $pdo->prepare("
             SELECT id FROM athlete_medals
-            WHERE athlete_id = :aid AND olympic_games_id = :gid AND discipline_id = :did AND medals_type_id = :mid
+            WHERE athlete_id = :aid AND olympic_games_id = :gid AND discipline_id = :did AND medal_type_id = :mid
             LIMIT 1
         ");
 
@@ -210,7 +215,7 @@ try{
 
         if(!$checkStmt->fetchColumn()){
             $insertStmt = $pdo->prepare("
-                INSERT INTO athlete_medals (athlete_id, olympic_games_id, discipline_id, medals_type_id)
+                INSERT INTO athlete_medals (athlete_id, olympic_games_id, discipline_id, medal_type_id)
                 VALUES (:aid, :gid, :did, :mid)
             ");
 
@@ -222,7 +227,7 @@ try{
             ]);
             $inserted++;
         }
-        else 
+        else
             $skipped++;
     }
 
@@ -230,7 +235,7 @@ try{
     $pdo->commit();
 
     echo json_encode([
-        "succes" => true,
+        "success" => true,
         "message" => "Import completed. Inserted: $inserted, Skipped: $skipped",
         "inserted" => $inserted,
         "skipped" => $skipped,
