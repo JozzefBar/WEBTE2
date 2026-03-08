@@ -30,11 +30,6 @@ export default function Navbar() {
 
         <div className="collapse navbar-collapse" id="mainNav">
           <ul className="navbar-nav me-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/">
-                <i className="bi bi-table me-1"></i>Olympionici
-              </Link>
-            </li>
             {user && (
               <li className="nav-item">
                 <Link className="nav-link" to="/dashboard">

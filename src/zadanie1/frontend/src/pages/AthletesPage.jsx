@@ -195,7 +195,7 @@ export default function AthletesPage() {
                         <td>{a.first_name}</td>
                         {!yearFilter && <td>{a.year}</td>}
                         <td>
-                          <span className={`badge ${a.games_type === 'LOH' ? 'bg-primary' : 'bg-success'}`}>
+                          <span className={`badge ${a.games_type === 'LOH' ? 'bg-success' : 'bg-primary'}`}>
                             {a.games_type}
                           </span>
                         </td>

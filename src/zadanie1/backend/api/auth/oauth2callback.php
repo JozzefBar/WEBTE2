@@ -15,9 +15,9 @@ use Google\Service\Oauth2;
 
 $client = new Client();
 
-$client->setAuthConfig(__DIR__ . '/../../../../client_secret.json');
+$client->setAuthConfig(__DIR__ . '/../../client_secret/client_secret_251050637037-srt1v9kdlkvleh4lr3n56q579trn6p7u.apps.googleusercontent.com.json');
 
-$redirectUri = 'http://localhost:8080/backend/api/auth/oauth2callback.php';
+$redirectUri = 'http://localhost:8080/zadanie1/backend/api/auth/oauth2callback.php';
 $client->setRedirectUri($redirectUri);
 
 //specific scopes
@@ -98,7 +98,7 @@ if (isset($_GET["code"])){
 
     //record to History
     $pdo->prepare("
-        INSERT INTO login_history (user_id, login_type, ip_address)
+        INSERT INTO login_history (user_id, auth_type, ip_address)
         VALUES (:uid, 'google', :ip)
     ")->execute([
         ':uid' => $userId,

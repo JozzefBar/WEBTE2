@@ -103,7 +103,7 @@ export default function LoginPage() {
                     <div className="text-center text-muted small mb-3">alebo</div>
 
                     <a
-                      href="http://localhost:8080/backend/api/auth/oauth2callback.php"
+                      href="http://localhost:8080/zadanie1/backend/api/auth/oauth2callback.php"
                       className="btn btn-outline-secondary w-100 mb-3"
                     >
                       <i className="bi bi-google me-2"></i>
