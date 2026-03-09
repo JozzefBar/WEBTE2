@@ -98,11 +98,10 @@ if (isset($_GET["code"])){
 
     //record to History
     $pdo->prepare("
-        INSERT INTO login_history (user_id, auth_type, ip_address)
-        VALUES (:uid, 'google', :ip)
+        INSERT INTO login_history (user_id, auth_type)
+        VALUES (:uid, 'google')
     ")->execute([
         ':uid' => $userId,
-        ':ip'  => $_SERVER['REMOTE_ADDR'] ?? null,
     ]);
 
     // Redirect to React frontend - private zone

@@ -27,7 +27,7 @@ if (!$pdo) { http_response_code(500); echo json_encode(['error' => 'Chyba DB']);
 
 //loading the history sorted from newest to oldest
 $stmt = $pdo->prepare("
-    SELECT login_type, created_at, ip_address
+    SELECT auth_type AS login_type, created_at
     FROM login_history
     WHERE user_id = :uid
     ORDER BY created_at DESC

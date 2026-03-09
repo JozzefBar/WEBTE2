@@ -27,7 +27,6 @@ export default function AthletesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [yearFilter, setYearFilter] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
   const [page, setPage] = useState(1);
   const [sortCol, setSortCol] = useState(null);
   const [sortDir, setSortDir] = useState(null);
@@ -40,7 +39,6 @@ export default function AthletesPage() {
         page,
         per_page: 10,
         year: yearFilter || undefined,
-        category: categoryFilter || undefined,
         sort_by: sortCol || undefined,
         sort_dir: sortDir || undefined,
       });
@@ -50,16 +48,15 @@ export default function AthletesPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, yearFilter, categoryFilter, sortCol, sortDir]);
+  }, [page, yearFilter, sortCol, sortDir]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const handleFilterChange = (type, value) => {
+  const handleFilterChange = (value) => {
     setPage(1)
-    if(type === "year") setYearFilter(value)
-    else setCategoryFilter(value)
+    setYearFilter(value)
   }
 
   const handleSort = (col) => {
@@ -77,14 +74,12 @@ export default function AthletesPage() {
   const athletes   = response?.data ?? [];
   const pagination = response?.pagination;
   const years      = response?.filters?.years ?? [];
-  const categories = response?.filters?.categories ?? [];
 
   return (
     <>
       <Navbar />
       <div className="container py-4">
         <h1 className="h3 fw-bold mb-4">
-          <i className="bi bi-trophy me-2 text-warning"></i>
           Slovenskí olympionici
         </h1>
 
@@ -99,32 +94,19 @@ export default function AthletesPage() {
                 <select
                   className="form-select"
                   value={yearFilter}
-                  onChange={e => handleFilterChange('year', e.target.value)}
+                  onChange={e => handleFilterChange(e.target.value)}
                 >
                   <option value="">Všetky roky</option>
                   {years.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
               </div>
               <div className="col-md-4">
-                <label className="form-label fw-semibold">
-                  <i className="bi bi-tag me-1"></i>Kategória
-                </label>
-                <select
-                  className="form-select"
-                  value={categoryFilter}
-                  onChange={e => handleFilterChange('category', e.target.value)}
-                >
-                  <option value="">Všetky kategórie</option>
-                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div className="col-md-4">
-                {(yearFilter || categoryFilter) && (
+                {yearFilter && (
                   <button
                     className="btn btn-outline-secondary w-100"
-                    onClick={() => { setYearFilter(''); setCategoryFilter(''); setPage(1); }}
+                    onClick={() => { setYearFilter(''); setPage(1); }}
                   >
-                    <i className="bi bi-x-circle me-1"></i>Zrušiť filtre
+                    <i className="bi bi-x-circle me-1"></i>Zrušiť filter
                   </button>
                 )}
               </div>
@@ -164,14 +146,6 @@ export default function AthletesPage() {
 
                     <th>Typ OH</th>
                     <th>Krajina</th>
-
-                    {!categoryFilter && (
-                      <th className="sortable" onClick={() => handleSort('category')}>
-                        Kategória
-                        <SortIcon dir={sortCol === 'category' ? sortDir : null} />
-                      </th>
-                    )}
-
                     <th>Disciplína</th>
                     <th>Medaila</th>
                   </tr>
@@ -179,7 +153,7 @@ export default function AthletesPage() {
                 <tbody>
                   {athletes.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="text-center text-muted py-5">
+                      <td colSpan={7} className="text-center text-muted py-5">
                         <i className="bi bi-inbox fs-3 d-block mb-2"></i>
                         Žiadne záznamy
                       </td>
@@ -200,7 +174,6 @@ export default function AthletesPage() {
                           </span>
                         </td>
                         <td>{a.games_country}</td>
-                        {!categoryFilter && <td>{a.category}</td>}
                         <td>{a.discipline}</td>
                         <td className={MEDAL_CLASS[a.placing]}>
                           {MEDAL_ICON[a.placing]} {a.medal_name}

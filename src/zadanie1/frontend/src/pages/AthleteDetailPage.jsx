@@ -110,12 +110,12 @@ export default function AthleteDetailPage() {
               <thead className="table-light">
                 <tr>
                   <th>Rok</th><th>OH</th><th>Mesto</th><th>Krajina</th>
-                  <th>Kategória</th><th>Disciplína</th><th>Medaila</th>
+                  <th>Disciplína</th><th>Medaila</th>
                 </tr>
               </thead>
               <tbody>
                 {!athlete.medals?.length ? (
-                  <tr><td colSpan={7} className="text-center text-muted py-4">Žiadne medaily</td></tr>
+                  <tr><td colSpan={6} className="text-center text-muted py-4">Žiadne medaily</td></tr>
                 ) : (
                   athlete.medals.map((m, i) => (
                     <tr key={i}>
@@ -127,7 +127,6 @@ export default function AthleteDetailPage() {
                       </td>
                       <td>{m.games_city}</td>
                       <td>{m.games_country}</td>
-                      <td>{m.category}</td>
                       <td>{m.discipline}</td>
                       <td className={MEDAL_CLASS[m.placing]}>
                         {MEDAL_ICON[m.placing]} {m.medal_name}

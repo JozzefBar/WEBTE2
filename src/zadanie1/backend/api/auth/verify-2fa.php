@@ -69,11 +69,10 @@ $_SESSION["auth_type"] = "local";
 
 try {
     $pdo->prepare("
-        INSERT INTO login_history(user_id, auth_type, ip_address)
-        VALUES (:uid, 'local', :ip);
+        INSERT INTO login_history(user_id, auth_type)
+        VALUES (:uid, 'local');
     ")->execute([
         ":uid" => $userId,
-        ":ip"   => $_SERVER["REMOTE_ADDR"] ?? null,
     ]);
 } catch (Exception $e) {
     error_log("login_history insert failed: " . $e->getMessage());

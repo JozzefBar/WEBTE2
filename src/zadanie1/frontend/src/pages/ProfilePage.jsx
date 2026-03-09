@@ -162,7 +162,6 @@ export default function ProfilePage() {
                         <tr>
                           <th>Dátum a čas</th>
                           <th>Spôsob</th>
-                          <th>IP</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -173,9 +172,6 @@ export default function ProfilePage() {
                               <span className={`badge ${h.login_type === 'google' ? 'bg-primary' : 'bg-secondary'}`}>
                                 {h.login_type === 'google' ? '🔵 Google' : '🔒 Lokálne'}
                               </span>
-                            </td>
-                            <td className="small text-muted font-monospace">
-                              {h.ip_address ?? '—'}
                             </td>
                           </tr>
                         ))}
