@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS"){
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST"){
     http_response_code(405);
-    echo json_encode(["error" => "Method is not allowed"]);
+    echo json_encode(["error" => "Metóda nie je povolená"]);
     exit();
 }
 
@@ -38,10 +38,10 @@ $userPassword = isset($body["password"]) ? trim($body["password"])   : "";
 
 $errors = [];
 if(empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL))
-    $errors["email"] = "Invalid email";
+    $errors["email"] = "Neplatný formát emailu";
 
 if(empty($userPassword))
-    $errors["password"] = "Heslo is required";
+    $errors["password"] = "Heslo je povinné";
 
 if(!empty($errors)){
     http_response_code(422);
@@ -52,7 +52,7 @@ if(!empty($errors)){
 $pdo = connectDatabase($hostname, $database, $username, $password);
 if(!$pdo){
     http_response_code(500);
-    echo json_encode(["error" => "Database connection error"]);
+    echo json_encode(["error" => "Chyba pripojenia k databáze"]);
     exit();
 }
 
@@ -63,7 +63,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 //warning with specific wrong input
 if(!$user || !password_verify($userPassword, $user["password_hash"])){
     http_response_code(401);
-    echo json_encode(["error" => "Incorrect email or password"]);
+    echo json_encode(["error" => "Nesprávny email alebo heslo"]);
     exit();
 }
 
@@ -72,5 +72,5 @@ $_SESSION["pending_2fa_user_id"] = $user["id"];
 
 echo json_encode([
     "required_2fa" => true,
-    "message"  => "Enter the code from the Google Authenticator app",
+    "message"  => "Zadaj kód z aplikácie Google Authenticator",
 ], JSON_UNESCAPED_UNICODE);

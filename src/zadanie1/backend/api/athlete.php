@@ -17,14 +17,14 @@ if($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
 
 if($_SERVER["REQUEST_METHOD"] !== "GET") {
     http_response_code(405);
-    echo json_encode(["error" => "Method is not allowed"]);
+    echo json_encode(["error" => "Metóda nie je povolená"]);
     exit();
 }
 
 // Olympian ID must be in the URL: /api/athlete.php?id=5
 if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
     http_response_code(400);
-    echo json_encode(["error" => "Missing or invalid ID"]);
+    echo json_encode(["error" => "Chýbajúce alebo neplatné ID"]);
     exit();
 }
 
@@ -33,7 +33,7 @@ $id = (int)$_GET["id"];
 $pdo = connectDatabase($hostname, $database, $username, $password);
 if(!$pdo){
     http_response_code(500);
-    echo json_encode(["error" => "Database connection error"]);
+    echo json_encode(["error" => "Chyba pripojenia k databáze"]);
     exit();
 }
 
@@ -60,7 +60,7 @@ $athlete = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if(!$athlete) {
     http_response_code(404);
-    echo json_encode(["error" => "Olympian not found"]);
+    echo json_encode(["error" => "Olympionik nebol nájdený"]);
     exit();
 }
 

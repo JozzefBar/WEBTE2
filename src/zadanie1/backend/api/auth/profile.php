@@ -17,13 +17,13 @@ session_start();
 
 if (!isset($_SESSION["user_id"])) {
     http_response_code(401);
-    echo json_encode(["error" => "Not logged in"]);
+    echo json_encode(["error" => "Nie si prihlásený"]);
     exit();
 }
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(405);
-    echo json_encode(["error" => "Method not allowed"]);
+    echo json_encode(["error" => "Metóda nie je povolená"]);
     exit();
 }
 
@@ -48,7 +48,7 @@ if (!empty($errors)) {
 $pdo = connectDatabase($hostname, $database, $username, $password);
 if (!$pdo) {
     http_response_code(500);
-    echo json_encode(["error" => "Database connection error"]);
+    echo json_encode(["error" => "Chyba pripojenia k databáze"]);
     exit();
 }
 

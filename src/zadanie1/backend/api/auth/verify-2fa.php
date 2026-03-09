@@ -24,7 +24,7 @@ session_start();
 //user have to be in state - "waiting for 2FA"
 if (!isset($_SESSION["pending_2fa_user_id"])) {
     http_response_code(401);
-    echo json_encode(["error" => "Invalid request - please enter your email and password first."]);
+    echo json_encode(["error" => "Neplatná požiadavka - najprv zadaj email a heslo."]);
     exit();
 }
 
@@ -33,7 +33,7 @@ $code = isset($body["code"]) ? trim($body["code"]) : "";
 
 if(empty($code)){
     http_response_code(422);
-    echo json_encode(["errors" => ["code" => "2FA code is mandatory"]]);
+    echo json_encode(["errors" => ["code" => "Kód 2FA je povinný"]]);
     exit();
 }
 
@@ -46,7 +46,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if(!$user || !$user["tfa_secret"]) {
     http_response_code(401);
-    echo json_encode(["error" => "User does not have 2FA set up"]);
+    echo json_encode(["error" => "Používateľ nemá nastavené 2FA"]);
     exit();
 }
 
@@ -55,7 +55,7 @@ if(!$user || !$user["tfa_secret"]) {
 $tfa = new TwoFactorAuth(new BaconQrCodeProvider());
 if (!$tfa->verifyCode($user["tfa_secret"], $code, 2)) {
     http_response_code(401);
-    echo json_encode(["error" => "Incorrect 2FA code"]);
+    echo json_encode(["error" => "Nesprávny kód 2FA"]);
     exit();
 }
 

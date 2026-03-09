@@ -21,14 +21,14 @@ if($_SERVER["REQUEST_METHOD"] === "OPTIONS"){
 //Only get requests
 if($_SERVER["REQUEST_METHOD"] !== "GET"){
     http_response_code(405);
-    echo json_encode(["error" => "Method is not allowed"]);
+    echo json_encode(["error" => "Metóda nie je povolená"]);
     exit();
 }
 
 $pdo = connectDatabase($hostname, $database, $username, $password);
 if (!$pdo){
     http_response_code(500);
-    echo json_encode(["error" => "Database connection error"]);
+    echo json_encode(["error" => "Chyba pripojenia k databáze"]);
     exit();
 }
 
@@ -36,7 +36,11 @@ if (!$pdo){
 $year = isset($_GET["year"]) && $_GET["year"] !== "" ? (int)$_GET["year"] : null;
 $category = isset($_GET['category']) && $_GET['category'] !== '' ? trim($_GET['category']) : null;
 $page = isset($_GET['page']) && (int)$_GET['page'] > 0 ? (int)$_GET['page'] : 1;
-$perPage = isset($_GET['per_page']) && in_array((int)$_GET['per_page'], [10, 20, 50]) ? (int)$_GET['per_page'] : 10;
+if (isset($_GET['per_page']) && $_GET['per_page'] === 'all') {
+    $perPage = null;
+} else {
+    $perPage = isset($_GET['per_page']) && in_array((int)$_GET['per_page'], [10, 20, 50]) ? (int)$_GET['per_page'] : 10;
+}
 $allowedSortColumns = ['last_name', 'year', 'category'];
 $sortBy = isset($_GET['sort_by']) && in_array($_GET['sort_by'], $allowedSortColumns) ? $_GET['sort_by'] : null;
 $sortDir = isset($_GET['sort_dir']) && strtoupper($_GET['sort_dir']) === 'DESC' ? 'DESC' : 'ASC';
@@ -86,7 +90,7 @@ $countSql = "SELECT COUNT(*) FROM ($sql) AS total_count";
 $countStmt = $pdo->prepare($countSql);
 $countStmt->execute($params);
 $totalRecords = (int)$countStmt->fetchColumn();
-$totalPages = (int)ceil($totalRecords/$perPage);
+$totalPages = $perPage !== null ? (int)ceil($totalRecords / $perPage) : 1;
 
 //adding sorting
 if($sortBy !== null) {
@@ -102,9 +106,10 @@ if($sortBy !== null) {
 }
 
 
-// LIMIT and OFFSET
-$offset = ($page - 1) * $perPage;
-$sql .= " LIMIT :limit OFFSET :offset";
+if ($perPage !== null) {
+    $offset = ($page - 1) * $perPage;
+    $sql .= " LIMIT :limit OFFSET :offset";
+}
 
 $stmt = $pdo->prepare($sql);
 
@@ -112,8 +117,10 @@ foreach ($params as $key => $value) {
     $stmt->bindValue($key, $value);
 }
 
-$stmt->bindValue(":limit", $perPage, PDO::PARAM_INT);
-$stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
+if ($perPage !== null) {
+    $stmt->bindValue(":limit", $perPage, PDO::PARAM_INT);
+    $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
+}
 
 $stmt->execute();
 $athletes = $stmt->fetchAll(PDO::FETCH_ASSOC);

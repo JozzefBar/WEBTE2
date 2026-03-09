@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS"){
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST"){
     http_response_code(405);
-    echo json_encode(["error" => "Method is not allowed"]);
+    echo json_encode(["error" => "Metóda nie je povolená"]);
     exit();
 }
 
@@ -36,20 +36,20 @@ $email = isset($body["email"]) ? trim($body["email"]) : "";
 $userPassword = isset($body["password"]) ? $body["password"] : "";   // renamed to avoid conflict with DB credentials
 
 if (empty($firstName))
-    $errors["first_name"] = "First name is required";
+    $errors["first_name"] = "Meno je povinné";
 
 if (empty($lastName))
-    $errors["last_name"] = "Last name is required";
+    $errors["last_name"] = "Priezvisko je povinné";
 
 if (empty($email))
-    $errors["email"] = "Email is required";
+    $errors["email"] = "Email je povinný";
 elseif (!filter_var($email, FILTER_VALIDATE_EMAIL))
-    $errors["email"] = "Invalid email format";
+    $errors["email"] = "Neplatný formát emailu";
 
 if(empty($userPassword))
-    $errors["password"] = "Password is required";
+    $errors["password"] = "Heslo je povinné";
 else if (strlen($userPassword) < 8)
-    $errors["password"] = "Password must be at least 8 characters long";
+    $errors["password"] = "Heslo musí mať aspoň 8 znakov";
 
 if (!empty($errors)){
     http_response_code(422);
@@ -61,7 +61,7 @@ if (!empty($errors)){
 $pdo = connectDatabase($hostname, $database, $username, $password);
 if(!$pdo){
     http_response_code(500);
-    echo json_encode(["error" => "Database connection error"]);
+    echo json_encode(["error" => "Chyba pripojenia k databáze"]);
     exit();
 }
 
@@ -69,7 +69,7 @@ $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email LIMIT 1");
 $stmt->execute([":email" => $email]);
 if($stmt->fetchColumn()){
     http_response_code(409);
-    echo json_encode(["errors" => ["This email is already registered"]]);
+    echo json_encode(["errors" => ["email" => "Tento email je už zaregistrovaný"]]);
     exit();
 }
 
@@ -97,7 +97,7 @@ $stmt->execute([
 http_response_code(201);
 echo json_encode([
     'success'    => true,
-    'message'    => 'Registration successful. Scan the QR code into the Google Authenticator app.',
+    'message'    => 'Registrácia úspešná. Naskenuj QR kód do aplikácie Google Authenticator.',
     'tfa_secret' => $tfaSecret, 
     'qr_code'    => $qrCode,  
 ], JSON_UNESCAPED_UNICODE);

@@ -28,20 +28,20 @@ session_start();
 //check if user is logged
 if(!isset($_SESSION["user_id"])) {
     http_response_code(401);
-    echo json_encode(["error" => "Not logged in"]);
+    echo json_encode(["error" => "Nie si prihlásený"]);
     exit();
 }
 
 
 if($_SERVER["REQUEST_METHOD"] !== "POST"){
     http_response_code(405);
-    echo json_encode(["error" => "Method is not allowed"]);
+    echo json_encode(["error" => "Metóda nie je povolená"]);
     exit();
 }
 
 if (!isset($_FILES["csv_file"])) {
     http_response_code(400);
-    echo json_encode(["error" => "No file uploaded"]);
+    echo json_encode(["error" => "Žiadny súbor nebol nahratý"]);
     exit();
 }
 
@@ -51,14 +51,14 @@ $file = $_FILES["csv_file"];
 //error and suffix check
 if ($file["error"] !== UPLOAD_ERR_OK){
     http_response_code(400);
-    echo json_encode(["error" => "Error uploading file: " . $file["error"]]);
+    echo json_encode(["error" => "Chyba pri nahrávaní súboru: " . $file["error"]]);
     exit();
 }
 
 $ext = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
 if ($ext !== "csv"){
     http_response_code(400);
-    echo json_encode(["error" => "Only csv files are allowed"]);
+    echo json_encode(["error" => "Povolené sú len súbory .csv"]);
     exit();
 }
 
@@ -67,14 +67,14 @@ $data = parseCsvToAssocArray($file["tmp_name"], ";");
 
 if(empty($data)){
     http_response_code(400);
-    echo json_encode(["error" => "CSV file is empty or invalid"]);
+    echo json_encode(["error" => "CSV súbor je prázdny alebo neplatný"]);
     exit();
 }
 
 $pdo = connectDatabase($hostname, $database, $username, $password);
 if(!$pdo){
     http_response_code(500);
-    echo json_encode(["error" => "Database connection error"]);
+    echo json_encode(["error" => "Chyba pripojenia k databáze"]);
     exit();
 }
 
@@ -115,14 +115,14 @@ try{
 
         if(!$year || !$type || !$city || !$gamesCountryId){
             $skipped++;
-            $errors[] = "Skipped line - missing OH data: " . json_encode($row, JSON_UNESCAPED_UNICODE);
+            $errors[] = "Preskočený riadok - chýbajú údaje OH: " . json_encode($row, JSON_UNESCAPED_UNICODE);
             continue;
         }
 
         //enum validation
         if(!in_array($type, ['LOH', 'ZOH'])){
             $skipped++;
-            $errors[] = "Invalid OH type '$type' in line: " . json_encode($row, JSON_UNESCAPED_UNICODE);
+            $errors[] = "Neplatný typ OH '$type' v riadku: " . json_encode($row, JSON_UNESCAPED_UNICODE);
             continue;
         }
 
@@ -135,7 +135,7 @@ try{
 
         if(!$firstName || !$lastName){
             $skipped++;
-            $errors[] = "Skipped line - missing first/last name";
+            $errors[] = "Preskočený riadok - chýba meno alebo priezvisko";
             continue;
         }
 
@@ -175,7 +175,7 @@ try{
 
         if(!$disciplineName){
             $skipped++;
-            $errors[] = "Skip the line - lack of discipline";
+            $errors[] = "Preskočený riadok – chýba disciplína";
             continue;
         }
 
@@ -194,10 +194,10 @@ try{
 
         if(!$placing){
             $skipped++;
-            $errors[] = "Skip line - missing placing";
+            $errors[] = "Preskočený riadok - chýba umiestnenie";
             continue;
         }
-        
+
         $medalTypeId = getOrCreateMedalType($pdo, $placing);
 
         $checkStmt = $pdo->prepare("
@@ -226,9 +226,10 @@ try{
                 ":mid" => $medalTypeId,
             ]);
             $inserted++;
-        }
-        else
+        } else {
             $skipped++;
+            $errors[] = "Duplikát preskočený: $firstName $lastName - $disciplineName ($year)";
+        }
     }
 
     //commit all
@@ -236,7 +237,7 @@ try{
 
     echo json_encode([
         "success" => true,
-        "message" => "Import completed. Inserted: $inserted, Skipped: $skipped",
+        "message" => "Import dokončený.",
         "inserted" => $inserted,
         "skipped" => $skipped,
         "errors" => $errors,
@@ -246,6 +247,6 @@ try{
     $pdo->rollBack();
     http_response_code(500);
     echo json_encode([
-      'error' => 'Issue during import: ' . $e->getMessage()
+      'error' => 'Chyba počas importu: ' . $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
 }

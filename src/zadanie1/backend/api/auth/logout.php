@@ -20,4 +20,4 @@ session_start();
 $_SESSION = [];
 session_destroy();
 
-echo json_encode(["success" => true, "message" => "Logout successful"], JSON_UNESCAPED_UNICODE);
+echo json_encode(["success" => true, "message" => "Odhlásenie úspešné"], JSON_UNESCAPED_UNICODE);
