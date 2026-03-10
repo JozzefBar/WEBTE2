@@ -57,12 +57,16 @@ function parseCsvToAssocArray(string $filePath, string $delimiter = ";"): array
     // Parsovanie riadkov
     while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
         if (count($row) === count($headers)) {
-            $data[] = array_combine($headers, $row);
+            // Skip rows where all values are empty
+            $nonEmpty = array_filter($row, function($v) { return $v !== '' && $v !== null; });
+            if (empty($nonEmpty)) continue;
+
+            $result[] = array_combine($headers, $row);
         }
     }
 
     // Korektne ukoncenie prace so suborom a vratenie spracovanych dat.
     fclose($handle);
-    return $data;
+    return $result;
 }
 ?>

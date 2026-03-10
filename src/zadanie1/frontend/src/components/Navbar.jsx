@@ -12,7 +12,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav className="navbar navbar-expand-lg navbar-dark app-navbar">
       <div className="container">
         <Link className="navbar-brand" to="/">
           Slovenskí Olympionici
@@ -62,7 +62,7 @@ export default function Navbar() {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="btn btn-danger btn-sm" to="/register">
+                  <Link className="btn btn-light btn-sm" to="/register">
                     Registrácia
                   </Link>
                 </li>

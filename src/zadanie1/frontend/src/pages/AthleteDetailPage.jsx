@@ -67,7 +67,7 @@ export default function AthleteDetailPage() {
     <>
       <Navbar />
       <div className="container py-5 text-center">
-        <div className="spinner-border text-danger"></div>
+        <div className="spinner-border text-primary"></div>
       </div>
     </>
   );
@@ -89,8 +89,8 @@ export default function AthleteDetailPage() {
           <i className="bi bi-arrow-left me-1"></i>Späť na zoznam
         </button>
 
-        <div className="card shadow-sm mb-4">
-          <div className="card-header bg-dark text-white py-3">
+        <div className="card shadow-sm mb-4 card-panel">
+          <div className="card-header card-header-main py-3">
             <h1 className="h4 mb-0 fw-bold">
               <i className="bi bi-person-badge me-2"></i>
               {athlete.first_name} {athlete.last_name}
@@ -139,7 +139,7 @@ export default function AthleteDetailPage() {
           </div>
         </div>
 
-        <div className="card shadow-sm">
+        <div className="card shadow-sm card-panel">
           <div className="card-header">
             <h5 className="mb-0">
               <i className="bi bi-award me-2 text-warning"></i>
@@ -153,7 +153,7 @@ export default function AthleteDetailPage() {
               options={dtOptions}
               className="table table-hover"
             >
-              <thead className="table-dark">
+              <thead className="table-header-custom">
                 <tr>
                   <th>Rok</th>
                   <th data-dt-order="disable">OH</th>

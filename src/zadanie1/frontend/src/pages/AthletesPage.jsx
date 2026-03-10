@@ -113,7 +113,7 @@ export default function AthletesPage() {
           <div className="row g-2 mb-3">
             <div className="col-auto">
               <select
-                className="form-select form-select-sm"
+                className="form-select form-select-sm form-input"
                 value={selectedYear}
                 onChange={e => setSelectedYear(e.target.value)}
               >
@@ -123,7 +123,7 @@ export default function AthletesPage() {
             </div>
             <div className="col-auto">
               <select
-                className="form-select form-select-sm"
+                className="form-select form-select-sm form-input"
                 value={selectedDiscipline}
                 onChange={e => setSelectedDiscipline(e.target.value)}
               >
@@ -136,11 +136,11 @@ export default function AthletesPage() {
 
         {loading ? (
           <div className="text-center py-5">
-            <div className="spinner-border text-danger" role="status"></div>
+            <div className="spinner-border text-primary" role="status"></div>
             <p className="mt-2 text-muted">Načítavam...</p>
           </div>
         ) : (
-          <div className="card shadow-sm">
+          <div className="card shadow-sm card-panel">
             <div className="card-body" style={{ overflowX: "auto" }}>
               <DataTable
                 ref={tableRef}
@@ -149,7 +149,7 @@ export default function AthletesPage() {
                 options={tableOptions}
                 className="table table-hover"
               >
-                <thead className="table-dark">
+                <thead className="table-header-custom">
                   <tr>
                     <th>Priezvisko</th>
                     <th>Meno</th>

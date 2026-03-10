@@ -29,14 +29,14 @@ export default function CookieBanner() {
       style={{ zIndex: 9999 }}
     >
       <div className="container">
-        <div className="card shadow border-0">
+        <div className="card shadow border-0 card-panel">
           <div className="card-body py-2 px-3">
             <div className="d-flex align-items-center gap-3">
               <span className="small text-muted flex-grow-1">
                 <i className="bi bi-shield-check me-1 text-warning"></i>
                 <strong>Cookies:</strong> Používame session cookies nevyhnutné pre fungovanie prihlásenia.
               </span>
-              <button className="btn btn-danger btn-sm flex-shrink-0" onClick={handleAccept}>
+              <button className="btn btn-primary btn-action btn-sm flex-shrink-0" onClick={handleAccept}>
                 <i className="bi bi-check-lg me-1"></i>Súhlasím
               </button>
             </div>

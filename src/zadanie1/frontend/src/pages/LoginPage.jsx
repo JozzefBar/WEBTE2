@@ -59,7 +59,7 @@ export default function LoginPage() {
       <div className="container py-5">
         <div className="row justify-content-center">
           <div className="col-md-5">
-            <div className="card shadow-sm">
+            <div className="card shadow-sm card-panel">
               <div className="card-body p-4">
                 <h1 className="h4 fw-bold mb-4 text-center">
                   <i className="bi bi-box-arrow-in-right me-2"></i>Prihlásenie
@@ -76,7 +76,7 @@ export default function LoginPage() {
                     <div className="mb-3">
                       <label className="form-label fw-semibold">E-mail</label>
                       <input
-                        type="email" className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                        type="email" className={`form-control form-input ${errors.email ? 'is-invalid' : ''}`}
                         value={email} placeholder="jan@priklad.sk"
                         onChange={e => { setEmail(e.target.value); setErrors({}); }}
                         autoComplete="email"
@@ -87,7 +87,7 @@ export default function LoginPage() {
                     <div className="mb-4">
                       <label className="form-label fw-semibold">Heslo</label>
                       <input
-                        type="password" className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                        type="password" className={`form-control form-input ${errors.password ? 'is-invalid' : ''}`}
                         value={password}
                         onChange={e => { setPassword(e.target.value); setErrors({}); }}
                         autoComplete="current-password"
@@ -95,7 +95,7 @@ export default function LoginPage() {
                       {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                     </div>
 
-                    <button type="submit" className="btn btn-danger w-100 mb-3" disabled={loading}>
+                    <button type="submit" className="btn btn-primary btn-action w-100 mb-3" disabled={loading}>
                       {loading
                         ? <><span className="spinner-border spinner-border-sm me-2"></span>Prihlasujem...</>
                         : 'Prihlásiť sa'}
@@ -105,14 +105,14 @@ export default function LoginPage() {
 
                     <a
                       href="http://localhost:8080/zadanie1/backend/api/auth/oauth2callback.php"
-                      className="btn btn-outline-secondary w-100 mb-3"
+                      className="btn btn-outline-primary w-100 mb-3"
                     >
                       <i className="bi bi-google me-2"></i>
                         Prihlásiť sa cez Google
                     </a>
 
                     <p className="text-center small mb-0">
-                      Nemáš účet? <Link to="/register" className="text-danger fw-semibold">Zaregistruj sa</Link>
+                      Nemáš účet? <Link to="/register" className="text-primary fw-semibold">Zaregistruj sa</Link>
                     </p>
                   </form>
                 )}
@@ -134,19 +134,19 @@ export default function LoginPage() {
                       <label className="form-label fw-semibold">6-miestny kód</label>
                       <input
                         type="text" inputMode="numeric" maxLength={6}
-                        className={`form-control totp-input ${errors.code ? 'is-invalid' : ''}`}
+                        className={`form-control form-input totp-input ${errors.code ? 'is-invalid' : ''}`}
                         value={totpCode} placeholder="000000" autoFocus
                         onChange={e => { setTotpCode(e.target.value.replace(/\D/g, '')); setErrors({}); }}
                       />
                       {errors.code && <div className="invalid-feedback">{errors.code}</div>}
                     </div>
 
-                    <button type="submit" className="btn btn-danger w-100 mb-2" disabled={loading}>
+                    <button type="submit" className="btn btn-primary btn-action w-100 mb-2" disabled={loading}>
                       {loading
                         ? <><span className="spinner-border spinner-border-sm me-2"></span>Overujem...</>
                         : <><i className="bi bi-check-lg me-1"></i>Potvrdiť</>}
                     </button>
-                    <button type="button" className="btn btn-outline-secondary w-100"
+                    <button type="button" className="btn btn-outline-primary w-100"
                       onClick={() => { setStep(1); setTotpCode(''); setErrors({}); setGlobalError(''); }}>
                       <i className="bi bi-arrow-left me-1"></i>Späť
                     </button>

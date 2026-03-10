@@ -36,7 +36,7 @@ export default function WelcomeToast() {
       style={{ zIndex: 9998, marginTop: '70px', pointerEvents: 'none' }}
     >
       <div className="toast show shadow" role="alert" style={{ pointerEvents: 'auto', width: '100%', maxWidth: '350px' }}>
-        <div className="toast-header bg-danger text-white">
+        <div className="toast-header bg-primary text-white">
           <i className="bi bi-trophy-fill me-2"></i>
           <strong className="me-auto">
             {toast.type === 'register' ? 'Vitajte!' : 'Vitajte späť!'}

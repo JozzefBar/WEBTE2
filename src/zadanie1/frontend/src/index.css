@@ -1,5 +1,10 @@
 /* Custom styles */
 
+/* --- Base page background --- */
+body {
+  background-color: #f1f5f9;
+}
+
 .loading-screen {
   display: flex;
   justify-content: center;
@@ -38,4 +43,144 @@
 .qr-image {
   max-width: 220px;
   width: 100%;
+}
+
+/* --- Custom fonts (loaded via index.html <link>) --- */
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* --- Navbar (indigo gradient) --- */
+
+.app-navbar {
+  background: linear-gradient(135deg, #312e81, #4338ca);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --- Form input styling (border, background, padding, margin, hover) --- */
+
+.form-input {
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.25rem;
+  border-radius: 6px;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+select.form-input {
+  padding-right: 2rem;
+}
+
+.form-input:hover {
+  border-color: #6366f1;
+  background-color: #fff;
+}
+
+.form-input:focus {
+  border-color: #6366f1;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  outline: none;
+}
+
+/* --- Button styling (border, background, padding, margin, hover) --- */
+
+.btn-action {
+  border: 1px solid transparent;
+  background-color: #4f46e5;
+  color: #fff;
+  padding: 0.5rem 1.25rem;
+  margin-top: 0.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.btn-action:hover {
+  background-color: #4338ca;
+  border-color: #3730a3;
+  transform: translateY(-1px);
+}
+
+/* --- Card header (slate-indigo) --- */
+
+.card-header-main {
+  background: linear-gradient(135deg, #334155, #475569);
+  color: #f1f5f9;
+  border-bottom: 2px solid #6366f1;
+}
+
+/* --- Table header (slate) --- */
+
+.table-header-custom {
+  background-color: #475569;
+  color: #f1f5f9;
+}
+
+/* --- Table styling (border, background, padding, margin, hover) --- */
+
+.data-table {
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+  margin-top: 0.5rem;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.data-table th {
+  padding: 0.75rem 1rem;
+  background-color: #475569;
+  color: #f1f5f9;
+}
+
+.data-table td {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #fff;
+}
+
+.data-table tbody tr:hover td {
+  background-color: #eef2ff;
+}
+
+/* --- Card panel (border, background, padding, margin, hover) --- */
+
+.card-panel {
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+  padding: 0;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.card-panel:hover {
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+  border-color: #c7d2fe;
+}
+
+/* --- DataTables sort icon + alignment fix --- */
+
+table.dataTable thead th {
+  position: relative;
+  padding-right: 26px !important;
+  text-align: left !important;
+}
+
+table.dataTable tbody td {
+  text-align: left !important;
+}
+
+table.dataTable thead th .dt-column-order {
+  position: absolute !important;
+  right: 8px !important;
+  left: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }

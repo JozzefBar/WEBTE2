@@ -78,6 +78,76 @@ if(!$pdo){
     exit();
 }
 
+// Auto-detect CSV format
+$firstRowKeys = array_keys($data[0] ?? []);
+
+$isGamesCSV = in_array('type', $firstRowKeys)
+           && in_array('year', $firstRowKeys)
+           && in_array('city', $firstRowKeys)
+           && in_array('country', $firstRowKeys)
+           && in_array('code', $firstRowKeys);
+
+if ($isGamesCSV) {
+    // Import Olympic Games + Countries
+    $pdo->beginTransaction();
+    $inserted = 0;
+    $skipped = 0;
+    $errors = [];
+
+    try {
+        foreach ($data as $row) {
+            $get = function(string $key) use ($row): ?string {
+                return isset($row[$key]) && $row[$key] !== "" ? trim($row[$key]) : null;
+            };
+
+            $type    = $get('type');
+            $year    = $get('year') ? (int)$get('year') : null;
+            $city    = $get('city');
+            $country = $get('country');
+            $code    = $get('code');
+
+            // Skip empty rows
+            if (!$type || !$year || !$city || !$country) {
+                continue;
+            }
+
+            if (!in_array($type, ['LOH', 'ZOH'])) {
+                $skipped++;
+                $errors[] = "Neplatný typ OH '$type'";
+                continue;
+            }
+
+            // Create / update country with code
+            $countryId = getOrCreateCountry($pdo, $country, $code);
+
+            // Create games if not exists
+            getOrCreateGames($pdo, $year, $type, $city, $countryId);
+            $inserted++;
+        }
+
+        $pdo->commit();
+
+        echo json_encode([
+            "success"  => true,
+            "message"  => "Import OH dát dokončený.",
+            "inserted" => $inserted,
+            "skipped"  => $skipped,
+            "errors"   => $errors,
+        ], JSON_UNESCAPED_UNICODE);
+
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Chyba počas importu OH: ' . $e->getMessage()
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+    exit();
+}
+
+// Standard athlete CSV import
+
 //Transaction start - if something goes wrong, rollback and there will be no inconsistent data left
 $pdo->beginTransaction();
 

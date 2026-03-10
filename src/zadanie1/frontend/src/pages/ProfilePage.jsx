@@ -67,7 +67,7 @@ export default function ProfilePage() {
         <div className="row g-4">
           {/* Profile editing */}
           <div className="col-lg-6">
-            <div className="card shadow-sm h-100">
+            <div className="card shadow-sm card-panel">
               <div className="card-header">
                 <h5 className="mb-0"><i className="bi bi-pencil me-2"></i>Upraviť údaje</h5>
               </div>
@@ -77,7 +77,7 @@ export default function ProfilePage() {
                     <div className="col-6">
                       <label className="form-label fw-semibold">Meno</label>
                       <input type="text"
-                        className={`form-control ${errors.first_name ? 'is-invalid' : ''}`}
+                        className={`form-control form-input ${errors.first_name ? 'is-invalid' : ''}`}
                         value={firstName}
                         onChange={e => { setFirstName(e.target.value); setErrors({}); }}
                       />
@@ -86,7 +86,7 @@ export default function ProfilePage() {
                     <div className="col-6">
                       <label className="form-label fw-semibold">Priezvisko</label>
                       <input type="text"
-                        className={`form-control ${errors.last_name ? 'is-invalid' : ''}`}
+                        className={`form-control form-input ${errors.last_name ? 'is-invalid' : ''}`}
                         value={lastName}
                         onChange={e => { setLastName(e.target.value); setErrors({}); }}
                       />
@@ -96,7 +96,7 @@ export default function ProfilePage() {
 
                   <div className="mb-3">
                     <label className="form-label fw-semibold">E-mail</label>
-                    <input type="email" className="form-control" value={user?.email ?? ''} disabled />
+                    <input type="email" className="form-control form-input" value={user?.email ?? ''} disabled />
                     <div className="form-text">Email nie je možné zmeniť.</div>
                   </div>
 
@@ -110,7 +110,7 @@ export default function ProfilePage() {
                       <div className="mb-3">
                         <label className="form-label">Nové heslo</label>
                         <input type="password"
-                          className={`form-control ${errors.new_password ? 'is-invalid' : ''}`}
+                          className={`form-control form-input ${errors.new_password ? 'is-invalid' : ''}`}
                           value={newPassword} placeholder="Nechaj prázdne ak nechceš meniť"
                           onChange={e => { setNewPassword(e.target.value); setErrors({}); }}
                         />
@@ -119,7 +119,7 @@ export default function ProfilePage() {
                       <div className="mb-3">
                         <label className="form-label">Nové heslo znova</label>
                         <input type="password"
-                          className={`form-control ${errors.new_password_repeat ? 'is-invalid' : ''}`}
+                          className={`form-control form-input ${errors.new_password_repeat ? 'is-invalid' : ''}`}
                           value={newPassRepeat}
                           onChange={e => { setNewPassRepeat(e.target.value); setErrors({}); }}
                         />
@@ -132,7 +132,7 @@ export default function ProfilePage() {
                     <div className={`alert alert-${saveMsgType} py-2`}>{saveMsg}</div>
                   )}
 
-                  <button type="submit" className="btn btn-danger w-100" disabled={saving}>
+                  <button type="submit" className="btn btn-primary btn-action w-100" disabled={saving}>
                     {saving
                       ? <><span className="spinner-border spinner-border-sm me-2"></span>Ukladám...</>
                       : <><i className="bi bi-check-lg me-1"></i>Uložiť zmeny</>}
@@ -144,11 +144,11 @@ export default function ProfilePage() {
 
           {/* Login history */}
           <div className="col-lg-6">
-            <div className="card shadow-sm h-100">
+            <div className="card shadow-sm card-panel">
               <div className="card-header">
                 <h5 className="mb-0"><i className="bi bi-clock-history me-2"></i>História prihlásení</h5>
               </div>
-              <div className="card-body p-0" style={{maxHeight: "270px", overflowY: "auto" }}>
+              <div className="card-body p-0" style={{maxHeight: "350px", overflowY: "auto" }}>
                 {histLoading ? (
                   <div className="text-center py-4">
                     <div className="spinner-border spinner-border-sm text-secondary"></div>
@@ -159,8 +159,8 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div className="table-responsive">
-                    <table className="table table-sm table-hover mb-0">
-                      <thead className="table-light">
+                    <table className="table table-sm table-hover data-table mb-0">
+                      <thead className="table-header-custom">
                         <tr>
                           <th>Dátum a čas</th>
                           <th>Spôsob</th>

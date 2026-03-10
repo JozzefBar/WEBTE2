@@ -64,17 +64,22 @@ function insertAthlete(
     return (int) $pdo->lastInsertId();
 }
 
-function getOrCreateCountry(PDO $pdo, string $name): int {
-    $stmt = $pdo->prepare("SELECT id FROM countries WHERE name = :name LIMIT 1");
+function getOrCreateCountry(PDO $pdo, string $name, ?string $code = null): int {
+    $stmt = $pdo->prepare("SELECT id, code FROM countries WHERE name = :name LIMIT 1");
     $stmt->execute([':name' => $name]);
-    $id = $stmt->fetchColumn();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($id) {
-        return (int) $id;
+    if ($row) {
+        // Update code if we have a new one and the existing one is empty
+        if ($code && (!$row['code'] || $row['code'] === '')) {
+            $upd = $pdo->prepare("UPDATE countries SET code = :code WHERE id = :id");
+            $upd->execute([':code' => $code, ':id' => $row['id']]);
+        }
+        return (int) $row['id'];
     }
 
-    $stmt = $pdo->prepare("INSERT INTO countries (name, code) VALUES (:name, '')");
-    $stmt->execute([':name' => $name]);
+    $stmt = $pdo->prepare("INSERT INTO countries (name, code) VALUES (:name, :code)");
+    $stmt->execute([':name' => $name, ':code' => $code ?? '']);
     return (int) $pdo->lastInsertId();
 }
 

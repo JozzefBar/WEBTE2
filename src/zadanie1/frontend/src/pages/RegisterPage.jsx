@@ -54,7 +54,7 @@ export default function RegisterPage() {
       <div className="container py-5">
         <div className="row justify-content-center">
           <div className="col-md-6">
-            <div className="card shadow-sm text-center">
+            <div className="card shadow-sm text-center card-panel">
               <div className="card-body p-4">
                 <div className="fs-1 mb-2">✅</div>
                 <h2 className="h4 fw-bold">Registrácia úspešná!</h2>
@@ -72,7 +72,7 @@ export default function RegisterPage() {
                   <i className="bi bi-exclamation-triangle me-1"></i>
                   <strong>Dôležité:</strong> Tento kód sa zobrazí len raz. Naskenuj ho teraz alebo si ho ulož.
                 </div>
-                <button className="btn btn-danger w-100" onClick={() => navigate('/login')}>
+                <button className="btn btn-primary btn-action w-100" onClick={() => navigate('/login')}>
                   Naskenoval som — pokračovať na prihlásenie
                   <i className="bi bi-arrow-right ms-1"></i>
                 </button>
@@ -90,7 +90,7 @@ export default function RegisterPage() {
       <div className="container py-5">
         <div className="row justify-content-center">
           <div className="col-md-6">
-            <div className="card shadow-sm">
+            <div className="card shadow-sm card-panel">
               <div className="card-body p-4">
                 <h1 className="h4 fw-bold mb-4 text-center">
                   <i className="bi bi-person-plus me-2"></i>Registrácia
@@ -101,13 +101,13 @@ export default function RegisterPage() {
                   <div className="row g-3 mb-3">
                     <div className="col-6">
                       <label className="form-label fw-semibold">Meno</label>
-                      <input type="text" className={`form-control ${errors.first_name ? 'is-invalid' : ''}`}
+                      <input type="text" className={`form-control form-input ${errors.first_name ? 'is-invalid' : ''}`}
                         value={form.first_name} onChange={set('first_name')} placeholder="Ján" />
                       {errors.first_name && <div className="invalid-feedback">{errors.first_name}</div>}
                     </div>
                     <div className="col-6">
                       <label className="form-label fw-semibold">Priezvisko</label>
-                      <input type="text" className={`form-control ${errors.last_name ? 'is-invalid' : ''}`}
+                      <input type="text" className={`form-control form-input ${errors.last_name ? 'is-invalid' : ''}`}
                         value={form.last_name} onChange={set('last_name')} placeholder="Novák" />
                       {errors.last_name && <div className="invalid-feedback">{errors.last_name}</div>}
                     </div>
@@ -115,32 +115,32 @@ export default function RegisterPage() {
 
                   <div className="mb-3">
                     <label className="form-label fw-semibold">E-mail</label>
-                    <input type="email" className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                    <input type="email" className={`form-control form-input ${errors.email ? 'is-invalid' : ''}`}
                       value={form.email} onChange={set('email')} placeholder="jan@priklad.sk" />
                     {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                   </div>
 
                   <div className="mb-3">
                     <label className="form-label fw-semibold">Heslo</label>
-                    <input type="password" className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                    <input type="password" className={`form-control form-input ${errors.password ? 'is-invalid' : ''}`}
                       value={form.password} onChange={set('password')} placeholder="Min. 8 znakov" />
                     {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                   </div>
 
                   <div className="mb-4">
                     <label className="form-label fw-semibold">Heslo znova</label>
-                    <input type="password" className={`form-control ${errors.password_repeat ? 'is-invalid' : ''}`}
+                    <input type="password" className={`form-control form-input ${errors.password_repeat ? 'is-invalid' : ''}`}
                       value={form.password_repeat} onChange={set('password_repeat')} />
                     {errors.password_repeat && <div className="invalid-feedback">{errors.password_repeat}</div>}
                   </div>
 
-                  <button type="submit" className="btn btn-danger w-100 mb-3" disabled={loading}>
+                  <button type="submit" className="btn btn-primary btn-action w-100 mb-3" disabled={loading}>
                     {loading
                       ? <><span className="spinner-border spinner-border-sm me-2"></span>Registrujem...</>
                       : <><i className="bi bi-person-check me-1"></i>Vytvoriť konto</>}
                   </button>
                   <p className="text-center small mb-0">
-                    Už máš účet? <Link to="/login" className="text-danger fw-semibold">Prihlás sa</Link>
+                    Už máš účet? <Link to="/login" className="text-primary fw-semibold">Prihlás sa</Link>
                   </p>
                 </form>
               </div>

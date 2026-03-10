@@ -72,8 +72,8 @@ export default function DashboardPage() {
         </h1>
 
         {/* Info about user */}
-        <div className="card shadow-sm mb-4">
-          <div className="card-header bg-dark text-white">
+        <div className="card shadow-sm mb-4 card-panel">
+          <div className="card-header card-header-main">
             <h5 className="mb-0">
               <i className="bi bi-person-circle me-2"></i>Prihlásený používateľ
             </h5>
@@ -90,7 +90,7 @@ export default function DashboardPage() {
                 </span>
               </div>
               <div className="col-md-4 text-md-end">
-                <button className="btn btn-outline-dark btn-sm" onClick={() => navigate('/profile')}>
+                <button className="btn btn-outline-primary btn-sm" onClick={() => navigate('/profile')}>
                   <i className="bi bi-gear me-1"></i>Spravovať profil
                 </button>
               </div>
@@ -99,7 +99,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Import CSV */}
-        <div className="card shadow-sm mb-4">
+        <div className="card shadow-sm mb-4 card-panel">
           <div className="card-header">
             <h5 className="mb-0">
               <i className="bi bi-upload me-2"></i>Import dát zo súboru CSV
@@ -114,7 +114,7 @@ export default function DashboardPage() {
                 ref={fileInputRef}
                 type="file"
                 accept=".csv"
-                className="form-control"
+                className="form-control form-input"
                 onChange={handleFileChange}
               />
             </div>
@@ -124,7 +124,7 @@ export default function DashboardPage() {
               </div>
             )}
             <button
-              className="btn btn-danger"
+              className="btn btn-primary btn-action"
               onClick={handleImport}
               disabled={importing || !selectedFile}
             >
@@ -156,7 +156,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Data removing */}
-        <div className="card shadow-sm border-danger">
+        <div className="card shadow-sm border-danger card-panel">
           <div className="card-header bg-danger text-white">
             <h5 className="mb-0">
               <i className="bi bi-trash3 me-2"></i>Vymazať všetky dáta
