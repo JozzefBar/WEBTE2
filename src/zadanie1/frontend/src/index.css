@@ -1,5 +1,35 @@
 /* Custom styles */
 
+/* --- Override Bootstrap primary to match indigo theme --- */
+:root {
+  --bs-primary: #4f46e5;
+  --bs-primary-rgb: 79, 70, 229;
+}
+
+.btn-primary {
+  background-color: #4f46e5;
+  border-color: #4f46e5;
+}
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+  background-color: #4338ca;
+  border-color: #3730a3;
+}
+.btn-outline-primary {
+  color: #4f46e5;
+  border-color: #4f46e5;
+}
+.btn-outline-primary:hover, .btn-outline-primary:active {
+  background-color: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}
+.bg-primary { background-color: #4f46e5 !important; }
+.text-primary { color: #4f46e5 !important; }
+.btn-check:checked + .btn-primary, .btn-primary.active {
+  background-color: #3730a3;
+  border-color: #312e81;
+}
+
 /* --- Base page background --- */
 body {
   background-color: #f1f5f9;
