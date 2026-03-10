@@ -29,15 +29,22 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
 $body = json_decode(file_get_contents("php://input"), true);
 
-$firstName = isset($body["first_name"]) ? trim($body["first_name"]) : "";
-$lastName  = isset($body["last_name"])  ? trim($body["last_name"])  : "";
-$newPassword = isset($body["new_password"]) ? $body["new_password"] : null;
+$firstName       = isset($body["first_name"])       ? trim($body["first_name"])       : "";
+$lastName        = isset($body["last_name"])        ? trim($body["last_name"])        : "";
+$newPassword     = isset($body["new_password"])     ? $body["new_password"]           : null;
+$newPasswordRep  = isset($body["new_password_repeat"]) ? $body["new_password_repeat"] : null;
 
 $errors = [];
-if (empty($firstName)) $errors["first_name"] = "Meno je povinné";
-if (empty($lastName))  $errors["last_name"]  = "Priezvisko je povinné";
-if ($newPassword !== null && strlen($newPassword) < 8)
-    $errors["new_password"] = "Heslo musí mať aspoň 8 znakov";
+if (empty($firstName))            $errors["first_name"] = "Meno je povinné";
+elseif (strlen($firstName) > 64)  $errors["first_name"] = "Max. 64 znakov";
+if (empty($lastName))             $errors["last_name"]  = "Priezvisko je povinné";
+elseif (strlen($lastName) > 64)   $errors["last_name"]  = "Max. 64 znakov";
+if ($newPassword !== null) {
+    if (strlen($newPassword) < 8)
+        $errors["new_password"] = "Heslo musí mať aspoň 8 znakov";
+    elseif ($newPassword !== $newPasswordRep)
+        $errors["new_password_repeat"] = "Heslá sa nezhodujú";
+}
 
 if (!empty($errors)) {
     http_response_code(422);

@@ -37,12 +37,18 @@ $userPassword = isset($body["password"]) ? $body["password"] : "";   // renamed 
 
 if (empty($firstName))
     $errors["first_name"] = "Meno je povinné";
+elseif (strlen($firstName) > 64)
+    $errors["first_name"] = "Max. 64 znakov";
 
 if (empty($lastName))
     $errors["last_name"] = "Priezvisko je povinné";
+elseif (strlen($lastName) > 64)
+    $errors["last_name"] = "Max. 64 znakov";
 
 if (empty($email))
     $errors["email"] = "Email je povinný";
+elseif (strlen($email) > 128)
+    $errors["email"] = "Max. 128 znakov";
 elseif (!filter_var($email, FILTER_VALIDATE_EMAIL))
     $errors["email"] = "Neplatný formát emailu";
 

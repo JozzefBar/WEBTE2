@@ -46,6 +46,7 @@ export default function LoginPage() {
     try {
       const res = await verify2fa(totpCode);
       setUser(res.user);
+      sessionStorage.setItem('welcome_toast', JSON.stringify({ type: 'login', name: res.user.first_name }));
       navigate('/dashboard');
     } catch (err) {
       setGlobalError(err.error ?? 'Nesprávny kód');

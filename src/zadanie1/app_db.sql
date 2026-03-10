@@ -126,9 +126,9 @@ CREATE TABLE `olympic_games` (
 
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
-  `first_name` varchar(100) NOT NULL,
-  `last_name` varchar(100) NOT NULL,
-  `email` varchar(150) NOT NULL,
+  `first_name` varchar(64) NOT NULL,
+  `last_name` varchar(64) NOT NULL,
+  `email` varchar(128) NOT NULL,
   `password_hash` varchar(255) DEFAULT NULL,
   `auth_type` enum('local','google') NOT NULL DEFAULT 'local',
   `google_id` varchar(255) DEFAULT NULL,

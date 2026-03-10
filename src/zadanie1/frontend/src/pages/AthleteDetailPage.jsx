@@ -3,9 +3,50 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getAthlete } from '../api/api';
 import Navbar from '../components/Navbar';
+import DataTable from "datatables.net-react";
+import DT from "datatables.net-bs5";
+import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 
-const MEDAL_CLASS = { 1: 'medal-gold', 2: 'medal-silver', 3: 'medal-bronze' };
-const MEDAL_ICON  = { 1: '🥇', 2: '🥈', 3: '🥉' };
+DataTable.use(DT);
+
+const MEDAL_ICON = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}.${m}.${y}`;
+};
+
+const medalColumns = [
+  { data: "year",          title: "Rok",        orderable: true,  orderSequence: ["desc", "asc", ""] },
+  {
+    data: "games_type",
+    title: "OH",
+    orderable: false,
+    render: (data) =>
+      `<span class="badge ${data === "LOH" ? "bg-success" : "bg-primary"}">${data}</span>`,
+  },
+  { data: "games_city",    title: "Mesto",      orderable: false },
+  { data: "games_country", title: "Krajina",    orderable: false },
+  { data: "discipline",    title: "Disciplína", orderable: true, orderSequence: ["asc", "desc", ""] },
+  {
+    data: null,
+    title: "Medaila",
+    orderable: false,
+    render: (_data, _type, row) =>
+      `${MEDAL_ICON[row.placing] ?? ""} ${row.medal_name}`,
+  },
+];
+
+const dtOptions = {
+  paging: false,
+  searching: false,
+  info: false,
+  language: {
+    emptyTable:  "Žiadne medaily",
+    zeroRecords: "Žiadne medaily",
+  },
+};
 
 export default function AthleteDetailPage() {
   const { id } = useParams();
@@ -62,7 +103,7 @@ export default function AthleteDetailPage() {
                 <div className="col-sm-6 col-md-3">
                   <div className="border rounded p-2">
                     <small className="text-muted d-block">Dátum narodenia</small>
-                    <span className="fw-semibold">{athlete.birth_date}</span>
+                    <span className="fw-semibold">{formatDate(athlete.birth_date)}</span>
                   </div>
                 </div>
               )}
@@ -80,7 +121,7 @@ export default function AthleteDetailPage() {
                 <div className="col-sm-6 col-md-3">
                   <div className="border rounded p-2">
                     <small className="text-muted d-block">Dátum úmrtia</small>
-                    <span className="fw-semibold">{athlete.death_date}</span>
+                    <span className="fw-semibold">{formatDate(athlete.death_date)}</span>
                   </div>
                 </div>
               )}
@@ -105,37 +146,24 @@ export default function AthleteDetailPage() {
               Medaily ({athlete.medals?.length ?? 0})
             </h5>
           </div>
-          <div className="table-responsive">
-            <table className="table table-hover mb-0">
-              <thead className="table-light">
+          <div className="card-body" style={{ overflowX: "auto" }}>
+            <DataTable
+              data={athlete.medals ?? []}
+              columns={medalColumns}
+              options={dtOptions}
+              className="table table-hover"
+            >
+              <thead className="table-dark">
                 <tr>
-                  <th>Rok</th><th>OH</th><th>Mesto</th><th>Krajina</th>
-                  <th>Disciplína</th><th>Medaila</th>
+                  <th>Rok</th>
+                  <th data-dt-order="disable">OH</th>
+                  <th data-dt-order="disable">Mesto</th>
+                  <th data-dt-order="disable">Krajina</th>
+                  <th>Disciplína</th>
+                  <th data-dt-order="disable">Medaila</th>
                 </tr>
               </thead>
-              <tbody>
-                {!athlete.medals?.length ? (
-                  <tr><td colSpan={6} className="text-center text-muted py-4">Žiadne medaily</td></tr>
-                ) : (
-                  athlete.medals.map((m, i) => (
-                    <tr key={i}>
-                      <td>{m.year}</td>
-                      <td>
-                        <span className={`badge ${m.games_type === 'LOH' ? 'bg-primary' : 'bg-success'}`}>
-                          {m.games_type}
-                        </span>
-                      </td>
-                      <td>{m.games_city}</td>
-                      <td>{m.games_country}</td>
-                      <td>{m.discipline}</td>
-                      <td className={MEDAL_CLASS[m.placing]}>
-                        {MEDAL_ICON[m.placing]} {m.medal_name}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+            </DataTable>
           </div>
         </div>
       </div>

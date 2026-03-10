@@ -130,9 +130,9 @@ $athletes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $yearsStmt = $pdo->query("SELECT DISTINCT year FROM olympic_games ORDER BY year DESC");
 $years = $yearsStmt->fetchAll(PDO::FETCH_COLUMN);
 
-// categories
-$categoriesStmt = $pdo->query("SELECT DISTINCT category FROM disciplines ORDER BY category ASC");
-$categories = $categoriesStmt->fetchAll(PDO::FETCH_COLUMN);
+// disciplines
+$disciplinesStmt = $pdo->query("SELECT DISTINCT name FROM disciplines ORDER BY name ASC");
+$disciplines = $disciplinesStmt->fetchAll(PDO::FETCH_COLUMN);
 
 echo json_encode([
     "data" => $athletes,
@@ -144,6 +144,6 @@ echo json_encode([
     ],
     "filters" => [
         "year" => $years,
-        "categories" => $categories,
+        "disciplines" => $disciplines,
     ]
 ], JSON_UNESCAPED_UNICODE);

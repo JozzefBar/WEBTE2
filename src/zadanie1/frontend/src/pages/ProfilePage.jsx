@@ -29,7 +29,9 @@ export default function ProfilePage() {
   const validate = () => {
     const errs = {};
     if (!firstName.trim()) errs.first_name = 'Meno je povinné';
+    else if (firstName.length > 64) errs.first_name = 'Max. 64 znakov';
     if (!lastName.trim()) errs.last_name = 'Priezvisko je povinné';
+    else if (lastName.length > 64) errs.last_name = 'Max. 64 znakov';
     if (newPassword && newPassword.length < 8) errs.new_password = 'Min. 8 znakov';
     if (newPassword && newPassword !== newPassRepeat) errs.new_password_repeat = 'Heslá sa nezhodujú';
     return errs;
@@ -146,7 +148,7 @@ export default function ProfilePage() {
               <div className="card-header">
                 <h5 className="mb-0"><i className="bi bi-clock-history me-2"></i>História prihlásení</h5>
               </div>
-              <div className="card-body p-0">
+              <div className="card-body p-0" style={{maxHeight: "270px", overflowY: "auto" }}>
                 {histLoading ? (
                   <div className="text-center py-4">
                     <div className="spinner-border spinner-border-sm text-secondary"></div>

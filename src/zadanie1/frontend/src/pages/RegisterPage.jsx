@@ -18,10 +18,11 @@ export default function RegisterPage() {
   const validate = () => {
     const errs = {};
     if (!form.first_name.trim()) errs.first_name = 'Meno je povinné';
-    else if (form.first_name.length > 100) errs.first_name = 'Max. 100 znakov';
+    else if (form.first_name.length > 64) errs.first_name = 'Max. 64 znakov';
     if (!form.last_name.trim()) errs.last_name = 'Priezvisko je povinné';
-    else if (form.last_name.length > 100) errs.last_name = 'Max. 100 znakov';
+    else if (form.last_name.length > 64) errs.last_name = 'Max. 64 znakov';
     if (!form.email) errs.email = 'Email je povinný';
+    else if (form.email.length > 128) errs.email = 'Max. 128 znakov';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Neplatný formát emailu';
     if (!form.password) errs.password = 'Heslo je povinné';
     else if (form.password.length < 8) errs.password = 'Min. 8 znakov';
@@ -40,6 +41,7 @@ export default function RegisterPage() {
       setQrCode(res.qr_code);
       setTfaSecret(res.tfa_secret);
       setRegistered(true);
+      sessionStorage.setItem('welcome_toast', JSON.stringify({ type: 'register', name: form.first_name }));
     } catch (err) {
       if (err.errors) setErrors(err.errors);
       else setErrors({ global: err.error ?? 'Chyba registrácie' });

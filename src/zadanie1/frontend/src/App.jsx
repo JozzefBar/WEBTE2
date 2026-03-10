@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
+import CookieBanner from './components/CookieBanner';
+import WelcomeToast from './components/WelcomeToast';
 import AthletesPage from './pages/AthletesPage';
 import AthleteDetailPage from './pages/AthleteDetailPage';
 import LoginPage from './pages/LoginPage';
@@ -58,6 +60,8 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppRoutes/>
+        <WelcomeToast/>
+        <CookieBanner/>
       </AuthProvider>
     </BrowserRouter>
   );
