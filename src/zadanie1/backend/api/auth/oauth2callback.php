@@ -105,7 +105,8 @@ if (isset($_GET["code"])){
     ]);
 
     // Redirect to React frontend - private zone
-    header('Location: http://localhost:5173/dashboard');
+    $welcomeName = urlencode($firstName);
+    header("Location: http://localhost:5173/dashboard?welcome=google&name={$welcomeName}");
     exit();
 }
 
