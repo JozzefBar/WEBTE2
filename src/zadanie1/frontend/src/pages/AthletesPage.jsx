@@ -15,9 +15,9 @@ const YEAR_COL_IDX       = 2;
 const DISCIPLINE_COL_IDX = 5;
 
 const columns = [
-  { data: "last_name",  title: "Priezvisko", orderable: true, orderSequence: ["asc", "desc", ""] },
-  { data: "first_name", title: "Meno", orderable: false},
-  { data: "year",       title: "Rok", orderable: true, orderSequence: ["asc", "desc", ""] },
+  { data: "last_name", title: "Priezvisko", orderable: true, orderSequence: ["asc", "desc", ""] },
+  { data: "first_name", title: "Meno", orderable: false },
+  { data: "year", title: "Rok", orderable: true, orderSequence: ["desc", "asc", ""] },
   {
     data: "games_type",
     title: "Typ OH",

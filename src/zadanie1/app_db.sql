@@ -87,8 +87,7 @@ CREATE TABLE `login_history` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `auth_type` enum('local','google') NOT NULL,
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `ip_address` varchar(45) DEFAULT NULL
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
