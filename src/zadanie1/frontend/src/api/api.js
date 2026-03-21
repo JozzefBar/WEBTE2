@@ -1,5 +1,6 @@
 //Central part for all HTTP request on PHP backend
 
+//const BASE_URL = "https://node26.webte.fei.stuba.sk/Z1/backend/api";
 const BASE_URL = "http://localhost:8080/zadanie1/backend/api";
 
 async function request(path, options = {}) {

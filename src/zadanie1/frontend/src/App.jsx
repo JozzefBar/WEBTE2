@@ -11,7 +11,7 @@ import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
 
 //safety for private zone -> login
-function PrivateRoute({ children }){
+function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return (
     <div className="loading-screen">
@@ -32,13 +32,13 @@ function PublicOnlyRoute({ children }) {
   return !user ? children : <Navigate to="/dashboard" replace />;
 }
 
-function AppRoutes(){
+function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<AthletesPage/>} />
+      <Route path="/" element={<AthletesPage />} />
       <Route path="/athlete/:id" element={<AthleteDetailPage />} />
-      <Route path ="/login" element={
-        <PublicOnlyRoute><LoginPage/></PublicOnlyRoute>
+      <Route path="/login" element={
+        <PublicOnlyRoute><LoginPage /></PublicOnlyRoute>
       } />
       <Route path="/register" element={
         <PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>
@@ -59,9 +59,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes/>
-        <WelcomeToast/>
-        <CookieBanner/>
+        <AppRoutes />
+        <WelcomeToast />
+        <CookieBanner />
       </AuthProvider>
     </BrowserRouter>
   );

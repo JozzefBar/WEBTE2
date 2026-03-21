@@ -7,6 +7,9 @@
 
 session_start();
 
+//require_once('/var/www/config.php');
+//require_once('/var/www/node26.webte.fei.stuba.sk/vendor/vendor/autoload.php');
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/../../../../vendor/autoload.php');
 
@@ -14,6 +17,10 @@ use Google\Client;
 use Google\Service\Oauth2;
 
 $client = new Client();
+
+//$client->setAuthConfig('/var/www/node26.webte.fei.stuba.sk/Z1/backend/client_secret/client_secret_251050637037-srt1v9kdlkvleh4lr3n56q579trn6p7u.apps.googleusercontent.com.json');
+
+//$redirectUri = 'https://node26.webte.fei.stuba.sk/Z1/backend/api/auth/oauth2callback.php';
 
 $client->setAuthConfig(__DIR__ . '/../../client_secret/client_secret_251050637037-srt1v9kdlkvleh4lr3n56q579trn6p7u.apps.googleusercontent.com.json');
 
@@ -72,20 +79,31 @@ if (isset($_GET["code"])){
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if(!$user) {
-        //first login, new row in db
-        //password_hash is null
+        // let's check if the email exists from local registration
+        $stmtLocal = $pdo->prepare("SELECT id FROM users WHERE email = :email LIMIT 1");
+        $stmtLocal->execute([":email" => $email]);
+        $localUser = $stmtLocal->fetch(PDO::FETCH_ASSOC);
 
-        $stmt = $pdo->prepare("
-            INSERT INTO users (first_name, last_name, email, auth_type, google_id)
-            VALUES (:fn, :ln, :email, 'google', :gid)
-        ");
-        $stmt->execute([
-            ":fn" => $firstName,
-            ":ln" => $lastName,
-            ":email" => $email,
-            ":gid" => $googleId,
-        ]);
-        $userId = (int)$pdo->lastInsertId();
+        if ($localUser) {
+            // Email exists from local auth - attach google_id to it and update auth_type
+            $userId = $localUser["id"];
+            // If we want to allow login by both, we might just set the google_id
+            $stmtUpdate = $pdo->prepare("UPDATE users SET google_id = :gid WHERE id = :uid");
+            $stmtUpdate->execute([":gid" => $googleId, ":uid" => $userId]);
+        } else {
+            // Completely new user
+            $stmt = $pdo->prepare("
+                INSERT INTO users (first_name, last_name, email, auth_type, google_id)
+                VALUES (:fn, :ln, :email, 'google', :gid)
+            ");
+            $stmt->execute([
+                ":fn" => $firstName,
+                ":ln" => $lastName,
+                ":email" => $email,
+                ":gid" => $googleId,
+            ]);
+            $userId = (int)$pdo->lastInsertId();
+        }
     }
     else {
         $userId = $user["id"];
@@ -106,12 +124,14 @@ if (isset($_GET["code"])){
 
     // Redirect to React frontend - private zone
     $welcomeName = urlencode($firstName);
+    //header("Location: https://node26.webte.fei.stuba.sk/Z1/frontend/dist/?welcome=google&name={$welcomeName}");
     header("Location: http://localhost:5173/dashboard?welcome=google&name={$welcomeName}");
     exit();
 }
 
 // Google returned an error (e.g. user denied access)
 if (isset($_GET['error'])) {
+    //header('Location: https://node26.webte.fei.stuba.sk/Z1/frontend/dist/login?error=oauth_denied');
     header('Location: http://localhost:5173/login?error=oauth_denied');
     exit();
 

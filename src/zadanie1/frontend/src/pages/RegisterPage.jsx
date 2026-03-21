@@ -23,7 +23,7 @@ export default function RegisterPage() {
     else if (form.last_name.length > 64) errs.last_name = 'Max. 64 znakov';
     if (!form.email) errs.email = 'Email je povinný';
     else if (form.email.length > 128) errs.email = 'Max. 128 znakov';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Neplatný formát emailu';
+    else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(form.email)) errs.email = 'Neplatný formát emailu';
     if (!form.password) errs.password = 'Heslo je povinné';
     else if (form.password.length < 8) errs.password = 'Min. 8 znakov';
     if (!form.password_repeat) errs.password_repeat = 'Zopakuj heslo';

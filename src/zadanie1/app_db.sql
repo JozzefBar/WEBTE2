@@ -31,12 +31,12 @@ CREATE TABLE `athletes` (
   `id` int(11) NOT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
-  `birth_date` date NOT NULL,
-  `birth_place` varchar(150) NOT NULL,
-  `birth_country_id` int(11) NOT NULL,
-  `death_date` date NOT NULL,
-  `death_place` varchar(150) NOT NULL,
-  `death_country_id` int(11) NOT NULL
+  `birth_date` date DEFAULT NULL,
+  `birth_place` varchar(150) DEFAULT NULL,
+  `birth_country_id` int(11) DEFAULT NULL,
+  `death_date` date DEFAULT NULL,
+  `death_place` varchar(150) DEFAULT NULL,
+  `death_country_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -74,7 +74,7 @@ CREATE TABLE `countries` (
 CREATE TABLE `disciplines` (
   `id` int(11) NOT NULL,
   `name` varchar(150) NOT NULL,
-  `category` varchar(50) NOT NULL
+  `category` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -206,6 +206,11 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+-- AUTO_INCREMENT for table `athletes`
+--
+ALTER TABLE `athletes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `athlete_medals`

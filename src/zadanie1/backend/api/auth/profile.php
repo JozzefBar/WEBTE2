@@ -1,8 +1,10 @@
 <?php
 
+//require_once('/var/www/config.php');
 require_once(__DIR__ . "/../../config.php");
 
 header("Content-Type: application/json; charset=utf-8");
+//header("Access-Control-Allow-Origin: https://node26.webte.fei.stuba.sk");
 header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -31,19 +33,25 @@ $body = json_decode(file_get_contents("php://input"), true);
 
 $firstName       = isset($body["first_name"])       ? trim($body["first_name"])       : "";
 $lastName        = isset($body["last_name"])        ? trim($body["last_name"])        : "";
-$newPassword     = isset($body["new_password"])     ? $body["new_password"]           : null;
-$newPasswordRep  = isset($body["new_password_repeat"]) ? $body["new_password_repeat"] : null;
+$newPassword     = isset($body["new_password"]) && $body["new_password"] !== '' ? $body["new_password"] : null;
+$newPasswordRep  = isset($body["new_password_repeat"]) && $body["new_password_repeat"] !== '' ? $body["new_password_repeat"] : null;
 
 $errors = [];
 if (empty($firstName))            $errors["first_name"] = "Meno je povinné";
 elseif (strlen($firstName) > 64)  $errors["first_name"] = "Max. 64 znakov";
 if (empty($lastName))             $errors["last_name"]  = "Priezvisko je povinné";
 elseif (strlen($lastName) > 64)   $errors["last_name"]  = "Max. 64 znakov";
-if ($newPassword !== null) {
-    if (strlen($newPassword) < 8)
+
+if ($newPassword !== null || $newPasswordRep !== null) {
+    if ($newPassword === null || $newPassword === "") {
+        $errors["new_password"] = "Zadaj nové heslo";
+    } elseif (strlen($newPassword) < 8) {
         $errors["new_password"] = "Heslo musí mať aspoň 8 znakov";
-    elseif ($newPassword !== $newPasswordRep)
+    } 
+    
+    if ($newPassword !== $newPasswordRep) {
         $errors["new_password_repeat"] = "Heslá sa nezhodujú";
+    }
 }
 
 if (!empty($errors)) {

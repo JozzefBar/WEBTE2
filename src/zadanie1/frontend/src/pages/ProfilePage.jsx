@@ -32,8 +32,17 @@ export default function ProfilePage() {
     else if (firstName.length > 64) errs.first_name = 'Max. 64 znakov';
     if (!lastName.trim()) errs.last_name = 'Priezvisko je povinné';
     else if (lastName.length > 64) errs.last_name = 'Max. 64 znakov';
-    if (newPassword && newPassword.length < 8) errs.new_password = 'Min. 8 znakov';
-    if (newPassword && newPassword !== newPassRepeat) errs.new_password_repeat = 'Heslá sa nezhodujú';
+    if (newPassword || newPassRepeat) {
+      if (!newPassword) {
+        errs.new_password = 'Zadaj nové heslo';
+      } else if (newPassword.length < 8) {
+        errs.new_password = 'Min. 8 znakov';
+      }
+      
+      if (newPassword !== newPassRepeat) {
+        errs.new_password_repeat = 'Heslá sa nezhodujú';
+      }
+    }
     return errs;
   };
 
@@ -44,7 +53,10 @@ export default function ProfilePage() {
     setSaving(true); setSaveMsg('');
     try {
       const payload = { first_name: firstName, last_name: lastName };
-      if (newPassword) payload.new_password = newPassword;
+      if (newPassword || newPassRepeat) {
+        payload.new_password = newPassword || '';
+        payload.new_password_repeat = newPassRepeat || '';
+      }
       await updateProfile(payload);
       setUser({ ...user, first_name: firstName, last_name: lastName });
       setSaveMsg('Profil bol aktualizovaný.');
