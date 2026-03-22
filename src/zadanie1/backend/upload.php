@@ -128,3 +128,17 @@ function getOrCreateMedalType(PDO $pdo, int $placing): int {
     $stmt->execute([':p' => $placing, ':n' => $name, ':d' => $desc]);
     return (int) $pdo->lastInsertId();
 }
+
+function getOrCreateDiscipline(PDO $pdo, string $name, ?string $category = null): int {
+    $stmt = $pdo->prepare("SELECT id FROM disciplines WHERE name = :name LIMIT 1");
+    $stmt->execute([':name' => $name]);
+    $id = $stmt->fetchColumn();
+
+    if ($id) {
+        return (int) $id;
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO disciplines (name, category) VALUES (:name, :category)");
+    $stmt->execute([':name' => $name, ':category' => $category ?? '']);
+    return (int) $pdo->lastInsertId();
+}

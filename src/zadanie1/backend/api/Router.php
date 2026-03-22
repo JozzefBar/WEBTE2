@@ -5,7 +5,6 @@ class Router {
     // Array to store all registered routes
     private $routes = [];
 
-    // Core method to add a new route to the router
     public function add($method, $route, $handler)
     {
         $this->routes[] = [
@@ -21,9 +20,19 @@ class Router {
     public function put($route, $handler) { $this->add("PUT", $route, $handler); }
     public function delete($route, $handler) { $this->add("DELETE", $route, $handler); }
 
-    // Start matching the current URL to the registered routes
     public function run()
     {
+        // --- CORS headers (allow frontend to call the API)
+        header("Access-Control-Allow-Origin: http://localhost:5173");
+        header("Access-Control-Allow-Credentials: true");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type");
+        
+        if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+            http_response_code(200);
+            exit();
+        }
+
         // Get the current HTTP request method and URI
         $method = $_SERVER["REQUEST_METHOD"];
         $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
@@ -31,10 +40,8 @@ class Router {
         // Remove the "/api" prefix from the URI since endpoints are registered without it
         $uri = preg_replace("#^/api#", "", $uri);
 
-        // Iterate over all registered routes
         foreach ($this->routes as $route) {
 
-            // Skip routes that don't match the current HTTP method (e.g., skip POST if request is GET)
             if ($route["method"] !== $method) {
                 continue;
             }
@@ -63,7 +70,6 @@ class Router {
             }
         }
 
-        // If no routes matched, return a 404 Not Found JSON response
         Response::json(["error" => "Not Found"], 404);
     }
 }
