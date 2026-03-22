@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAthletes } from "../api/api";
+//Now used with REST API for 2. assignment
+//import { getAthletes } from "../api/api";
+import { getAthletesREST } from "../api/api";
 import Navbar from "../components/Navbar";
 import DataTable from "datatables.net-react";
 import DT from "datatables.net-bs5";
@@ -58,9 +60,13 @@ export default function AthletesPage() {
 
   const [selectedYear,       setSelectedYear]       = useState("");
   const [selectedDiscipline, setSelectedDiscipline] = useState("");
+  const [selectedType,       setSelectedType]       = useState("");
+  const [selectedPlacing,    setSelectedPlacing]    = useState("");
 
   useEffect(() => {
-    getAthletes({ per_page: "all" })
+    //Now used with REST API for 2. assignment
+    //getAthletes({ per_page: "all" })
+    getAthletesREST()
       .then(data => {
         setAthletes(data.data ?? []);
         setYears(data.filters?.year ?? []);
@@ -129,6 +135,23 @@ export default function AthletesPage() {
               >
                 <option value="">Všetky disciplíny</option>
                 {disciplines.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            {/* Type filter (LOH/ZOH) */}
+            <div className="col-auto">
+              <select className="form-select form-select-sm form-input" value={selectedType} onChange={e => setSelectedType(e.target.value)}>
+                <option value="">Všetky typy OH</option>
+                <option value="LOH">LOH</option>
+                <option value="ZOH">ZOH</option>
+              </select>
+            </div>
+            {/* Placing filter */}
+            <div className="col-auto">
+              <select className="form-select form-select-sm form-input" value={selectedPlacing} onChange={e => setSelectedPlacing(e.target.value)}>
+                <option value="">Všetky umiestnenia</option>
+                <option value="1">🥇 Zlatá</option>
+                <option value="2">🥈 Strieborná</option>
+                <option value="3">🥉 Bronzová</option>
               </select>
             </div>
           </div>

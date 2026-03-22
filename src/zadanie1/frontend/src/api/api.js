@@ -96,3 +96,52 @@ export async function importCSV(file) {
 export function clearData() {
   return request('/clear-data.php', { method: 'POST' });
 }
+
+
+
+//Athletes REST API - NEW endpoints through Router
+//replacing old standalone athletes.php / athlete.php calls
+
+
+// Get all athletes with filters via REST API
+export function getAthletesREST(params = {}) {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+        if(v !== undefined && v !== "") query.set(k, String(v));
+    });
+    return request(`/athletes?${query.toString()}`);
+}
+
+// Get single athlete detail by ID via REST API
+export function getAthleteREST(id) {
+  return request(`/athletes/${id}`);
+}
+
+// Create a new athlete
+export function createAthlete(data) {
+    return request('/athletes', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+
+// Batch create athletes from JSON array
+export function batchCreateAthletes(data) {
+    return request('/athletes/batch', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+// Update an existing athlete by ID
+export function updateAthlete(id, data) {
+    return request(`/athletes/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    });
+}
+// Delete an athlete by ID
+export function deleteAthlete(id) {
+    return request(`/athletes/${id}`, {
+        method: 'DELETE',
+    });
+}

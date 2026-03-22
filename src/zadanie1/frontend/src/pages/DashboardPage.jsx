@@ -1,5 +1,8 @@
-// frontend/src/pages/DashboardPage.jsx
-import { useState, useRef } from 'react';
+import { getAthletesREST, createAthlete, updateAthlete, deleteAthlete, batchCreateAthletes } from '../api/api';
+import AthleteForm from '../components/AthleteForm';
+import Toast from '../components/Toast';
+
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { importCSV, clearData } from '../api/api';
@@ -22,6 +25,81 @@ export default function DashboardPage() {
   const [clearResultType, setClearResultType] = useState('success');
   // Confirmation before removing
   const [showConfirm, setShowConfirm]   = useState(false);
+
+  // --- Athletes CRUD state ---
+  const [athletes, setAthletes]       = useState([]);
+  const [loadingAthletes, setLoadingAthletes] = useState(true);
+  const [showForm, setShowForm]       = useState(false);    // show create form?
+  const [editAthlete, setEditAthlete] = useState(null);     // athlete being edited
+  const [toast, setToast]             = useState({ message: '', type: 'success' });
+
+  // Load athletes on page load
+  useEffect(() => {
+    loadAthletes();
+  }, []);
+
+  const loadAthletes = async () => {
+    setLoadingAthletes(true);
+    try {
+      const res = await getAthletesREST();
+      setAthletes(res.data || []);
+    } catch (err) {
+      setToast({ message: 'Failed to load athletes', type: 'error' });
+    } finally {
+      setLoadingAthletes(false);
+    }
+  };
+
+  // Handle creating a new athlete
+  const handleCreate = async (formData) => {
+    try {
+      await createAthlete(formData);
+      setToast({ message: 'Olympionik bol úspešne pridaný!', type: 'success' });
+      setShowForm(false);
+      loadAthletes(); // refresh the table
+    } catch (err) {
+      setToast({ message: err.error || 'Chyba pri pridávaní', type: 'error' });
+    }
+  };
+
+  // Handle updating an existing athlete
+  const handleUpdate = async (formData) => {
+    try {
+      await updateAthlete(editAthlete.id, formData);
+      setToast({ message: 'Olympionik bol úspešne upravený!', type: 'success' });
+      setEditAthlete(null);
+      loadAthletes();
+    } catch (err) {
+      setToast({ message: err.error || 'Chyba pri úprave', type: 'error' });
+    }
+  };
+
+  // Handle deleting an athlete
+  const handleDelete = async (id) => {
+    if (!window.confirm('Naozaj chceš vymazať tohto olympionika?')) return;
+    try {
+      await deleteAthlete(id);
+      setToast({ message: 'Olympionik bol úspešne vymazaný!', type: 'success' });
+      loadAthletes();
+    } catch (err) {
+      setToast({ message: err.error || 'Chyba pri mazaní', type: 'error' });
+    }
+  };
+
+  // Handle JSON file import
+  const handleJsonImport = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      const res = await batchCreateAthletes(data);
+      setToast({ message: `Import dokončený: ${res.inserted} pridaných, ${res.skipped} preskočených`, type: 'success' });
+      loadAthletes();
+    } catch (err) {
+      setToast({ message: err.error || 'Chyba pri JSON importe', type: 'error' });
+    }
+  };
 
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files?.[0] ?? null);
@@ -213,6 +291,92 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+
+        {/* Toast notification */}
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: 'success' })} />
+        
+        {/* Athletes CRUD */}
+        <div className="card shadow-sm mb-4 card-panel">
+          <div className="card-header card-header-main d-flex justify-content-between align-items-center">
+            <h5 className="mb-0">
+              <i className="bi bi-people me-2"></i>Správa olympionikov
+            </h5>
+            <div className="d-flex gap-2">
+              <label className="btn btn-outline-primary btn-sm mb-0">
+                <i className="bi bi-file-earmark-code me-1"></i>Import z JSON
+                <input type="file" accept=".json" className="d-none" onChange={handleJsonImport} />
+              </label>
+              <button className="btn btn-primary btn-sm" onClick={() => { setShowForm(true); setEditAthlete(null); }}>
+                <i className="bi bi-plus-lg me-1"></i>Pridať olympionika
+              </button>
+            </div>
+          </div>
+          <div className="card-body">
+            {/* Create Form */}
+            {showForm && (
+              <div className="mb-4 p-3 border rounded">
+                <h6 className="fw-bold mb-3">Nový olympionik</h6>
+                <AthleteForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />
+              </div>
+            )}
+            
+            {/* Edit Form */}
+            {editAthlete && (
+              <div className="mb-4 p-3 border rounded">
+                <h6 className="fw-bold mb-3">Upraviť: {editAthlete.first_name} {editAthlete.last_name}</h6>
+                <AthleteForm initialData={editAthlete} onSubmit={handleUpdate} onCancel={() => setEditAthlete(null)} />
+              </div>
+            )}
+            
+            {/* Table of athletes */}
+            {loadingAthletes ? (
+              <div className="text-center py-3">
+                <div className="spinner-border text-primary"></div>
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table className="table table-hover">
+                  <thead className="table-header-custom">
+                    <tr>
+                      <th>Meno</th>
+                      <th>Priezvisko</th>
+                      <th>Dát. narodenia</th>
+                      <th>Disciplína</th>
+                      <th>Rok OH</th>
+                      <th>Medaila</th>
+                      <th>Akcie</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {athletes.length === 0 ? (
+                      <tr><td colSpan="7" className="text-center text-muted">Žiadni olympionici</td></tr>
+                    ) : (
+                      athletes.map((a, i) => (
+                        <tr key={i}>
+                          <td>{a.first_name}</td>
+                          <td>{a.last_name}</td>
+                          <td>{a.birth_date || '–'}</td>
+                          <td>{a.discipline || '–'}</td>
+                          <td>{a.year || '–'}</td>
+                          <td>{a.medal_name || '–'}</td>
+                          <td>
+                            <button className="btn btn-sm btn-outline-primary me-1" onClick={() => { setEditAthlete(a); setShowForm(false); }}>
+                              <i className="bi bi-pencil"></i>
+                            </button>
+                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(a.id)}>
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
     </>
   );

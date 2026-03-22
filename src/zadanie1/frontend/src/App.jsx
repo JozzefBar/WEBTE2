@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
+import ApiDocsPage from './pages/ApiDocsPage';
 
 //safety for private zone -> login
 function PrivateRoute({ children }) {
@@ -49,6 +50,8 @@ function AppRoutes() {
       <Route path="/profile" element={
         <PrivateRoute><ProfilePage /></PrivateRoute>
       } />
+
+      <Route path="/api-docs" element={<ApiDocsPage />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

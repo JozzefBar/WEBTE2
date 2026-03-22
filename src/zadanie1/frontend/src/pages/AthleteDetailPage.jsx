@@ -1,7 +1,8 @@
-// frontend/src/pages/AthleteDetailPage.jsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getAthlete } from '../api/api';
+//Now used with REST API for 2. assignment
+//import { getAthlete } from '../api/api';
+import { getAthleteREST } from '../api/api';
 import Navbar from '../components/Navbar';
 import DataTable from "datatables.net-react";
 import DT from "datatables.net-bs5";
@@ -57,7 +58,9 @@ export default function AthleteDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    getAthlete(Number(id))
+    //Now used with REST API for 2. assignment
+    //getAthlete(Number(id))
+    getAthleteREST(Number(id))
       .then(setAthlete)
       .catch(() => setError('Olympionik nebol nájdený.'))
       .finally(() => setLoading(false));

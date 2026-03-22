@@ -39,7 +39,7 @@ class AthleteController
     
         $athletes = $this->athleteModel->getAll($type, $year, $placing, $discipline);
 
-        $filters = $this->athelteModel->getFilterOptions();
+        $filters = $this->athleteModel->getFilterOptions();
 
         Response::json([
             "data" => $athletes,

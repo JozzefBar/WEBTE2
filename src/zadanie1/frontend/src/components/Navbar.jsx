@@ -37,6 +37,11 @@ export default function Navbar() {
                 </Link>
               </li>
             )}
+            <li className="nav-item">
+              <Link className="nav-link" to="/api-docs">
+                <i className="bi bi-book me-1"></i>API Dokumentácia
+              </Link>
+            </li>
           </ul>
 
           <ul className="navbar-nav ms-auto">
