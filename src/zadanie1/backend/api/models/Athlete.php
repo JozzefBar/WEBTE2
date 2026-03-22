@@ -200,38 +200,54 @@ class Athlete
             $isNewAthlete = true;
         }
 
-        //if medal is provided, add the medal record for this athlete
-        if ($gameYear && $gameType && $gameCity && $gameCountry && $discipline && $placing) {
-            $gameCountryId = getOrCreateCountry($this->pdo, $gameCountry);
-            $gamesId = getOrCreateGames($this->pdo, $gameYear, $gameType, $gameCity, $gameCountryId);
-            $disciplineId = getOrCreateDiscipline($this->pdo, $discipline);
-            $medalTypeId = getOrCreateMedalType($this->pdo, $placing);
+        //if medals are provided, add the medal records for this athlete
+        $medalsToProcess = [];
+        if (!empty($data["year"]) || !empty($data["games_type"])) {
+            $medalsToProcess[] = $data;
+        }
+        if (!empty($data["medals"]) && is_array($data["medals"])) {
+            $medalsToProcess = array_merge($medalsToProcess, $data["medals"]);
+        }
 
-            $checkStmt = $this->pdo->prepare("
-                SELECT id FROM athlete_medals
-                WHERE athlete_id = :aid AND olympic_games_id = :gid AND discipline_id = :did AND medal_type_id = :mid
-                LIMIT 1
-            ");
+        foreach ($medalsToProcess as $medal) {
+            $gameYear = isset($medal["year"]) ? (int)$medal["year"] : null;
+            $gameType = $medal["games_type"] ?? null;
+            $gameCity = $medal["games_city"] ?? null;
+            $gameCountry = $medal["games_country"] ?? null;
+            $discipline = $medal["discipline"] ?? null;
+            $placing = isset($medal["placing"]) ? (int)$medal["placing"] : null;
 
-            $checkStmt->execute([
-                ":aid" => $athleteId,
-                ":gid" => $gamesId,
-                ":did" => $disciplineId,
-                ":mid" => $medalTypeId,
-            ]);
+            if ($gameYear && $gameType && $gameCity && $gameCountry && $discipline && $placing) {
+                $gameCountryId = getOrCreateCountry($this->pdo, $gameCountry);
+                $gamesId = getOrCreateGames($this->pdo, $gameYear, $gameType, $gameCity, $gameCountryId);
+                $disciplineId = getOrCreateDiscipline($this->pdo, $discipline);
+                $medalTypeId = getOrCreateMedalType($this->pdo, $placing);
 
-            if (!$checkStmt->fetchColumn()) {
-                $medalStmt = $this->pdo->prepare("
-                INSERT INTO athlete_medals (athlete_id, olympic_games_id, discipline_id, medal_type_id)
-                VALUES (:aid, :gid, :did, :mid)
-            ");
-                $medalStmt->execute([
+                $checkStmt = $this->pdo->prepare("
+                    SELECT id FROM athlete_medals
+                    WHERE athlete_id = :aid AND olympic_games_id = :gid AND discipline_id = :did AND medal_type_id = :mid
+                    LIMIT 1
+                ");
+                $checkStmt->execute([
                     ":aid" => $athleteId,
                     ":gid" => $gamesId,
                     ":did" => $disciplineId,
                     ":mid" => $medalTypeId,
                 ]);
-                $isNewMedal = true;
+
+                if (!$checkStmt->fetchColumn()) {
+                    $medalStmt = $this->pdo->prepare("
+                        INSERT INTO athlete_medals (athlete_id, olympic_games_id, discipline_id, medal_type_id)
+                        VALUES (:aid, :gid, :did, :mid)
+                    ");
+                    $medalStmt->execute([
+                        ":aid" => $athleteId,
+                        ":gid" => $gamesId,
+                        ":did" => $disciplineId,
+                        ":mid" => $medalTypeId,
+                    ]);
+                    $isNewMedal = true;
+                }
             }
         }
 
@@ -282,32 +298,79 @@ class Athlete
             ":id" => $id,
         ]);
 
-        $medalRecordId = $data["medal_record_id"] ?? null;
-        $gameYear = isset($data["year"]) ? (int)$data["year"] : null;
-        $gameType = $data["games_type"] ?? null;
-        $gameCity = $data["games_city"] ?? null;
-        $gameCountry = $data["games_country"] ?? null;
-        $discipline = $data["discipline"] ?? null;
-        $placing = isset($data["placing"]) ? (int)$data["placing"] : null;
+        $medalsToProcess = [];
+        if (!empty($data["year"]) || !empty($data["games_type"])) {
+            $medalsToProcess[] = $data;
+        }
+        if (isset($data["medals"]) && is_array($data["medals"])) {
+            $medalsToProcess = array_merge($medalsToProcess, $data["medals"]);
+        }
 
-        if ($medalRecordId && $gameYear && $gameType && $gameCity && $gameCountry && $discipline && $placing) {
-            $gameCountryId = getOrCreateCountry($this->pdo, $gameCountry);
-            $gamesId = getOrCreateGames($this->pdo, $gameYear, $gameType, $gameCity, $gameCountryId);
-            $disciplineId = getOrCreateDiscipline($this->pdo, $discipline);
-            $medalTypeId = getOrCreateMedalType($this->pdo, $placing);
+        $processedRecordIds = [];
 
-            $updateMedal = $this->pdo->prepare("
-                UPDATE athlete_medals 
-                SET olympic_games_id = :gid, discipline_id = :did, medal_type_id = :mid
-                WHERE id = :mrid AND athlete_id = :aid
-            ");
-            $updateMedal->execute([
-                ":gid" => $gamesId,
-                ":did" => $disciplineId,
-                ":mid" => $medalTypeId,
-                ":mrid" => $medalRecordId,
-                ":aid" => $id
-            ]);
+        foreach ($medalsToProcess as $medal) {
+            $medalRecordId = $medal["medal_record_id"] ?? null;
+            $gameYear = isset($medal["year"]) ? (int)$medal["year"] : null;
+            $gameType = $medal["games_type"] ?? null;
+            $gameCity = $medal["games_city"] ?? null;
+            $gameCountry = $medal["games_country"] ?? null;
+            $discipline = $medal["discipline"] ?? null;
+            $placing = isset($medal["placing"]) ? (int)$medal["placing"] : null;
+
+            if ($gameYear && $gameType && $gameCity && $gameCountry && $discipline && $placing) {
+                $gameCountryId = getOrCreateCountry($this->pdo, $gameCountry);
+                $gamesId = getOrCreateGames($this->pdo, $gameYear, $gameType, $gameCity, $gameCountryId);
+                $disciplineId = getOrCreateDiscipline($this->pdo, $discipline);
+                $medalTypeId = getOrCreateMedalType($this->pdo, $placing);
+
+                if ($medalRecordId) {
+                    $updateMedal = $this->pdo->prepare("
+                        UPDATE athlete_medals 
+                        SET olympic_games_id = :gid, discipline_id = :did, medal_type_id = :mid
+                        WHERE id = :mrid AND athlete_id = :aid
+                    ");
+                    $updateMedal->execute([
+                        ":gid" => $gamesId,
+                        ":did" => $disciplineId,
+                        ":mid" => $medalTypeId,
+                        ":mrid" => $medalRecordId,
+                        ":aid" => $id
+                    ]);
+                    $processedRecordIds[] = $medalRecordId;
+                } else {
+                    $checkStmt = $this->pdo->prepare("
+                        SELECT id FROM athlete_medals
+                        WHERE athlete_id = :aid AND olympic_games_id = :gid AND discipline_id = :did AND medal_type_id = :mid
+                        LIMIT 1
+                    ");
+                    $checkStmt->execute([":aid" => $id, ":gid" => $gamesId, ":did" => $disciplineId, ":mid" => $medalTypeId]);
+                    $existingId = $checkStmt->fetchColumn();
+
+                    if (!$existingId) {
+                        $insertMedal = $this->pdo->prepare("
+                            INSERT INTO athlete_medals (athlete_id, olympic_games_id, discipline_id, medal_type_id)
+                            VALUES (:aid, :gid, :did, :mid)
+                        ");
+                        $insertMedal->execute([":aid" => $id, ":gid" => $gamesId, ":did" => $disciplineId, ":mid" => $medalTypeId]);
+                        $processedRecordIds[] = $this->pdo->lastInsertId();
+                    } else {
+                        $processedRecordIds[] = $existingId;
+                    }
+                }
+            }
+        }
+
+        // Apply strict cascading DELETE if the array was provided (the "Edit" modal enforces array submission)
+        if (isset($data["medals"]) && is_array($data["medals"])) {
+            if (!empty($processedRecordIds)) {
+                $placeholders = implode(',', array_fill(0, count($processedRecordIds), '?'));
+                $deleteStmt = $this->pdo->prepare("DELETE FROM athlete_medals WHERE athlete_id = ? AND id NOT IN ($placeholders)");
+                $params = array_merge([$id], $processedRecordIds);
+                $deleteStmt->execute($params);
+            } else {
+                $deleteStmt = $this->pdo->prepare("DELETE FROM athlete_medals WHERE athlete_id = ?");
+                $deleteStmt->execute([$id]);
+            }
         }
 
         return true;

@@ -19,22 +19,22 @@ const DISCIPLINE_COL_IDX = 5;
 const columns = [
   { data: "last_name", title: "Priezvisko", orderable: true, orderSequence: ["asc", "desc", ""] },
   { data: "first_name", title: "Meno", orderable: false },
-  { data: "year", title: "Rok", orderable: true, orderSequence: ["desc", "asc", ""] },
+  { data: "year", title: "Rok", orderable: true, orderSequence: ["desc", "asc", ""], render: (data) => data || "–" },
   {
     data: "games_type",
     title: "Typ OH",
     orderable: false,
     render: (data) =>
-      `<span class="badge ${data === "LOH" ? "bg-success" : "bg-primary"}">${data}</span>`,
+      data ? `<span class="badge ${data === "LOH" ? "bg-success" : "bg-primary"}">${data}</span>` : "–",
   },
-  { data: "games_country", title: "Krajina", orderable: false },
-  { data: "discipline",    title: "Disciplína", orderable: true, orderSequence: ["asc", "desc", ""] },
+  { data: "games_country", title: "Krajina", orderable: false, render: (data) => data || "–" },
+  { data: "discipline",    title: "Disciplína", orderable: true, orderSequence: ["asc", "desc", ""], render: (data) => data || "–" },
   {
     data: null,
     title: "Medaila",
     orderable: false,
     render: (_data, _type, row) =>
-      `${MEDAL_ICON[row.placing] ?? ""} ${row.medal_name}`,
+      row.medal_name ? `${MEDAL_ICON[row.placing] ?? ""} ${row.medal_name}`.trim() : "–",
   },
   { data: "placing", visible: false },
 ];

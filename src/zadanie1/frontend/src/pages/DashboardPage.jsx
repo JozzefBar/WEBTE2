@@ -1,11 +1,10 @@
-import { getAthletesREST, createAthlete, updateAthlete, deleteAthlete, batchCreateAthletes } from '../api/api';
+import { getAthletesREST, importCSV, clearData, deleteAthlete, batchCreateAthletes, createAthlete, updateAthlete, getAthleteREST } from '../api/api';
 import AthleteForm from '../components/AthleteForm';
 import Toast from '../components/Toast';
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { importCSV, clearData } from '../api/api';
 import Navbar from '../components/Navbar';
 
 import DataTable from "datatables.net-react";
@@ -191,9 +190,14 @@ export default function DashboardPage() {
     createdRow: (row, data) => {
       const editBtn = row.querySelector('.edit-btn');
       if (editBtn) {
-        editBtn.addEventListener("click", () => {
-          setEditAthlete(data);
-          setShowForm(false);
+        editBtn.addEventListener("click", async () => {
+          try {
+            const res = await getAthleteREST(data.id);
+            setEditAthlete(res);
+            setShowForm(false);
+          } catch (err) {
+            setToast({ message: "Chyba pri načítaní detailu", type: "error" });
+          }
         });
       }
       const deleteBtn = row.querySelector('.delete-btn');

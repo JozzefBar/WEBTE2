@@ -72,20 +72,41 @@ class AthleteController
         }
 
         // Validate partial medal submissions
-        $medalFields = ["year", "games_type", "games_city", "games_country", "discipline", "placing"];
-        $hasAnyMedalData = false;
-        $hasAllMedalData = true;
+        if (isset($data["medals"]) && is_array($data["medals"])) {
+            $medalFields = ["year", "games_type", "games_city", "games_country", "discipline", "placing"];
+            foreach ($data["medals"] as $index => $medal) {
+                $hasAnyMedalData = false;
+                $hasAllMedalData = true;
 
-        foreach ($medalFields as $field) {
-            if (!empty($data[$field])) {
-                $hasAnyMedalData = true;
-            } else {
-                $hasAllMedalData = false;
+                foreach ($medalFields as $field) {
+                    if (!empty($medal[$field])) {
+                        $hasAnyMedalData = true;
+                    } else {
+                        $hasAllMedalData = false;
+                    }
+                }
+
+                if ($hasAnyMedalData && !$hasAllMedalData) {
+                    Response::json(["error" => "Incomplete medal record at position " . ($index + 1) . ". Please provide all 6 details or clear them all."], 400);
+                }
             }
-        }
+        } else {
+            // Legacy flat structure
+            $medalFields = ["year", "games_type", "games_city", "games_country", "discipline", "placing"];
+            $hasAnyMedalData = false;
+            $hasAllMedalData = true;
 
-        if ($hasAnyMedalData && !$hasAllMedalData) {
-            Response::json(["error" => "Incomplete medal record. Please provide all 6 medal details or clear them all."], 400);
+            foreach ($medalFields as $field) {
+                if (!empty($data[$field])) {
+                    $hasAnyMedalData = true;
+                } else {
+                    $hasAllMedalData = false;
+                }
+            }
+
+            if ($hasAnyMedalData && !$hasAllMedalData) {
+                Response::json(["error" => "Incomplete medal record. Please provide all 6 medal details or clear them all."], 400);
+            }
         }
 
         try {
@@ -133,20 +154,41 @@ class AthleteController
         }
 
         // Validate partial medal submissions
-        $medalFields = ["year", "games_type", "games_city", "games_country", "discipline", "placing"];
-        $hasAnyMedalData = false;
-        $hasAllMedalData = true;
+        if (isset($data["medals"]) && is_array($data["medals"])) {
+            $medalFields = ["year", "games_type", "games_city", "games_country", "discipline", "placing"];
+            foreach ($data["medals"] as $index => $medal) {
+                $hasAnyMedalData = false;
+                $hasAllMedalData = true;
 
-        foreach ($medalFields as $field) {
-            if (!empty($data[$field])) {
-                $hasAnyMedalData = true;
-            } else {
-                $hasAllMedalData = false;
+                foreach ($medalFields as $field) {
+                    if (!empty($medal[$field])) {
+                        $hasAnyMedalData = true;
+                    } else {
+                        $hasAllMedalData = false;
+                    }
+                }
+
+                if ($hasAnyMedalData && !$hasAllMedalData) {
+                    Response::json(["error" => "Incomplete medal record at position " . ($index + 1) . ". Please provide all 6 details or clear them all."], 400);
+                }
             }
-        }
+        } else {
+            // Legacy flat structure
+            $medalFields = ["year", "games_type", "games_city", "games_country", "discipline", "placing"];
+            $hasAnyMedalData = false;
+            $hasAllMedalData = true;
 
-        if ($hasAnyMedalData && !$hasAllMedalData) {
-            Response::json(["error" => "Incomplete medal record. Please provide all 6 medal details or clear them all."], 400);
+            foreach ($medalFields as $field) {
+                if (!empty($data[$field])) {
+                    $hasAnyMedalData = true;
+                } else {
+                    $hasAllMedalData = false;
+                }
+            }
+
+            if ($hasAnyMedalData && !$hasAllMedalData) {
+                Response::json(["error" => "Incomplete medal record. Please provide all 6 medal details or clear them all."], 400);
+            }
         }
         // Check if the athlete exists first
         $existing = $this->athleteModel->getById((int)$id);
