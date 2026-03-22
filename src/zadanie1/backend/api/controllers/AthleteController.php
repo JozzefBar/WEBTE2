@@ -71,6 +71,23 @@ class AthleteController
             Response::json(["error" => "Missing required fields: first_name, last_name"], 400);
         }
 
+        // Validate partial medal submissions
+        $medalFields = ["year", "games_type", "games_city", "games_country", "discipline", "placing"];
+        $hasAnyMedalData = false;
+        $hasAllMedalData = true;
+
+        foreach ($medalFields as $field) {
+            if (!empty($data[$field])) {
+                $hasAnyMedalData = true;
+            } else {
+                $hasAllMedalData = false;
+            }
+        }
+
+        if ($hasAnyMedalData && !$hasAllMedalData) {
+            Response::json(["error" => "Incomplete medal record. Please provide all 6 medal details or clear them all."], 400);
+        }
+
         try {
             $result = $this->athleteModel->create($data);
             Response::json(["message" => "Athlete created", "id" => $result["id"]], 201);
@@ -113,6 +130,23 @@ class AthleteController
         $data = json_decode(file_get_contents("php://input"), true);
         if (empty($data["first_name"]) || empty($data["last_name"])) {
             Response::json(["error" => "Missing required fields: first_name, last_name"], 400);
+        }
+
+        // Validate partial medal submissions
+        $medalFields = ["year", "games_type", "games_city", "games_country", "discipline", "placing"];
+        $hasAnyMedalData = false;
+        $hasAllMedalData = true;
+
+        foreach ($medalFields as $field) {
+            if (!empty($data[$field])) {
+                $hasAnyMedalData = true;
+            } else {
+                $hasAllMedalData = false;
+            }
+        }
+
+        if ($hasAnyMedalData && !$hasAllMedalData) {
+            Response::json(["error" => "Incomplete medal record. Please provide all 6 medal details or clear them all."], 400);
         }
         // Check if the athlete exists first
         $existing = $this->athleteModel->getById((int)$id);

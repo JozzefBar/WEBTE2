@@ -1,0 +1,12 @@
+[
+  { "first_name": "Valid1", "last_name": "Skok", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Kladivo", "placing": 1 },
+  { "first_name": "Valid2", "last_name": "Skok", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Kladivo", "placing": 2 },
+  { "first_name": "Valid3", "last_name": "Skok", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Kladivo", "placing": 3 },
+  { "first_name": "Valid4", "last_name": "Skok", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Kladivo", "placing": 4 },
+  { "first_name": "Valid5", "last_name": "Skok", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Kladivo", "placing": 5 },
+  { "first_name": "Valid6", "last_name": "Skok", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Kladivo", "placing": 6 },
+  { "first_name": "Valid7", "last_name": "Skok", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Kladivo", "placing": 7 },
+  { "first_name": "Valid8", "last_name": "Skok", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Kladivo", "placing": 8 },
+  { "first_name": "Valid9", "last_name": "Skok", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Kladivo", "placing": 9 },
+  { "first_name": "Valid10", "last_name": "Skok", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Kladivo", "placing": 10 }
+]

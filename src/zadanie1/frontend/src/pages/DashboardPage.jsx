@@ -213,7 +213,11 @@ export default function DashboardPage() {
       const text = await file.text();
       const data = JSON.parse(text);
       const res = await batchCreateAthletes(data);
-      setToast({ message: `Import dokončený: ${res.inserted} pridaných, ${res.skipped} preskočených`, type: 'success' });
+      let msg = `Import dokončený: ${res.inserted} pridaných, ${res.skipped} preskočených.`;
+      if (res.errors && res.errors.length > 0) {
+        msg += `\n⚠️ Chyby:\n` + res.errors.join('\n');
+      }
+      setToast({ message: msg, type: res.skipped > 0 ? 'warning' : 'success' });
       loadAthletes();
     } catch (err) {
       setToast({ message: err.error || 'Chyba pri JSON importe', type: 'error' });
@@ -416,14 +420,13 @@ export default function DashboardPage() {
         {/* Toast notification */}
         <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: 'success' })} />
         
-        {/* Athletes CRUD */}
         <div className="card shadow-sm mb-4 card-panel">
-          <div className="card-header card-header-main d-flex justify-content-between align-items-center">
+          <div className="card-header card-header-main d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
             <h5 className="mb-0">
               <i className="bi bi-people me-2"></i>Správa olympionikov
             </h5>
-            <div className="d-flex gap-2">
-              <label className="btn btn-outline-light btn-sm mb-0">
+            <div className="d-flex flex-column flex-sm-row gap-2">
+              <label className="btn btn-outline-light btn-sm mb-0 text-center">
                 <i className="bi bi-file-earmark-code me-1"></i>Import z JSON
                 <input type="file" accept=".json" className="d-none" onChange={handleJsonImport} />
               </label>

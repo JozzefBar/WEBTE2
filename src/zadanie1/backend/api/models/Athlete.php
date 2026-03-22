@@ -34,11 +34,11 @@ class Athlete
                 d.category,
                 mt.name AS medal_name,
                 mt.placing
-            FROM athlete_medals am
-            JOIN athletes a ON am.athlete_id = a.id
-            JOIN olympic_games og ON am.olympic_games_id = og.id
-            JOIN disciplines d ON am.discipline_id = d.id
-            JOIN medal_types mt ON am.medal_type_id = mt.id
+            FROM athletes a
+            LEFT JOIN athlete_medals am ON a.id = am.athlete_id
+            LEFT JOIN olympic_games og ON am.olympic_games_id = og.id
+            LEFT JOIN disciplines d ON am.discipline_id = d.id
+            LEFT JOIN medal_types mt ON am.medal_type_id = mt.id
             LEFT JOIN countries c_birth ON a.birth_country_id = c_birth.id
             LEFT JOIN countries c_games ON og.country_id = c_games.id
             WHERE 1 = 1
@@ -146,10 +146,10 @@ class Athlete
         $firstName = $data["first_name"] ?? null;
         $lastName = $data["last_name"] ?? null;
         $birthDate = empty($data["birth_date"]) ? null : $data["birth_date"];
-        $birthPlace = empty($data["birth_place"]) ? null : $data["birth_place"];
+        $birthPlace = empty($data["birth_place"]) ? '' : $data["birth_place"];
         $birthCountry = empty($data["birth_country"]) ? null : $data["birth_country"];
         $deathDate = empty($data["death_date"]) ? null : $data["death_date"];
-        $deathPlace = empty($data["death_place"]) ? null : $data["death_place"];
+        $deathPlace = empty($data["death_place"]) ? '' : $data["death_place"];
         $deathCountry = empty($data["death_country"]) ? null : $data["death_country"];
 
         //Medals and game data
@@ -160,8 +160,8 @@ class Athlete
         $discipline = $data["discipline"] ?? null;
         $placing = isset($data["placing"]) ? (int)$data["placing"] : null;
 
-        $birthCountryId = $birthCountry ? getOrCreateCountry($this->pdo, $birthCountry) : null;
-        $deathCountryId = $deathCountry ? getOrCreateCountry($this->pdo, $deathCountry) : null;
+        $birthCountryId = getOrCreateCountry($this->pdo, $birthCountry ?: '');
+        $deathCountryId = getOrCreateCountry($this->pdo, $deathCountry ?: '');
 
         //check if athlete exists (<=> returns true even when both sides are NULL)
         $findStmt = $this->pdo->prepare(
@@ -176,6 +176,8 @@ class Athlete
             ":bd" => $birthDate,
         ]);
         $athleteId = $findStmt->fetchColumn();
+        $isNewAthlete = false;
+        $isNewMedal = false;
 
         if (!$athleteId) {
             $insertStmt = $this->pdo->prepare("
@@ -195,6 +197,7 @@ class Athlete
             ]);
 
             $athleteId = (int)$this->pdo->lastInsertId();
+            $isNewAthlete = true;
         }
 
         //if medal is provided, add the medal record for this athlete
@@ -228,10 +231,14 @@ class Athlete
                     ":did" => $disciplineId,
                     ":mid" => $medalTypeId,
                 ]);
+                $isNewMedal = true;
             }
         }
 
-        return ["id" => $athleteId];
+        return [
+            "id" => $athleteId,
+            "inserted_something" => $isNewAthlete || $isNewMedal
+        ];
     }
 
     //Update existing athlete
@@ -241,14 +248,14 @@ class Athlete
         $firstName = $data["first_name"] ?? null;
         $lastName = $data["last_name"] ?? null;
         $birthDate = empty($data["birth_date"]) ? null : $data["birth_date"];
-        $birthPlace = empty($data["birth_place"]) ? null : $data["birth_place"];
+        $birthPlace = empty($data["birth_place"]) ? '' : $data["birth_place"];
         $birthCountry = empty($data["birth_country"]) ? null : $data["birth_country"];
         $deathDate = empty($data["death_date"]) ? null : $data["death_date"];
-        $deathPlace = empty($data["death_place"]) ? null : $data["death_place"];
+        $deathPlace = empty($data["death_place"]) ? '' : $data["death_place"];
         $deathCountry = empty($data["death_country"]) ? null : $data["death_country"];
 
-        $birthCountryId = $birthCountry ? getOrCreateCountry($this->pdo, $birthCountry) : null;
-        $deathCountryId = $deathCountry ? getOrCreateCountry($this->pdo, $deathCountry) : null;
+        $birthCountryId = getOrCreateCountry($this->pdo, $birthCountry ?: '');
+        $deathCountryId = getOrCreateCountry($this->pdo, $deathCountry ?: '');
     
         $stmt = $this->pdo->prepare("
             UPDATE athletes SET
@@ -330,12 +337,39 @@ class Athlete
             foreach($items as $index => $item){
                 if(empty($item["first_name"]) || empty($item["last_name"])){
                     $skipped++;
-                    $errors[] = "V riadku $index: chýba meno alebo priezvisko";
+                    $displayIndex = $index + 1;
+                    $errors[] = "V zázname $displayIndex: chýba meno alebo priezvisko";
                     continue;
                 }
 
-                $this->create($item);
-                $inserted++;
+                $medalFields = ["year", "games_type", "games_city", "games_country", "discipline", "placing"];
+                $hasAnyMedalData = false;
+                $hasAllMedalData = true;
+
+                foreach ($medalFields as $field) {
+                    if (!empty($item[$field])) {
+                        $hasAnyMedalData = true;
+                    } else {
+                        $hasAllMedalData = false;
+                    }
+                }
+
+                if ($hasAnyMedalData && !$hasAllMedalData) {
+                    $skipped++;
+                    $displayIndex = $index + 1;
+                    $errors[] = "V zázname $displayIndex: nekompletné údaje o medaile (vyžaduje sa všetkých 6 polí alebo žiadne)";
+                    continue;
+                }
+
+                $result = $this->create($item);
+                
+                if ($result["inserted_something"]) {
+                    $inserted++;
+                } else {
+                    $skipped++;
+                    $displayIndex = $index + 1;
+                    $errors[] = "V zázname $displayIndex: Duplicitný záznam (športovec aj medaila už existujú)";
+                }
             }
 
             $this->pdo->commit();

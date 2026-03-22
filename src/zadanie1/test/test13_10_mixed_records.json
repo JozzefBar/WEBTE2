@@ -1,0 +1,12 @@
+[
+  { "first_name": "Mixed1", "last_name": "Valid", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Vodný slalom", "placing": 1 },
+  { "first_name": "", "last_name": "InvalidName", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Vodný slalom", "placing": 2 },
+  { "first_name": "Mixed3", "last_name": "Valid" },
+  { "first_name": "Mixed4", "last_name": "InvalidMedal", "year": 2024, "games_type": "LOH" },
+  { "first_name": "Mixed5", "last_name": "Valid", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Vodný slalom", "placing": 3 },
+  { "first_name": "Mixed6", "last_name": "InvalidMedal2", "discipline": "Plávanie", "placing": 1 },
+  { "first_name": "Mixed7", "last_name": "Valid" },
+  { "first_name": "Mixed8", "last_name": "Valid", "year": 2024, "games_type": "LOH", "games_city": "Paríž", "games_country": "Francúzsko", "discipline": "Vodný slalom", "placing": 4 },
+  { "first_name": "Mixed9", "last_name": "Valid" },
+  { "first_name": "Mixed10", "last_name": "InvalidName2" }
+]

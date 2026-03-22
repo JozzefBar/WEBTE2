@@ -58,6 +58,19 @@ export default function AthleteForm({ initialData, onSubmit, onCancel }) {
     const errs = {};
     if (!form.first_name.trim()) errs.first_name = 'Vyžaduje sa meno';
     if (!form.last_name.trim()) errs.last_name = 'Vyžaduje sa priezvisko';
+
+    // If ANY medal field is filled out, ALL of them must be filled out
+    const medalFields = ['year', 'games_type', 'games_city', 'games_country', 'discipline', 'placing'];
+    const anyMedalFieldFilled = medalFields.some(field => String(form[field]).trim() !== '');
+
+    if (anyMedalFieldFilled) {
+      medalFields.forEach(field => {
+        if (!String(form[field]).trim()) {
+          errs[field] = 'Vyžaduje sa pre záznam o medaile';
+        }
+      });
+    }
+
     return errs;
   };
 
@@ -112,11 +125,12 @@ export default function AthleteForm({ initialData, onSubmit, onCancel }) {
         <div className="col-md-3">
           <div className="mb-3">
             <label className="form-label fw-semibold">Typ OH</label>
-            <select className="form-select form-input" value={form.games_type} onChange={handleChange('games_type')}>
+            <select className={`form-select form-input ${errors.games_type ? 'is-invalid' : ''}`} value={form.games_type} onChange={handleChange('games_type')}>
               <option value="">-- Vyber --</option>
               <option value="LOH">LOH</option>
               <option value="ZOH">ZOH</option>
             </select>
+            {errors.games_type && <div className="invalid-feedback">{errors.games_type}</div>}
           </div>
         </div>
         <div className="col-md-3">{renderField('Mesto OH', 'games_city')}</div>
@@ -129,12 +143,13 @@ export default function AthleteForm({ initialData, onSubmit, onCancel }) {
             <label className="form-label fw-semibold">Umiestnenie</label>
             <input 
               type="number" 
-              className="form-control form-input" 
+              className={`form-control form-input ${errors.placing ? 'is-invalid' : ''}`} 
               value={form.placing} 
               onChange={handleChange('placing')} 
               placeholder="Napr. 1, 4, 8..."
               min="1"
             />
+            {errors.placing && <div className="invalid-feedback">{errors.placing}</div>}
           </div>
         </div>
       </div>
