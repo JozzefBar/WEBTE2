@@ -35,10 +35,15 @@ class Router {
 
         // Get the current HTTP request method and URI
         $method = $_SERVER["REQUEST_METHOD"];
-        $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
         
-        // Remove the "/api" prefix from the URI since endpoints are registered without it
-        $uri = preg_replace("#^/api#", "", $uri);
+        // Support Vite proxy: _route query param passes the REST endpoint directly
+        if (isset($_GET['_route'])) {
+            $uri = $_GET['_route'];
+        } else {
+            $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+            // Remove the "/api" prefix from the URI since endpoints are registered without it
+            $uri = preg_replace("#^/api#", "", $uri);
+        }
 
         foreach ($this->routes as $route) {
 

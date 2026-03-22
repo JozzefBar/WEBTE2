@@ -2,12 +2,12 @@ import Navbar from '../components/Navbar';
 
 export default function ApiDocsPage() {
   const endpoints = [
-    { method: 'GET',    path: '/api/athletes',         desc: 'Get list of athletes with medals. Filters: ?type=LOH&year=2024&placing=1&discipline=...' },
-    { method: 'GET',    path: '/api/athletes/{id}',    desc: 'Get details of a single athlete by ID, including all medals.' },
-    { method: 'POST',   path: '/api/athletes',         desc: 'Create a new athlete. Body: JSON with first_name, last_name, and optional medal data.' },
-    { method: 'POST',   path: '/api/athletes/batch',   desc: 'Batch create athletes from JSON array. Body: [{ athlete1 }, { athlete2 }, ...]' },
-    { method: 'PUT',    path: '/api/athletes/{id}',    desc: 'Update personal data of an existing athlete. Body: JSON with fields to update.' },
-    { method: 'DELETE', path: '/api/athletes/{id}',    desc: 'Delete an athlete and all related medal records.' },
+    { method: 'GET',    path: '/api/athletes',         desc: 'Získa zoznam športovcov s medailami. Filtre: ?type=LOH&year=2024&placing=1&discipline=...' },
+    { method: 'GET',    path: '/api/athletes/{id}',    desc: 'Získa detaily jedného športovca podľa ID vrátane všetkých medailí.' },
+    { method: 'POST',   path: '/api/athletes',         desc: 'Vytvorí nového športovca. Body prázdne JSON dáta s first_name, last_name a voliteľne dátami o medailách.' },
+    { method: 'POST',   path: '/api/athletes/batch',   desc: 'Hromadné vytvorenie športovcov z JSON poľa. Body: [{ athlete1 }, { athlete2 }, ...]' },
+    { method: 'PUT',    path: '/api/athletes/{id}',    desc: 'Aktualizuje údaje existujúceho športovca. Body: JSON s poľami na aktualizáciu.' },
+    { method: 'DELETE', path: '/api/athletes/{id}',    desc: 'Vymaže športovca a všetky jeho súvisiace záznamy o medailách.' },
   ];
 
   // Color coding for HTTP methods

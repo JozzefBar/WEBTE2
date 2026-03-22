@@ -1,0 +1,24 @@
+[
+  {
+    "first_name": "Duplicitný",
+    "last_name": "Olympionik",
+    "birth_date": "1990-01-01",
+    "year": 2020,
+    "games_type": "LOH",
+    "games_city": "Tokio",
+    "games_country": "Japonsko",
+    "discipline": "Zápasenie",
+    "placing": 1
+  },
+  {
+    "first_name": "Duplicitný",
+    "last_name": "Olympionik",
+    "birth_date": "1990-01-01",
+    "year": 2024,
+    "games_type": "LOH",
+    "games_city": "Paríž",
+    "games_country": "Francúzsko",
+    "discipline": "Zápasenie",
+    "placing": 2
+  }
+]

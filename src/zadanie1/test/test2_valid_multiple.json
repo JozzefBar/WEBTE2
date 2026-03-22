@@ -1,0 +1,28 @@
+[
+  {
+    "first_name": "Ján",
+    "last_name": "Volko",
+    "birth_date": "1996-11-02",
+    "birth_place": "Bratislava",
+    "birth_country": "Slovensko",
+    "year": 2020,
+    "games_type": "LOH",
+    "games_city": "Tokio",
+    "games_country": "Japonsko",
+    "discipline": "Beh na 100m",
+    "placing": 2
+  },
+  {
+    "first_name": "Petra",
+    "last_name": "Vlhová",
+    "birth_date": "1995-06-13",
+    "birth_place": "Liptovský Mikuláš",
+    "birth_country": "Slovensko",
+    "year": 2022,
+    "games_type": "ZOH",
+    "games_city": "Peking",
+    "games_country": "Čína",
+    "discipline": "Slalom",
+    "placing": 1
+  }
+]

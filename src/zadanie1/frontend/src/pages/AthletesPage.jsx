@@ -36,6 +36,7 @@ const columns = [
     render: (_data, _type, row) =>
       `${MEDAL_ICON[row.placing] ?? ""} ${row.medal_name}`,
   },
+  { data: "placing", visible: false },
 ];
 
 const dtLanguage = {
@@ -69,7 +70,7 @@ export default function AthletesPage() {
     getAthletesREST()
       .then(data => {
         setAthletes(data.data ?? []);
-        setYears(data.filters?.year ?? []);
+        setYears(data.filters?.years ?? []);
         setDisciplines(data.filters?.disciplines ?? []);
       })
       .catch(() => setError("Nepodarilo sa načítať dáta. Skontroluj spojenie so serverom."))
@@ -91,6 +92,20 @@ export default function AthletesPage() {
     dt.column(DISCIPLINE_COL_IDX).search(selectedDiscipline, true, false).draw();
     dt.column(DISCIPLINE_COL_IDX).visible(!selectedDiscipline);
   }, [selectedDiscipline]);
+
+  // Type filter
+  useEffect(() => {
+    if (!tableRef.current) return;
+    const dt = tableRef.current.dt();
+    dt.column(3).search(selectedType ? `^${selectedType}$` : '', true, false).draw();
+  }, [selectedType]);
+
+  // Placing filter
+  useEffect(() => {
+    if (!tableRef.current) return;
+    const dt = tableRef.current.dt();
+    dt.column(7).search(selectedPlacing ? `^${selectedPlacing}$` : '', true, false).draw();
+  }, [selectedPlacing]);
 
   const tableOptions = {
     pageLength: 10,
@@ -147,12 +162,7 @@ export default function AthletesPage() {
             </div>
             {/* Placing filter */}
             <div className="col-auto">
-              <select className="form-select form-select-sm form-input" value={selectedPlacing} onChange={e => setSelectedPlacing(e.target.value)}>
-                <option value="">Všetky umiestnenia</option>
-                <option value="1">🥇 Zlatá</option>
-                <option value="2">🥈 Strieborná</option>
-                <option value="3">🥉 Bronzová</option>
-              </select>
+              <input type="number" className="form-control form-control-sm form-input" placeholder="Umiestnenie (1, 4...)" value={selectedPlacing} onChange={e => setSelectedPlacing(e.target.value)} min="1" />
             </div>
           </div>
         )}
@@ -181,6 +191,7 @@ export default function AthletesPage() {
                     <th>Krajina</th>
                     <th>Disciplína</th>
                     <th>Medaila</th>
+                    <th style={{ display: 'none' }}>_</th>
                   </tr>
                 </thead>
               </DataTable>

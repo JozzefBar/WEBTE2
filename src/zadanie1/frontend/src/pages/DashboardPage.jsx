@@ -8,12 +8,31 @@ import { useAuth } from '../context/AuthContext';
 import { importCSV, clearData } from '../api/api';
 import Navbar from '../components/Navbar';
 
+import DataTable from "datatables.net-react";
+import DT from "datatables.net-bs5";
+import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
+
+DataTable.use(DT);
+
+const dtLanguage = {
+  search:     "Hľadať:",
+  lengthMenu: "Zobraziť _MENU_ záznamov",
+  info:       "Záznamy _START_ – _END_ z _TOTAL_",
+  infoEmpty:  "Žiadne záznamy",
+  emptyTable: "Žiadne záznamy",
+  zeroRecords:"Žiadne záznamy",
+  paginate: { first: "«", last: "»", next: "›", previous: "‹" },
+};
+
+const MEDAL_ICON = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
   // Import state
   const fileInputRef              = useRef(null);
+  const formRef                   = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [importing, setImporting]       = useState(false);
   const [importResult, setImportResult] = useState(null);
@@ -25,13 +44,23 @@ export default function DashboardPage() {
   const [clearResultType, setClearResultType] = useState('success');
   // Confirmation before removing
   const [showConfirm, setShowConfirm]   = useState(false);
+  const [deleteAthleteId, setDeleteAthleteId] = useState(null);
 
   // --- Athletes CRUD state ---
+  const tableRef                      = useRef(null);
   const [athletes, setAthletes]       = useState([]);
   const [loadingAthletes, setLoadingAthletes] = useState(true);
   const [showForm, setShowForm]       = useState(false);    // show create form?
   const [editAthlete, setEditAthlete] = useState(null);     // athlete being edited
   const [toast, setToast]             = useState({ message: '', type: 'success' });
+
+  // Filters state
+  const [years,       setYears]       = useState([]);
+  const [disciplines, setDisciplines] = useState([]);
+  const [selectedYear,       setSelectedYear]       = useState("");
+  const [selectedDiscipline, setSelectedDiscipline] = useState("");
+  const [selectedType,       setSelectedType]       = useState("");
+  const [selectedPlacing,    setSelectedPlacing]    = useState("");
 
   // Load athletes on page load
   useEffect(() => {
@@ -43,12 +72,55 @@ export default function DashboardPage() {
     try {
       const res = await getAthletesREST();
       setAthletes(res.data || []);
+      setYears(res.filters?.years || []);
+      setDisciplines(res.filters?.disciplines || []);
     } catch (err) {
       setToast({ message: 'Failed to load athletes', type: 'error' });
     } finally {
       setLoadingAthletes(false);
     }
   };
+
+  // Scroll to form when opening Edit/Create
+  useEffect(() => {
+    if (showForm || editAthlete) {
+      setTimeout(() => {
+        if (formRef.current) {
+          // Calculate the exact position of the form and subtract 80px (for navbar offset)
+          const yOffset = formRef.current.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top: yOffset, behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [showForm, editAthlete]);
+
+  // DataTables filters + column visibility
+  useEffect(() => {
+    if (!tableRef.current) return;
+    const dt = tableRef.current.dt();
+    dt.column(4).search(selectedYear ? `^${selectedYear}$` : '', true, false).draw();
+    dt.column(4).visible(!selectedYear);
+  }, [selectedYear]);
+
+  useEffect(() => {
+    if (!tableRef.current) return;
+    const dt = tableRef.current.dt();
+    dt.column(3).search(selectedDiscipline, false, true).draw();
+    dt.column(3).visible(!selectedDiscipline);
+  }, [selectedDiscipline]);
+
+  useEffect(() => {
+    if (!tableRef.current) return;
+    const dt = tableRef.current.dt();
+    dt.column(5).search(selectedType ? `^${selectedType}$` : '', true, false).draw();
+    dt.column(5).visible(!selectedType);
+  }, [selectedType]);
+
+  useEffect(() => {
+    if (!tableRef.current) return;
+    const dt = tableRef.current.dt();
+    dt.column(6).search(selectedPlacing ? `^${selectedPlacing}$` : '', true, false).draw();
+  }, [selectedPlacing]);
 
   // Handle creating a new athlete
   const handleCreate = async (formData) => {
@@ -74,16 +146,63 @@ export default function DashboardPage() {
     }
   };
 
-  // Handle deleting an athlete
-  const handleDelete = async (id) => {
-    if (!window.confirm('Naozaj chceš vymazať tohto olympionika?')) return;
+  // Handle deleting an athlete via Custom Modal
+  const handleDeleteConfirmed = async () => {
+    if (!deleteAthleteId) return;
     try {
-      await deleteAthlete(id);
+      await deleteAthlete(deleteAthleteId.id);
       setToast({ message: 'Olympionik bol úspešne vymazaný!', type: 'success' });
+      setDeleteAthleteId(null);
       loadAthletes();
     } catch (err) {
       setToast({ message: err.error || 'Chyba pri mazaní', type: 'error' });
+      setDeleteAthleteId(null);
     }
+  };
+
+  const dtColumns = [
+    { data: "first_name", title: "Meno" },
+    { data: "last_name", title: "Priezvisko" },
+    { data: "birth_date", title: "Dát. narodenia", render: (data) => data || '–' },
+    { data: "discipline", title: "Disciplína", render: (data) => data || '–' },
+    { data: "year", title: "Rok OH", render: (data) => data || '–' },
+    { data: "games_type", title: "Typ OH", render: (data) => data || '–' },
+    { data: "placing", visible: false },
+    { 
+      data: null, 
+      title: "Medaila", 
+      render: (_data, _type, row) => `${MEDAL_ICON[row.placing] ?? ""} ${row.medal_name || "–"}`.trim()
+    },
+    {
+      data: null,
+      title: "Akcie",
+      orderable: false,
+      render: () => `
+        <button class="btn btn-sm btn-outline-primary me-1 edit-btn"><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-sm btn-outline-danger delete-btn"><i class="bi bi-trash"></i></button>
+      `
+    }
+  ];
+
+  const tableOptions = {
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, 100, 10000], [10, 25, 50, 100, "Všetky"]],
+    language: dtLanguage,
+    createdRow: (row, data) => {
+      const editBtn = row.querySelector('.edit-btn');
+      if (editBtn) {
+        editBtn.addEventListener("click", () => {
+          setEditAthlete(data);
+          setShowForm(false);
+        });
+      }
+      const deleteBtn = row.querySelector('.delete-btn');
+      if (deleteBtn) {
+        deleteBtn.addEventListener("click", () => {
+          setDeleteAthleteId(data);
+        });
+      }
+    },
   };
 
   // Handle JSON file import
@@ -116,6 +235,7 @@ export default function DashboardPage() {
       setImportResult(result);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setSelectedFile(null);
+      loadAthletes();
     } catch (err) {
       setImportError(err?.error ?? 'Chyba pri importe. Skontroluj formát súboru.');
     } finally {
@@ -133,6 +253,7 @@ export default function DashboardPage() {
       setClearResult(res.message);
       setClearResultType('success');
       setImportResult(null);
+      loadAthletes();
     } catch (err) {
       setClearResult(err.error ?? 'Chyba pri mazaní dát');
       setClearResultType('danger');
@@ -302,7 +423,7 @@ export default function DashboardPage() {
               <i className="bi bi-people me-2"></i>Správa olympionikov
             </h5>
             <div className="d-flex gap-2">
-              <label className="btn btn-outline-primary btn-sm mb-0">
+              <label className="btn btn-outline-light btn-sm mb-0">
                 <i className="bi bi-file-earmark-code me-1"></i>Import z JSON
                 <input type="file" accept=".json" className="d-none" onChange={handleJsonImport} />
               </label>
@@ -312,6 +433,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="card-body">
+            <div ref={formRef}></div>
             {/* Create Form */}
             {showForm && (
               <div className="mb-4 p-3 border rounded">
@@ -329,13 +451,45 @@ export default function DashboardPage() {
             )}
             
             {/* Table of athletes */}
+            {!loadingAthletes && (
+              <div className="row g-2 mb-3">
+                <div className="col-auto">
+                  <select className="form-select form-select-sm form-input" value={selectedYear} onChange={e => setSelectedYear(e.target.value)}>
+                    <option value="">Všetky roky</option>
+                    {years.map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+                <div className="col-auto">
+                  <select className="form-select form-select-sm form-input" value={selectedDiscipline} onChange={e => setSelectedDiscipline(e.target.value)}>
+                    <option value="">Všetky disciplíny</option>
+                    {disciplines.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div className="col-auto">
+                  <select className="form-select form-select-sm form-input" value={selectedType} onChange={e => setSelectedType(e.target.value)}>
+                    <option value="">Všetky typy OH</option>
+                    <option value="LOH">LOH</option>
+                    <option value="ZOH">ZOH</option>
+                  </select>
+                </div>
+                <div className="col-auto">
+                  <input type="number" className="form-control form-control-sm form-input" placeholder="Umiestnenie (1, 4...)" value={selectedPlacing} onChange={e => setSelectedPlacing(e.target.value)} />
+                </div>
+              </div>
+            )}
             {loadingAthletes ? (
               <div className="text-center py-3">
                 <div className="spinner-border text-primary"></div>
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
-                <table className="table table-hover">
+                <DataTable
+                  ref={tableRef}
+                  data={athletes}
+                  columns={dtColumns}
+                  options={tableOptions}
+                  className="table table-hover"
+                >
                   <thead className="table-header-custom">
                     <tr>
                       <th>Meno</th>
@@ -343,39 +497,42 @@ export default function DashboardPage() {
                       <th>Dát. narodenia</th>
                       <th>Disciplína</th>
                       <th>Rok OH</th>
+                      <th>Typ OH</th>
+                      <th>Umiestnenie</th>
                       <th>Medaila</th>
                       <th>Akcie</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {athletes.length === 0 ? (
-                      <tr><td colSpan="7" className="text-center text-muted">Žiadni olympionici</td></tr>
-                    ) : (
-                      athletes.map((a, i) => (
-                        <tr key={i}>
-                          <td>{a.first_name}</td>
-                          <td>{a.last_name}</td>
-                          <td>{a.birth_date || '–'}</td>
-                          <td>{a.discipline || '–'}</td>
-                          <td>{a.year || '–'}</td>
-                          <td>{a.medal_name || '–'}</td>
-                          <td>
-                            <button className="btn btn-sm btn-outline-primary me-1" onClick={() => { setEditAthlete(a); setShowForm(false); }}>
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(a.id)}>
-                              <i className="bi bi-trash"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                </DataTable>
               </div>
             )}
           </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {deleteAthleteId && (
+          <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content card-panel">
+                <div className="modal-header border-bottom-0 pb-0">
+                  <h5 className="modal-title text-danger fw-bold">
+                    <i className="bi bi-exclamation-triangle me-2"></i>Vymazať olympionika?
+                  </h5>
+                  <button type="button" className="btn-close btn-close-white" onClick={() => setDeleteAthleteId(null)}></button>
+                </div>
+                <div className="modal-body py-4">
+                  Naozaj chceš trvalo vymazať olympionika <strong>{deleteAthleteId.first_name} {deleteAthleteId.last_name}</strong> a všetky jeho medaily?
+                </div>
+                <div className="modal-footer border-top-0 pt-0">
+                  <button type="button" className="btn btn-secondary" onClick={() => setDeleteAthleteId(null)}>Zrušiť</button>
+                  <button type="button" className="btn btn-danger" onClick={handleDeleteConfirmed}>
+                    <i className="bi bi-trash me-1"></i>Vymazať
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </>

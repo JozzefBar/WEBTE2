@@ -33,7 +33,7 @@ export default function Navbar() {
             {user && (
               <li className="nav-item">
                 <Link className="nav-link" to="/dashboard">
-                  <i className="bi bi-upload me-1"></i>Import dát
+                  <i className="bi bi-gear me-1"></i>Správa dát
                 </Link>
               </li>
             )}

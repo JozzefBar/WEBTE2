@@ -1,0 +1,22 @@
+[
+  {
+    "first_name": "Fiktívny",
+    "last_name": "Športovec",
+    "year": 2024,
+    "games_type": "LOH",
+    "games_city": "Paríž",
+    "games_country": "Francúzsko",
+    "discipline": "Skok do diaľky",
+    "placing": 4
+  },
+  {
+    "first_name": "Ďalší",
+    "last_name": "Športovec",
+    "year": 2024,
+    "games_type": "LOH",
+    "games_city": "Paríž",
+    "games_country": "Francúzsko",
+    "discipline": "Skok do diaľky",
+    "placing": 15
+  }
+]

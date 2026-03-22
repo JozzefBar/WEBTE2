@@ -36,12 +36,13 @@ export default function AthleteForm({ initialData, onSubmit, onCancel }) {
         death_date: initialData.death_date || '',
         death_place: initialData.death_place || '',
         death_country: initialData.death_country || '',
-        year: '',
-        games_type: '',
-        games_city: '',
-        games_country: '',
-        discipline: '',
-        placing: '',
+        year: initialData.year || '',
+        games_type: initialData.games_type || '',
+        games_city: initialData.games_city || '',
+        games_country: initialData.games_country || '',
+        discipline: initialData.discipline || '',
+        placing: initialData.placing || '',
+        medal_record_id: initialData.medal_record_id || null,
       });
     }
   }, [initialData]);
@@ -104,42 +105,39 @@ export default function AthleteForm({ initialData, onSubmit, onCancel }) {
         <div className="col-md-4">{renderField('Krajina úmrtia', 'death_country')}</div>
       </div>
 
-      {/* Only show medal fields when CREATING (not editing personal data) */}
-      {!initialData && (
-        <>
-          <hr />
-          <h6 className="text-uppercase text-muted small fw-bold mb-3">Údaje o medaile</h6>
-          <div className="row">
-            <div className="col-md-3">{renderField('Rok OH', 'year', 'number', '2024')}</div>
-            <div className="col-md-3">
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Typ OH</label>
-                <select className="form-select form-input" value={form.games_type} onChange={handleChange('games_type')}>
-                  <option value="">-- Vyber --</option>
-                  <option value="LOH">LOH</option>
-                  <option value="ZOH">ZOH</option>
-                </select>
-              </div>
-            </div>
-            <div className="col-md-3">{renderField('Mesto OH', 'games_city')}</div>
-            <div className="col-md-3">{renderField('Krajina OH', 'games_country')}</div>
+      <hr />
+      <h6 className="text-uppercase text-muted small fw-bold mb-3">Údaje o medaile {initialData && "(Upravujete konkrétnu medailu pre tohto olympionika)"}</h6>
+      <div className="row">
+        <div className="col-md-3">{renderField('Rok OH', 'year', 'number', '2024')}</div>
+        <div className="col-md-3">
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Typ OH</label>
+            <select className="form-select form-input" value={form.games_type} onChange={handleChange('games_type')}>
+              <option value="">-- Vyber --</option>
+              <option value="LOH">LOH</option>
+              <option value="ZOH">ZOH</option>
+            </select>
           </div>
-          <div className="row">
-            <div className="col-md-6">{renderField('Disciplína', 'discipline')}</div>
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Umiestnenie</label>
-                <select className="form-select form-input" value={form.placing} onChange={handleChange('placing')}>
-                  <option value="">-- Vyber --</option>
-                  <option value="1">🥇 1. miesto (Zlatá)</option>
-                  <option value="2">🥈 2. miesto (Strieborná)</option>
-                  <option value="3">🥉 3. miesto (Bronzová)</option>
-                </select>
-              </div>
-            </div>
+        </div>
+        <div className="col-md-3">{renderField('Mesto OH', 'games_city')}</div>
+        <div className="col-md-3">{renderField('Krajina OH', 'games_country')}</div>
+      </div>
+      <div className="row">
+        <div className="col-md-6">{renderField('Disciplína', 'discipline')}</div>
+        <div className="col-md-6">
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Umiestnenie</label>
+            <input 
+              type="number" 
+              className="form-control form-input" 
+              value={form.placing} 
+              onChange={handleChange('placing')} 
+              placeholder="Napr. 1, 4, 8..."
+              min="1"
+            />
           </div>
-        </>
-      )}
+        </div>
+      </div>
 
       <div className="d-flex gap-2 mt-3">
         <button type="submit" className="btn btn-primary btn-action">

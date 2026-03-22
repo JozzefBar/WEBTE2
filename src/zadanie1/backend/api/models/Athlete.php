@@ -19,6 +19,7 @@ class Athlete
     {
         $sql = "
             SELECT
+                am.id AS medal_record_id,
                 a.id,
                 a.first_name,
                 a.last_name,
@@ -77,11 +78,11 @@ class Athlete
     //GET filter options for dropdowns
     public function getFilterOptions(): array
     {
-        $yearStmt = $this->pdo->query("SELECT DISTINCT year FROM olmypic_games ORDER BY year DESC");
+        $yearStmt = $this->pdo->query("SELECT DISTINCT year FROM olympic_games ORDER BY year DESC");
 
         $years = $yearStmt->fetchAll(PDO::FETCH_COLUMN);
 
-        $discStmt = $this->pdo->query("SELECT DISTINCT name FROM disciplines ORDER BY year ASC");
+        $discStmt = $this->pdo->query("SELECT DISTINCT name FROM disciplines ORDER BY name ASC");
         $disciplines = $discStmt->fetchAll(PDO::FETCH_COLUMN);
 
         return [
@@ -144,12 +145,12 @@ class Athlete
         //personal data of athlete
         $firstName = $data["first_name"] ?? null;
         $lastName = $data["last_name"] ?? null;
-        $birthDate = $data["birth_date"] ?? null;
-        $birthPlace = $data["birth_place"] ?? null;
-        $birthCountry = $data["birth_country"] ?? null;
-        $deathDate = $data["death_date"] ?? null;
-        $deathPlace = $data["death_place"] ?? null;
-        $deathCountry = $data["death_country"] ?? null;
+        $birthDate = empty($data["birth_date"]) ? null : $data["birth_date"];
+        $birthPlace = empty($data["birth_place"]) ? null : $data["birth_place"];
+        $birthCountry = empty($data["birth_country"]) ? null : $data["birth_country"];
+        $deathDate = empty($data["death_date"]) ? null : $data["death_date"];
+        $deathPlace = empty($data["death_place"]) ? null : $data["death_place"];
+        $deathCountry = empty($data["death_country"]) ? null : $data["death_country"];
 
         //Medals and game data
         $gameYear = isset($data["year"]) ? (int)$data["year"] : null;
@@ -165,7 +166,7 @@ class Athlete
         //check if athlete exists (<=> returns true even when both sides are NULL)
         $findStmt = $this->pdo->prepare(
             "SELECT id FROM athletes
-            WHERE first_name :fn AND last_name :ln AND birthdate <=> : bd
+            WHERE first_name = :fn AND last_name = :ln AND birth_date <=> :bd
             LIMIT 1"
         );
 
@@ -204,10 +205,10 @@ class Athlete
             $medalTypeId = getOrCreateMedalType($this->pdo, $placing);
 
             $checkStmt = $this->pdo->prepare("
-            SELECT id FROM athlete_medals
-            WHERE athlete_id = :aid AND olympic_games_id = :gid AND discipline_id = :did AND medal_type_id = :mid
-            LIMIT 1
-        ");
+                SELECT id FROM athlete_medals
+                WHERE athlete_id = :aid AND olympic_games_id = :gid AND discipline_id = :did AND medal_type_id = :mid
+                LIMIT 1
+            ");
 
             $checkStmt->execute([
                 ":aid" => $athleteId,
@@ -239,12 +240,12 @@ class Athlete
         //personal data of athlete
         $firstName = $data["first_name"] ?? null;
         $lastName = $data["last_name"] ?? null;
-        $birthDate = $data["birth_date"] ?? null;
-        $birthPlace = $data["birth_place"] ?? null;
-        $birthCountry = $data["birth_country"] ?? null;
-        $deathDate = $data["death_date"] ?? null;
-        $deathPlace = $data["death_place"] ?? null;
-        $deathCountry = $data["death_country"] ?? null;
+        $birthDate = empty($data["birth_date"]) ? null : $data["birth_date"];
+        $birthPlace = empty($data["birth_place"]) ? null : $data["birth_place"];
+        $birthCountry = empty($data["birth_country"]) ? null : $data["birth_country"];
+        $deathDate = empty($data["death_date"]) ? null : $data["death_date"];
+        $deathPlace = empty($data["death_place"]) ? null : $data["death_place"];
+        $deathCountry = empty($data["death_country"]) ? null : $data["death_country"];
 
         $birthCountryId = $birthCountry ? getOrCreateCountry($this->pdo, $birthCountry) : null;
         $deathCountryId = $deathCountry ? getOrCreateCountry($this->pdo, $deathCountry) : null;
@@ -274,7 +275,35 @@ class Athlete
             ":id" => $id,
         ]);
 
-        return $stmt->rowCount() > 0;
+        $medalRecordId = $data["medal_record_id"] ?? null;
+        $gameYear = isset($data["year"]) ? (int)$data["year"] : null;
+        $gameType = $data["games_type"] ?? null;
+        $gameCity = $data["games_city"] ?? null;
+        $gameCountry = $data["games_country"] ?? null;
+        $discipline = $data["discipline"] ?? null;
+        $placing = isset($data["placing"]) ? (int)$data["placing"] : null;
+
+        if ($medalRecordId && $gameYear && $gameType && $gameCity && $gameCountry && $discipline && $placing) {
+            $gameCountryId = getOrCreateCountry($this->pdo, $gameCountry);
+            $gamesId = getOrCreateGames($this->pdo, $gameYear, $gameType, $gameCity, $gameCountryId);
+            $disciplineId = getOrCreateDiscipline($this->pdo, $discipline);
+            $medalTypeId = getOrCreateMedalType($this->pdo, $placing);
+
+            $updateMedal = $this->pdo->prepare("
+                UPDATE athlete_medals 
+                SET olympic_games_id = :gid, discipline_id = :did, medal_type_id = :mid
+                WHERE id = :mrid AND athlete_id = :aid
+            ");
+            $updateMedal->execute([
+                ":gid" => $gamesId,
+                ":did" => $disciplineId,
+                ":mid" => $medalTypeId,
+                ":mrid" => $medalRecordId,
+                ":aid" => $id
+            ]);
+        }
+
+        return true;
     }
 
     //Delete athlete and all their medals
