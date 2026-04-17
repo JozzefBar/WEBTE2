@@ -1,8 +1,30 @@
 //Central part for all HTTP request on PHP backend
 
-//const BASE_URL = "https://node26.webte.fei.stuba.sk/Z1/backend/api";
-//const BASE_URL = "http://localhost:8080/zadanie1/backend/api";
-const BASE_URL = "/api";  // uses Vite proxy → no CORS in dev
+const getBaseUrl = () => {
+    if (import.meta.env.DEV) {
+        return "/api";
+    }
+    // Dynamically calculate backend URL if running from a subdirectory in production
+    // e.g. /Z1/frontend/dist/ -> /Z1/backend/api
+    const url = window.location.pathname;
+    const match = url.match(/^(\/.*?)\/frontend\/dist/);
+    if (match) {
+        return `${match[1]}/backend/api`;
+    }
+    return "/backend/api";
+};
+
+export const BASE_URL = getBaseUrl();
+
+export const getOAuthInitUrl = () => {
+    const origin = window.location.origin;
+    const basePath = window.location.pathname.replace(/\/login$/, '');
+    const successUrl = `${origin}${basePath}/dashboard`;
+    const errorUrl = `${origin}${basePath}/login?error=oauth_denied`;
+    
+    const qs = `frontend_redirect=${encodeURIComponent(successUrl)}&frontend_error=${encodeURIComponent(errorUrl)}`;
+    return `${BASE_URL}/auth/oauth2callback.php?${qs}`;
+};
 
 async function request(path, options = {}) {
     const res = await fetch(`${BASE_URL}${path}`, {

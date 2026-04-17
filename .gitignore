@@ -1,4 +1,4 @@
 *.csv
-src/zadanie1/backend/client_secret/
+src/*/backend/client_secret/
 src/vendor
 tests

@@ -24,7 +24,12 @@ $client = new Client();
 
 $client->setAuthConfig(__DIR__ . '/../../client_secret/client_secret_251050637037-srt1v9kdlkvleh4lr3n56q579trn6p7u.apps.googleusercontent.com.json');
 
-$redirectUri = 'http://localhost:8080/zadanie1/backend/api/auth/oauth2callback.php';
+// Dynamically formulate the callback URL based on current server variables
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$host = $_SERVER['HTTP_HOST'];
+$scriptPath = explode('?', $_SERVER['REQUEST_URI'])[0]; 
+$redirectUri = $protocol . "://" . $host . $scriptPath;
+
 $client->setRedirectUri($redirectUri);
 
 //specific scopes
@@ -36,10 +41,22 @@ $client->setAccessType("offline");
 
 //Step1 - user is not autentified yet -- transfer him to Google
 if(!isset($_GET["code"]) && !isset($_GET["error"])){
-    //state - random token against CSRF attack
-    $state = bin2hex(random_bytes(16));
+    //state - random token against CSRF attack and store frontend URLs
+    $frontendRedirect = $_GET["frontend_redirect"] ?? 'http://localhost:5173/dashboard';
+    $frontendError = $_GET["frontend_error"] ?? 'http://localhost:5173/login?error=oauth_denied';
+
+    $stateArray = [
+        "csrf" => bin2hex(random_bytes(16)),
+        "success_url" => $frontendRedirect,
+        "error_url" => $frontendError
+    ];
+    
+    $state = base64_encode(json_encode($stateArray));
     $client->setState($state);
-    $_SESSION["oauth_state"] = $state;
+    
+    $_SESSION["oauth_state"] = $stateArray["csrf"];
+    $_SESSION["oauth_success_url"] = $stateArray["success_url"];
+    $_SESSION["oauth_error_url"] = $stateArray["error_url"];
 
     $authUrl = $client->createAuthUrl();
     header("Location: " . filter_var($authUrl, FILTER_SANITIZE_URL));
@@ -49,7 +66,14 @@ if(!isset($_GET["code"]) && !isset($_GET["error"])){
 //STEP2 - Google sent him back with authentication code
 if (isset($_GET["code"])){
     //state verification
-    if(!isset($_GET["state"]) || $_GET["state"] !== $_SESSION["oauth_state"]){
+    if(!isset($_GET["state"])){
+        http_response_code(403);
+        die("Security error: state missing.");
+    }
+    
+    $stateArray = json_decode(base64_decode($_GET["state"]), true);
+    
+    if(!$stateArray || $stateArray["csrf"] !== $_SESSION["oauth_state"]){
         http_response_code(403);
         die("Security error: state mismatch. Possible CSRF attack.");
     }
@@ -124,15 +148,26 @@ if (isset($_GET["code"])){
 
     // Redirect to React frontend - private zone
     $welcomeName = urlencode($firstName);
-    //header("Location: https://node26.webte.fei.stuba.sk/Z1/frontend/dist/?welcome=google&name={$welcomeName}");
-    header("Location: http://localhost:5173/dashboard?welcome=google&name={$welcomeName}");
+    $frontendRedirect = $stateArray["success_url"] ?? $_SESSION["oauth_success_url"] ?? 'http://localhost:5173/dashboard';
+    $separator = parse_url($frontendRedirect, PHP_URL_QUERY) ? '&' : '?';
+    
+    header("Location: {$frontendRedirect}{$separator}welcome=google&name={$welcomeName}");
     exit();
 }
 
 // Google returned an error (e.g. user denied access)
 if (isset($_GET['error'])) {
-    //header('Location: https://node26.webte.fei.stuba.sk/Z1/frontend/dist/login?error=oauth_denied');
-    header('Location: http://localhost:5173/login?error=oauth_denied');
+    $frontendError = 'http://localhost:5173/login?error=oauth_denied';
+    
+    if (isset($_GET["state"])) {
+        $stateArray = json_decode(base64_decode($_GET["state"]), true);
+        if ($stateArray && isset($stateArray["error_url"])) {
+            $frontendError = $stateArray["error_url"];
+        }
+    } else if (isset($_SESSION["oauth_error_url"])) {
+        $frontendError = $_SESSION["oauth_error_url"];
+    }
+    
+    header("Location: {$frontendError}");
     exit();
-
 }

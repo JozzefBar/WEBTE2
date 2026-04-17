@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login, verify2fa } from '../api/api';
+import { login, verify2fa, getOAuthInitUrl } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 
@@ -103,8 +103,7 @@ export default function LoginPage() {
                     <div className="text-center text-muted small mb-3">alebo</div>
 
                     <a
-                      //href="https://node26.webte.fei.stuba.sk/Z1/backend/api/auth/oauth2callback.php"
-                      href="http://localhost:8080/zadanie1/backend/api/auth/oauth2callback.php"
+                      href={getOAuthInitUrl()}
                       className="btn btn-outline-primary w-100 mb-3"
                     >
                       <i className="bi bi-google me-2"></i>
