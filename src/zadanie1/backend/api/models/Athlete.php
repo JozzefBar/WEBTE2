@@ -1,5 +1,4 @@
 <?php
-use Google\Service\PeopleService\Birthday;
 
 require_once __DIR__ . '/../../upload.php';
 

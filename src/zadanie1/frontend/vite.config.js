@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  //base: '/Z1/frontend/dist/',
+  base: '/',
   server: {
     proxy: {
       '/api': {
@@ -15,7 +15,7 @@ export default defineConfig({
           if (path.includes('.php')) {
             return path.replace(/^\/api/, '/zadanie1/backend/api');
           }
-          
+
           // Otherwise, it's a REST endpoint. Route it through index.php explicitly to bypass Nginx limitations.
           // e.g. "/api/athletes?year=2024" -> "/zadanie1/backend/api/index.php?_route=/athletes&year=2024"
           const [pathname, search] = path.split('?');
