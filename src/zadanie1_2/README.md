@@ -72,3 +72,14 @@ Výstupné súbory sa vygenerujú do priečinka `frontend/dist/`.
 1. Otvoriť aplikáciu v prehliadači
 2. Zaregistrovať sa a prihlásiť sa
 3. Na stránke „Dashboard" nahrať CSV súbor cez sekciu „Import dát"
+
+## 6. Architektúra vlastného REST API (Zadanie 2)
+
+V rámci druhého zadania bola implementovaná plnohodnotná **REST API architektúra**, ktorá oddeľuje logiku smerovania od samotného spracovania požiadaviek a komunikuje čisto cez formát **JSON**.
+
+**Technické riešenie API:**
+- **Vlastný Router (`Router.php`):** Aplikácia využíva vlastnú implementáciu smerovača (Router), ktorá zachytáva prichádzajúce HTTP metódy (`GET`, `POST`, `PUT`, `DELETE`) a spáruje ich s príslušnou cestou (napr. `/athletes` alebo dynamickou metódou `/athletes/{id}`).
+- **Controllers (napr. `AthleteController.php`):** Logika je rozdelená do kontrolérov. Router po nájdení zhody inštanciuje konkrétny kontrolér a zavolá v ňom príslušnú metódu (napríklad pre `GET /athletes/{id}` sa zavolá metóda `show($id)`). API tak dodržiava základný návrhový vzor MVC.
+- **Smerovanie (`index.php`):** Pre podporu pekných URL adries (bez priameho využitia `/index.php/...`) sa na Nginx servri (alebo lokálne cez Vite dev-server) presmerovávajú API požiadavky na backendový `index.php?_route=...`. Náš `Router` následne parsuje tento parameter.
+- **HTTP Návratové kódy a JSON:** API poctivo vracia príslušné stavové kódy ako `200 OK`, `201 Created`, `400 Bad Request` a `404 Not Found`, pričom celá komunikácia a odovzdávanie dát (`Response::json`) je striktne v JSON formáte.
+- **Integrácia s Frontend-om (`api.js`):** Na strane Reactu je vytvorená centrálna vrstva pre REST volania pomocou `fetch`, ktorá obsluhuje CRUD operácie (vytváranie, mazanie a úpravu športovcov).

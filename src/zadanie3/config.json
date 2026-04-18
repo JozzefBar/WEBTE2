@@ -1,0 +1,24 @@
+{
+  "stonesPerPlayer": 5,
+  "target": {
+    "x": 300,
+    "y": 150,
+    "radius": 80
+  },
+  "field": {
+    "width": 600,
+    "height": 1000
+  },
+  "throwPosition": {
+    "x": 300,
+    "y": 880
+  },
+  "stoneRadius": 18,
+  "maxShotSpeed": 18,
+  "maxDragDistance": 200,
+  "friction": 0.005,
+  "frictionAir": 0.018,
+  "restitution": 0.7,
+  "wallRestitution": 0.8,
+  "stopThreshold": 0.25
+}
