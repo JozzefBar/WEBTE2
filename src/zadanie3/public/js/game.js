@@ -1,68 +1,68 @@
 // ============================================================
-// GAME.JS — Herna logika, fyzika (Matter.js) a renderovanie (Canvas)
+// GAME.JS — Game logic, physics (Matter.js) and rendering (Canvas)
 // ============================================================
-// [ZADANIE: Hracia plocha a vizualizacia — Canvas API]
-// [ZADANIE: Ovladanie — mechanika praku (slingshot)]
-// [ZADANIE: Fyzika — Matter.js (kolizie, trenie, odrazy)]
-// [ZADANIE: Herna logika a striedanie]
+// [ASSIGNMENT: Game board and visualization — Canvas API]
+// [ASSIGNMENT: Controls — slingshot mechanic]
+// [ASSIGNMENT: Physics — Matter.js (collisions, friction, bouncing)]
+// [ASSIGNMENT: Game logic and turn switching]
 
 const Game = (function () {
-  // --- Matter.js moduly ---
+  // --- Matter.js modules ---
   const Engine = Matter.Engine;
   const Bodies = Matter.Bodies;
   const Body = Matter.Body;
   const Composite = Matter.Composite;
   const Events = Matter.Events;
 
-  // --- Konstanty farieb ---
-  // [ZADANIE: Kamene oboch hracov musia byt farebne odlisene]
-  const PLAYER_COLORS = ['#ef5350', '#42a5f5'];       // cervena, modra
-  const PLAYER_COLORS_DARK = ['#c62828', '#1565c0'];   // tmavsia verzia (okraj)
-  const PLAYER_COLORS_LIGHT = ['#ef9a9a', '#90caf9'];  // svetlejsia (highlight)
+  // --- Color constants ---
+  // [ASSIGNMENT: Stones of both players must be color-distinguished]
+  const PLAYER_COLORS = ['#ef5350', '#42a5f5'];       // red, blue
+  const PLAYER_COLORS_DARK = ['#c62828', '#1565c0'];   // darker version (border)
+  const PLAYER_COLORS_LIGHT = ['#ef9a9a', '#90caf9'];  // lighter version (highlight)
 
-  // Farby ciela (sustredne kruhy ako v curlingu)
+  // Target colors (concentric circles like in curling)
   const TARGET_COLORS = ['#1565c0', '#e8eaf6', '#c62828', '#f44336'];
 
-  // --- Herny stav ---
-  let canvas, ctx;           // Canvas element a 2D kontext
-  let engine;                // Matter.js fyzikalny engine
-  let config;                // Herna konfiguracia (z JSON)
-  let fieldW, fieldH;        // Rozmery hracej plochy
+  // --- Game state ---
+  let canvas, ctx;           // Canvas element and 2D context
+  let engine;                // Matter.js physics engine
+  let config;                // Game configuration (from JSON)
+  let fieldW, fieldH;        // Dimensions of the game board
 
-  let myPlayerIndex = -1;    // Index tohto hraca (0 alebo 1)
-  let currentTurn = -1;      // Kto je na tahu (0 alebo 1)
-  let stonesThrown = [0, 0]; // Pocet odhozenych kamenov kazdym hracom
-  let allStones = [];        // Vsetky kamene na ploche [{body, playerIndex}]
-  let activeStone = null;    // Aktualne aktivny kamen (na tahu)
+  let myPlayerIndex = -1;    // Index of this player (0 or 1)
+  let currentTurn = -1;      // Whose turn it is (0 or 1)
+  let stonesThrown = [0, 0]; // Number of stones thrown by each player
+  let allStones = [];        // All stones on the board [{body, playerIndex}]
+  let activeStone = null;    // Currently active stone (on turn)
 
-  // Stav mierenia (slingshot)
-  let isAiming = false;      // Ci hrac prave mieri
-  let mousePos = { x: 0, y: 0 }; // Pozicia mysi v logickych suradniciach
+  // Aiming state (slingshot)
+  let isAiming = false;      // Is player aiming right now
+  let mousePos = { x: 0, y: 0 }; // Mouse position in logical coordinates
 
-  // Stav zastavenia kamenov
-  let waitingForStop = false;  // Cakame na zastavenie kamenov po vystrele
-  let shotFrameCount = 0;     // Pocitadlo framov po vystrele
-  const SHOT_DELAY_FRAMES = 15; // Pocet framov pred kontrolou zastavenia
+  // Stopped state of stones
+  let waitingForStop = false;  // Waiting for stones to stop after shot
+  let shotFrameCount = 0;     // Counter of frames after shot
+  const SHOT_DELAY_FRAMES = 15; // Number of frames before checking for stop
 
-  // Stavy hry
-  let gameActive = false;     // Ci hra prebieha
-  let isPaused = false;       // Ci je hra pozastavena
-  let isGameOver = false;     // Ci hra skoncila
-  let animFrameId = null;     // ID animacneho framu (pre zrusenie)
+  // Game states
+  let gameActive = false;     // Is game running
+  let isPaused = false;       // Is game paused
+  let isGameOver = false;     // Is game over
+  let animFrameId = null;     // ID of animation frame (for cancelling)
 
-  // Callbacky — volane ked hrac vystreli alebo kamene zastanu
+  // Callbacks — called when player shoots or stones stop
   let onShootCallback = null;
   let onStonesStopCallback = null;
   let onGameOverCallback = null;
 
-  // Mena hracov (pre zobrazenie)
+  // Player names (for display)
   let playerNames = ['Hráč 1', 'Hráč 2'];
 
   // ============================================================
-  // INICIALIZACIA
+  // INITIALIZATION
   // ============================================================
 
-  // Inicializacia herneho enginu a canvasu
+  // Initialize game engine and canvas
   function init(canvasElement, gameConfig, playerIndex, names) {
     canvas = canvasElement;
     ctx = canvas.getContext('2d');
@@ -72,45 +72,45 @@ const Game = (function () {
     fieldW = config.field.width;
     fieldH = config.field.height;
 
-    // Nastavime Canvas na logicke rozmery
-    // CSS sa stara o responzivne skalovanie
+    // Set Canvas to logical dimensions
+    // CSS handles responsive scaling
     canvas.width = fieldW;
     canvas.height = fieldH;
 
-    // Vytvorenie Matter.js enginu BEZ gravitacie (pohlad zhora)
+    // Create Matter.js engine WITHOUT gravity (top-down view)
     engine = Engine.create();
     engine.gravity.x = 0;
     engine.gravity.y = 0;
 
-    // Vytvorenie stien (okrajov hracej plochy)
-    // [ZADANIE: Kamene sa odrazaju od okrajov hracej plochy]
+    // Create walls (edges of the game board)
+    // [ASSIGNMENT: Stones bounce off the edges of the board]
     createWalls();
 
-    // Nastavenie mouse/touch eventov
+    // Setup mouse/touch events
     setupInputEvents();
 
     console.log('[GAME] Inicializovany. Hrac:', myPlayerIndex);
   }
 
-  // Vytvorenie stien okolo hracej plochy
+  // Create walls around game board
   function createWalls() {
-    const t = 50; // hrubka steny
-    const r = config.wallRestitution; // odrazivost stien
+    const t = 50; // wall thickness
+    const r = config.wallRestitution; // wall restitution (bounciness)
 
     const walls = [
-      // Horna stena
+      // Top wall
       Bodies.rectangle(fieldW / 2, -t / 2, fieldW + t * 2, t, {
         isStatic: true, restitution: r, friction: 0, label: 'wall-top'
       }),
-      // Dolna stena
+      // Bottom wall
       Bodies.rectangle(fieldW / 2, fieldH + t / 2, fieldW + t * 2, t, {
         isStatic: true, restitution: r, friction: 0, label: 'wall-bottom'
       }),
-      // Lava stena
+      // Left wall
       Bodies.rectangle(-t / 2, fieldH / 2, t, fieldH + t * 2, {
         isStatic: true, restitution: r, friction: 0, label: 'wall-left'
       }),
-      // Prava stena
+      // Right wall
       Bodies.rectangle(fieldW + t / 2, fieldH / 2, t, fieldH + t * 2, {
         isStatic: true, restitution: r, friction: 0, label: 'wall-right'
       })
@@ -120,17 +120,17 @@ const Game = (function () {
   }
 
   // ============================================================
-  // INPUT EVENTS (mys + touch)
-  // [ZADANIE: Ovladanie — mechanika praku]
+  // INPUT EVENTS (mouse + touch)
+  // [ASSIGNMENT: Controls — slingshot mechanic]
   // ============================================================
 
   function setupInputEvents() {
-    // --- Mys ---
+    // --- Mouse ---
     canvas.addEventListener('mousedown', onPointerDown);
     canvas.addEventListener('mousemove', onPointerMove);
     canvas.addEventListener('mouseup', onPointerUp);
 
-    // --- Touch (mobilne zariadenia) ---
+    // --- Touch (mobile devices) ---
     canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
       const touch = e.touches[0];
@@ -149,12 +149,12 @@ const Game = (function () {
     }, { passive: false });
   }
 
-  // Konverzia touch eventu na format kompatibilny s mouse eventom
+  // Convert touch event to a format compatible with mouse event
   function touchToMouse(touch) {
     return { clientX: touch.clientX, clientY: touch.clientY };
   }
 
-  // Konverzia suradnic z canvas pixelov na logicke suradnice
+  // Convert coordinates from canvas pixels to logical coordinates
   function canvasToLogical(clientX, clientY) {
     const rect = canvas.getBoundingClientRect();
     return {
@@ -163,75 +163,75 @@ const Game = (function () {
     };
   }
 
-  // --- Kliknutie na kamen ---
-  // [ZADANIE: Hrac klikne na kamen na startovacej pozicii
-  //  a taha mysou smerom od ciela]
+  // --- Clicking on a stone ---
+  // [ASSIGNMENT: Player clicks on a stone at the starting position
+  //  and drags the mouse away from the target]
   function onPointerDown(e) {
     if (!gameActive || isPaused || isGameOver) return;
-    if (currentTurn !== myPlayerIndex) return; // nie je moj tah
+    if (currentTurn !== myPlayerIndex) return; // not my turn
     if (!activeStone) return;
     if (waitingForStop) return;
 
     const pos = canvasToLogical(e.clientX, e.clientY);
     const stone = activeStone.body;
 
-    // Kontrola ci klikol na kamen (vzdialenost od stredu)
+    // Check if clicked strictly on stone (distance from center)
     const dx = pos.x - stone.position.x;
     const dy = pos.y - stone.position.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
 
     if (dist <= config.stoneRadius * 2.5) {
-      // Zaciname mierenie
+      // Start aiming
       isAiming = true;
       mousePos = pos;
     }
   }
 
-  // --- Pohyb mysi pocas mierenia ---
-  // [ZADANIE: Pocas mierenia sa zobrazuje vizualna pomocka —
-  //  ciara alebo sipka od stredu kamena ku kurzoru]
+  // --- Mouse movement during aiming ---
+  // [ASSIGNMENT: While aiming, visual aid is displayed —
+  //  line or arrow from stone center to cursor]
   function onPointerMove(e) {
     if (!isAiming) return;
     mousePos = canvasToLogical(e.clientX, e.clientY);
   }
 
-  // --- Uvolnenie mysi — vystrel ---
-  // [ZADANIE: Po uvolneni mysi je kamen vystreleny]
+  // --- Mouse release — shoot ---
+  // [ASSIGNMENT: After mouse release, stone is fired]
   function onPointerUp() {
     if (!isAiming) return;
     isAiming = false;
 
     const stone = activeStone.body;
 
-    // Vypocet vektora vystrelu (slingshot — opacny smer od tahu)
-    // [ZADANIE: Sila vystrelu je umerna vzdialenosti tahu]
+    // Calculate shot vector (slingshot — opposite drag direction)
+    // [ASSIGNMENT: Shot power is proportional to drag distance]
     const pullDx = mousePos.x - stone.position.x;
     const pullDy = mousePos.y - stone.position.y;
     const pullDist = Math.sqrt(pullDx * pullDx + pullDy * pullDy);
 
-    // Minimalny tah aby sa zabranilo nahodnym klikom
+    // Minimum drag to prevent accidental clicks
     if (pullDist < 10) return;
 
-    // Orezanie na maximalnu vzdialenost tahu
+    // Clip to maximum drag distance
     const maxDrag = config.maxDragDistance;
     const clampedDist = Math.min(pullDist, maxDrag);
 
-    // Sila vystrelu — umerna vzdialenosti tahu
+    // Shot power — proportional to drag distance
     const power = (clampedDist / maxDrag) * config.maxShotSpeed;
 
-    // Smer vystrelu — OPACNY smer od tahu (mechanika praku)
+    // Shot direction — OPPOSITE direction of drag (slingshot mechanic)
     const angle = Math.atan2(pullDy, pullDx);
     const shootDx = -Math.cos(angle) * power;
     const shootDy = -Math.sin(angle) * power;
 
-    // Odoslanie vektora na server
+    // Send vector to server
     if (onShootCallback) {
       onShootCallback(shootDx, shootDy);
     }
   }
 
   // ============================================================
-  // HERNY LOOP — fyzika + renderovanie
+  // GAME LOOP — physics + rendering
   // ============================================================
 
   function startGameLoop(firstPlayer) {
@@ -244,10 +244,10 @@ const Game = (function () {
     activeStone = null;
     waitingForStop = false;
 
-    // Vytvorenie prveho kamena
+    // Create first stone
     placeNewStone(firstPlayer);
 
-    // Spustenie herneho loopu
+    // Start game loop
     gameLoop();
     console.log('[GAME] Hra zacala. Prvy hrac:', firstPlayer);
   }
@@ -255,46 +255,46 @@ const Game = (function () {
   function gameLoop() {
     if (!gameActive) return;
 
-    // Fyzika — aktualizacia enginu s fixnym krokom (determinizmus)
-    // [ZADANIE: Fyzikalna simulacia bezi na strane klientov,
-    //  pricvom obaja klienti dostanu rovnake vstupne parametre
-    //  a simuluju ten isty stav hry]
+    // Physics — engine update with fixed step (determinism)
+    // [ASSIGNMENT: Physics simulation runs on clients' side,
+    //  while both clients receive the same input parameters
+    //  and simulate the same game state]
     if (!isPaused) {
       Engine.update(engine, 1000 / 60);
       checkStoneSpeeds();
       checkStonesStop();
     }
 
-    // Renderovanie na canvas
+    // Rendering to canvas
     render();
 
-    // Dalsi frame
+    // Next frame
     animFrameId = requestAnimationFrame(gameLoop);
   }
 
-  // Kontrola a zastavenie velmi pomaly sa pohybujucich kamenov
-  // [ZADANIE: Kamene spomaluju trenim a uplne zastanu]
+  // Check and fully stop very slow moving stones
+  // [ASSIGNMENT: Stones slow down by friction and come to full stop]
   function checkStoneSpeeds() {
     const threshold = config.stopThreshold;
     allStones.forEach(s => {
       const speed = Math.sqrt(s.body.velocity.x ** 2 + s.body.velocity.y ** 2);
       if (speed > 0 && speed < threshold) {
-        // Kamen je priilis pomaly — zastavime ho uplne
+        // Stone is too slow — stop entirely
         Body.setVelocity(s.body, { x: 0, y: 0 });
         Body.setAngularVelocity(s.body, 0);
       }
     });
   }
 
-  // Kontrola ci vsetky kamene zastali (po vystrele)
+  // Check if all stones stopped (after shot)
   function checkStonesStop() {
     if (!waitingForStop) return;
 
     shotFrameCount++;
-    // Pockame par framov kym sila zaprsobi
+    // Wait a few frames for force to apply
     if (shotFrameCount < SHOT_DELAY_FRAMES) return;
 
-    // Kontrola ci vsetky kamene stoja
+    // Check if all stones stand still
     const allStopped = allStones.every(s => {
       const speed = Math.sqrt(s.body.velocity.x ** 2 + s.body.velocity.y ** 2);
       return speed === 0;
@@ -304,7 +304,7 @@ const Game = (function () {
       waitingForStop = false;
       console.log('[GAME] Vsetky kamene zastali');
 
-      // Len aktivny hrac (ktory vystrelil) reportuje zastavenie
+      // Only active player (who fired) reports the stop
       if (currentTurn === myPlayerIndex) {
         if (onStonesStopCallback) onStonesStopCallback();
       }
@@ -312,16 +312,16 @@ const Game = (function () {
   }
 
   // ============================================================
-  // SPRAVA KAMENOV
+  // STONE MANAGEMENT
   // ============================================================
 
-  // Umiestnenie noveho kamena na startovaciu poziciu
+  // Place new stone at starting position
   function placeNewStone(playerIndex) {
     const x = config.throwPosition.x;
     const y = config.throwPosition.y;
 
-    // Vytvorenie fyzikalneho telesa (kruh)
-    // [ZADANIE: Kolizie medzi kamenmi su fyzikalne korektne (odraz kruh-kruh)]
+    // Create physics body (circle)
+    // [ASSIGNMENT: Collisions between stones are physically correct (circle-circle bounce)]
     const body = Bodies.circle(x, y, config.stoneRadius, {
       friction: config.friction,
       frictionAir: config.frictionAir,
@@ -340,22 +340,22 @@ const Game = (function () {
   }
 
   // ============================================================
-  // PRIJATIE VYSTRELU ZO SERVERA
-  // Oba klienti spravia to iste — determinizmus
+  // RECEIVED SHOT FROM SERVER
+  // Both clients do the exact same thing — determinism
   // ============================================================
 
   function handleShotFired(data) {
-    // Ak kamen este nebol vytvoreny (druhy hrac), vytvorime ho
+    // If stone hasn't been created yet (other player), create it
     if (!activeStone || activeStone.playerIndex !== data.playerIndex) {
       placeNewStone(data.playerIndex);
     }
 
     stonesThrown[data.playerIndex] = data.stoneIndex + 1;
 
-    // Aplikujeme rychlost na kamen (nie silu — pre predspovedatelnost)
+    // Apply velocity to stone (not force — for predictability)
     Body.setVelocity(activeStone.body, { x: data.dx, y: data.dy });
 
-    // Zaciname cakat na zastavenie kamenov
+    // Start waiting for stones to stop
     waitingForStop = true;
     shotFrameCount = 0;
     isAiming = false;
@@ -363,26 +363,27 @@ const Game = (function () {
     console.log(`[GAME] Vystrel hraca ${data.playerIndex}: dx=${data.dx.toFixed(2)}, dy=${data.dy.toFixed(2)}`);
   }
 
-  // Zmena tahu — novy kamen pre dalsieho hraca
-  // [ZADANIE: Hraci sa v hadzani kamenov striedaju]
+  // Turn change — new stone for the next player
+  // [ASSIGNMENT: Players take turns throwing stones]
   function handleTurnChange(data) {
     currentTurn = data.currentPlayer;
     activeStone = null;
+    waitingForStop = false;
 
-    // Vytvorenie noveho kamena pre hraca na tahu
+    // Create new stone for the player on turn
     placeNewStone(data.currentPlayer);
 
     console.log(`[GAME] Zmena tahu — na tahu: ${data.currentPlayer}`);
   }
 
-  // Vsetky kamene boli odhodene — urcenie vitaza
-  // [ZADANIE: Po odohrani vsetkych kamenov sa urci vitaz —
-  //  vyhrava hrac, ktoreho kamen je najblizsi k cielu]
+  // All stones thrown — determine winner
+  // [ASSIGNMENT: After all stones are played, winner is determined —
+  //  the player whose stone is closest to the target wins]
   function handleAllStonesThrown() {
     isGameOver = true;
     activeStone = null;
 
-    // Vypocet vzdialenosti kamenov od ciela
+    // Calculate distance of stones from target
     const results = calculateResults();
 
     console.log('[GAME] Koniec hry! Vysledky:', results);
@@ -392,12 +393,12 @@ const Game = (function () {
     }
   }
 
-  // Vypocet vysledkov — vzdialenost kazdeho kamena od ciela
+  // Calculate results — distance of each stone from target
   function calculateResults() {
     const targetX = config.target.x;
     const targetY = config.target.y;
 
-    let bestDist = [Infinity, Infinity]; // Najlepsia vzdialenost pre kazdeho hraca
+    let bestDist = [Infinity, Infinity]; // Best distance for each player
     let stoneDistances = [];
 
     allStones.forEach(s => {
@@ -415,8 +416,8 @@ const Game = (function () {
       }
     });
 
-    // Urcenie vitaza
-    let winner = -1; // -1 = remiza
+    // Determine winner
+    let winner = -1; // -1 = draw
     if (bestDist[0] < bestDist[1]) winner = 0;
     else if (bestDist[1] < bestDist[0]) winner = 1;
 
@@ -428,9 +429,9 @@ const Game = (function () {
   }
 
   // ============================================================
-  // RENDEROVANIE (Canvas API)
-  // [ZADANIE: Rendering hracej plochy musi byt realizovany
-  //  pomocou Canvas API]
+  // RENDERING (Canvas API)
+  // [ASSIGNMENT: Rendering of the game board must be implemented
+  //  using Canvas API]
   // ============================================================
 
   function render() {
@@ -443,9 +444,9 @@ const Game = (function () {
     drawTurnText();
   }
 
-  // --- Hracia plocha (pozadie) — vertikalny layout ---
+  // --- Game board (background) — vertical layout ---
   function drawField() {
-    // Ledova plocha — gradient (zhora nadol)
+    // Ice surface — gradient (top to bottom)
     const grad = ctx.createLinearGradient(0, 0, 0, fieldH);
     grad.addColorStop(0, '#d4e6f1');
     grad.addColorStop(0.5, '#e8f0f8');
@@ -453,12 +454,12 @@ const Game = (function () {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, fieldW, fieldH);
 
-    // Okrajova ciara
+    // Border line
     ctx.strokeStyle = '#90a4ae';
     ctx.lineWidth = 3;
     ctx.strokeRect(2, 2, fieldW - 4, fieldH - 4);
 
-    // Stredova ciara (horizontalna)
+    // Center line (horizontal)
     ctx.beginPath();
     ctx.moveTo(0, fieldH / 2);
     ctx.lineTo(fieldW, fieldH / 2);
@@ -468,7 +469,7 @@ const Game = (function () {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Strelecka ciara (hog line) — horizontalna, nad startovacou poziciou
+    // Shooting line (hog line) — horizontal, above starting position
     const throwY = config.throwPosition.y - config.stoneRadius * 3;
     ctx.beginPath();
     ctx.moveTo(0, throwY);
@@ -480,16 +481,16 @@ const Game = (function () {
     ctx.setLineDash([]);
   }
 
-  // --- Ciel (sustredne kruhy) ---
-  // [ZADANIE: Ciel musi byt na hracej ploche farebne vyznaceny
-  //  (napr. sustredne kruhy)]
+  // --- Target (concentric circles) ---
+  // [ASSIGNMENT: Target must be color-marked on the board
+  //  (e.g., concentric circles)]
   function drawTarget() {
     const { x, y, radius } = config.target;
     const rings = [
-      { ratio: 1.0, color: TARGET_COLORS[0] },    // vonkajsi — modry
-      { ratio: 0.75, color: TARGET_COLORS[1] },   // biely
-      { ratio: 0.5, color: TARGET_COLORS[2] },    // cerveny
-      { ratio: 0.25, color: TARGET_COLORS[3] }    // stredovy — cerveny
+      { ratio: 1.0, color: TARGET_COLORS[0] },    // outer — blue
+      { ratio: 0.75, color: TARGET_COLORS[1] },   // white
+      { ratio: 0.5, color: TARGET_COLORS[2] },    // red
+      { ratio: 0.25, color: TARGET_COLORS[3] }    // center — red
     ];
 
     rings.forEach(ring => {
@@ -502,7 +503,7 @@ const Game = (function () {
       ctx.stroke();
     });
 
-    // Krizikovvy stred
+    // Crosshair center
     ctx.beginPath();
     ctx.moveTo(x - 8, y);
     ctx.lineTo(x + 8, y);
@@ -513,26 +514,26 @@ const Game = (function () {
     ctx.stroke();
   }
 
-  // --- Vsetky kamene ---
+  // --- All stones ---
   function drawAllStones() {
     allStones.forEach(s => {
       drawStone(s.body, s.playerIndex, s === activeStone);
     });
   }
 
-  // Vykreslenie jedneho kamena
+  // Draw single stone
   function drawStone(body, playerIndex, isActive) {
     const x = body.position.x;
     const y = body.position.y;
     const r = config.stoneRadius;
 
-    // Tien kamena
+    // Stone shadow
     ctx.beginPath();
     ctx.arc(x + 2, y + 2, r, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(0,0,0,0.2)';
     ctx.fill();
 
-    // Telo kamena — vypln
+    // Stone body — fill
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     const stoneGrad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
@@ -541,19 +542,19 @@ const Game = (function () {
     ctx.fillStyle = stoneGrad;
     ctx.fill();
 
-    // Okraj kamena
+    // Stone border
     ctx.strokeStyle = PLAYER_COLORS_DARK[playerIndex];
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Rukovet kamena (maly kruh v strede)
+    // Stone handle (small circle in center)
     ctx.beginPath();
     ctx.arc(x, y, r * 0.35, 0, Math.PI * 2);
     ctx.strokeStyle = PLAYER_COLORS_DARK[playerIndex];
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Aktivny kamen bliká (highlight)
+    // Active stone blinks (highlight)
     if (isActive && currentTurn === myPlayerIndex && !waitingForStop && !isGameOver) {
       ctx.beginPath();
       ctx.arc(x, y, r + 5 + Math.sin(Date.now() / 200) * 3, 0, Math.PI * 2);
@@ -565,10 +566,10 @@ const Game = (function () {
     }
   }
 
-  // --- Mieridlo (vizualna pomocka pocas tahu) ---
-  // [ZADANIE: Pocas mierenia sa zobrazuje vizualna pomocka —
-  //  ciara alebo sipka od stredu kamena ku kurzoru —
-  //  indikujuca smer a silu vystrelu]
+  // --- Aiming line (visual aid during drag) ---
+  // [ASSIGNMENT: Visual aid is shown during aiming —
+  //  line or arrow from stone center to cursor —
+  //  indicating direction and power of shot]
   function drawAimingLine() {
     if (!isAiming || !activeStone) return;
 
@@ -578,14 +579,14 @@ const Game = (function () {
     const mx = mousePos.x;
     const my = mousePos.y;
 
-    // Vzdialenost tahu
+    // Drag distance
     const pullDx = mx - sx;
     const pullDy = my - sy;
     const pullDist = Math.sqrt(pullDx * pullDx + pullDy * pullDy);
     const maxDrag = config.maxDragDistance;
     const powerRatio = Math.min(pullDist / maxDrag, 1);
 
-    // 1) Ciara od kamena ku kurzoru (tah)
+    // 1) Line from stone to cursor (drag)
     ctx.beginPath();
     ctx.moveTo(sx, sy);
     ctx.lineTo(mx, my);
@@ -595,18 +596,18 @@ const Game = (function () {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // 2) Sipka v smere vystrelu (opacny smer tahu)
+    // 2) Arrow in shot direction (opposite to drag)
     const angle = Math.atan2(pullDy, pullDx);
-    const arrowLen = powerRatio * 120; // dlzka sipky podla sily
+    const arrowLen = powerRatio * 120; // arrow length based on power
     const arrowEndX = sx - Math.cos(angle) * arrowLen;
     const arrowEndY = sy - Math.sin(angle) * arrowLen;
 
-    // Farba sipky podla sily (zelena → zlta → cervena)
+    // Arrow color based on power (green → yellow → red)
     const r = Math.round(255 * powerRatio);
     const g = Math.round(255 * (1 - powerRatio));
     const arrowColor = `rgb(${r}, ${g}, 50)`;
 
-    // Hlavna ciara sipky
+    // Main arrow line
     ctx.beginPath();
     ctx.moveTo(sx, sy);
     ctx.lineTo(arrowEndX, arrowEndY);
@@ -614,9 +615,9 @@ const Game = (function () {
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    // Hrot sipky
+    // Arrow head
     const headLen = 12;
-    const headAngle = angle + Math.PI; // smer vystrelu
+    const headAngle = angle + Math.PI; // shot direction
     ctx.beginPath();
     ctx.moveTo(arrowEndX, arrowEndY);
     ctx.lineTo(
@@ -632,7 +633,7 @@ const Game = (function () {
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    // 3) Indikator sily (text)
+    // 3) Power indicator (text)
     const powerPercent = Math.round(powerRatio * 100);
     ctx.fillStyle = arrowColor;
     ctx.font = 'bold 14px Inter, sans-serif';
@@ -640,33 +641,35 @@ const Game = (function () {
     ctx.fillText(`${powerPercent}%`, sx, sy - config.stoneRadius - 15);
   }
 
-  // --- Text kto je na tahu (v pripade ze nie som ja) ---
+  // --- Text indicating whose turn it is ---
   function drawTurnText() {
     if (isGameOver) return;
 
+    const textY = fieldH - 30; // Moved from top to bottom
+
     if (waitingForStop) {
-      // Kamene sa pohybuju
+      // Stones are moving
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.font = 'bold 16px Inter, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Kamene sa pohybujú...', fieldW / 2, 30);
+      ctx.fillText('Kamene sa pohybujú...', fieldW / 2, textY);
     } else if (currentTurn !== myPlayerIndex && !isGameOver) {
-      // Na tahu je supera
+      // Opponent's turn
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.font = 'bold 16px Inter, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Čaká sa na súpera...', fieldW / 2, 30);
+      ctx.fillText('Čaká sa na súpera...', fieldW / 2, textY);
     } else if (currentTurn === myPlayerIndex && !waitingForStop) {
-      // Na tahu som ja
+      // My turn
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.font = 'bold 16px Inter, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Ťahaj od kameňa a zamier!', fieldW / 2, 30);
+      ctx.fillText('Ťahaj od kameňa a zamier!', fieldW / 2, textY);
     }
   }
 
   // ============================================================
-  // PAUZA / RESTART
+  // PAUSE / RESTART
   // ============================================================
 
   function pause() {
@@ -677,9 +680,9 @@ const Game = (function () {
     isPaused = false;
   }
 
-  // Reset hry pre novu partiu
+  // Reset game for new match
   function reset() {
-    // Zastavime animacny loop
+    // Stop animation loop
     if (animFrameId) cancelAnimationFrame(animFrameId);
     gameActive = false;
     isPaused = false;
@@ -691,24 +694,24 @@ const Game = (function () {
     stonesThrown = [0, 0];
     currentTurn = -1;
 
-    // Reset Matter.js — vymazeme vsetky telesa
+    // Reset Matter.js — remove all bodies
     Composite.clear(engine.world);
     Engine.clear(engine);
 
-    // Znovu vytvorime engine a steny
+    // Recreate engine and walls
     engine = Engine.create();
     engine.gravity.x = 0;
     engine.gravity.y = 0;
     createWalls();
 
-    // Vycistime canvas
+    // Clear canvas
     ctx.clearRect(0, 0, fieldW, fieldH);
 
     console.log('[GAME] Hra resetovana');
   }
 
   // ============================================================
-  // GETTRE A SETTRE
+  // GETTERS AND SETTERS
   // ============================================================
 
   function getCurrentTurn() { return currentTurn; }
@@ -723,7 +726,7 @@ const Game = (function () {
   function setOnGameOver(cb) { onGameOverCallback = cb; }
 
   // ============================================================
-  // VEREJNE API
+  // PUBLIC API
   // ============================================================
 
   return {

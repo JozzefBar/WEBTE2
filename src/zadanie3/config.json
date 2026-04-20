@@ -15,7 +15,7 @@
   },
   "stoneRadius": 18,
   "maxShotSpeed": 18,
-  "maxDragDistance": 200,
+  "maxDragDistance": 110,
   "friction": 0.005,
   "frictionAir": 0.018,
   "restitution": 0.7,

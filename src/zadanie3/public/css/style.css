@@ -1,9 +1,9 @@
 /* ============================================================
-   STYLE.CSS — Styly pre online curling hru
-   [ZADANIE: Graficky vzhlad aplikacie tiez predava]
+   STYLE.CSS — Styles for online curling game
+   [ASSIGNMENT: Visual appearance of the application also sells]
    ============================================================ */
 
-/* --- Reset a zakladne nastavenia --- */
+/* --- Reset and base settings --- */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -11,7 +11,7 @@
 }
 
 :root {
-  /* Farbova paleta */
+  /* Color palette */
   --bg-primary: #0f1923;
   --bg-secondary: #1a2634;
   --bg-card: #1e2d3d;
@@ -28,10 +28,10 @@
   --success: #66bb6a;
   --border: rgba(255, 255, 255, 0.08);
 
-  /* Typografia */
+  /* Typography */
   --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* Rozmery */
+  /* Dimensions */
   --radius: 12px;
   --radius-sm: 8px;
 }
@@ -45,8 +45,8 @@ html, body {
   color: var(--text-primary);
 }
 
-/* --- Obrazovky (screens) --- */
-/* Kazda obrazovka zabera celu plochu, prepinaju sa cez JS */
+/* --- Screens --- */
+/* Each screen covers whole area, switched via JS */
 .screen {
   display: none;
   position: fixed;
@@ -62,7 +62,7 @@ html, body {
   display: flex;
 }
 
-/* Obsah obrazovky — centrovany stlpec */
+/* Screen content — centered column */
 .screen-content {
   text-align: center;
   padding: 2rem;
@@ -70,7 +70,7 @@ html, body {
   width: 100%;
 }
 
-/* --- Logo a texty --- */
+/* --- Logo and texts --- */
 .logo {
   font-size: 5rem;
   margin-bottom: 0.5rem;
@@ -104,7 +104,7 @@ h2 {
   margin-bottom: 1.5rem;
 }
 
-/* --- Formularove prvky --- */
+/* --- Form elements --- */
 .form-group {
   display: flex;
   gap: 0.75rem;
@@ -135,7 +135,7 @@ input[type="text"]::placeholder {
   color: var(--text-secondary);
 }
 
-/* --- Tlacidla --- */
+/* --- Buttons --- */
 .btn {
   padding: 0.8rem 1.5rem;
   border: none;
@@ -196,7 +196,7 @@ input[type="text"]::placeholder {
   font-size: 0.85rem;
 }
 
-/* --- Spinner (cakanie) --- */
+/* --- Spinner (waiting) --- */
 .spinner {
   width: 50px;
   height: 50px;
@@ -250,7 +250,7 @@ input[type="text"]::placeholder {
 }
 
 /* ============================================ */
-/* HERNA OBRAZOVKA                              */
+/* GAME SCREEN                                  */
 /* ============================================ */
 
 #screen-game {
@@ -258,7 +258,7 @@ input[type="text"]::placeholder {
   padding: 0;
 }
 
-/* Horny panel — mena hracov a tah */
+/* Top panel — player names and turn */
 #game-header {
   display: flex;
   align-items: center;
@@ -313,9 +313,9 @@ input[type="text"]::placeholder {
   flex-shrink: 0;
 }
 
-/* Canvas kontajner — zabera vsetko volne miesto */
-/* [ZADANIE: Hra musi byt responzivna — hracia plocha sa musi
-   prisposobit velkosti okna prehliadaca] */
+/* Canvas container — takes up all free space */
+/* [ASSIGNMENT: Game must be responsive — game board must
+   adapt to browser window size] */
 #canvas-container {
   flex: 1;
   display: flex;
@@ -333,31 +333,27 @@ input[type="text"]::placeholder {
   max-height: 100%;
   border-radius: 4px;
   cursor: crosshair;
-  /* Canvas sa responsivne zmensuje zachovanim pomeru stran */
+  /* Canvas scales responsively while keeping aspect ratio */
   object-fit: contain;
 }
 
-/* Spodny panel — pauza, status, restart */
-#game-footer {
+/* Center panel in header (Turn + Buttons) */
+.center-controls {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 1rem;
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-  width: 100%;
+  gap: 0.25rem;
   flex-shrink: 0;
 }
 
-.status-text {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  text-align: center;
-  flex: 1;
+.game-controls-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* ============================================ */
-/* VYSLEDKOVA OBRAZOVKA                         */
+/* RESULT SCREEN                                */
 /* ============================================ */
 
 .result-icon {
@@ -395,7 +391,7 @@ input[type="text"]::placeholder {
 }
 
 /* ============================================ */
-/* PRAVIDLA                                     */
+/* RULES                                        */
 /* ============================================ */
 
 .rules-content {
@@ -412,24 +408,29 @@ input[type="text"]::placeholder {
   margin-bottom: 1.5rem;
 }
 
-.rules-text h3 {
-  font-size: 1.1rem;
-  margin: 1rem 0 0.4rem;
-  color: var(--accent);
+.rules-text ul {
+  list-style-type: disc;
+  padding-left: 1.2rem;
 }
 
-.rules-text h3:first-child {
-  margin-top: 0;
-}
-
-.rules-text p {
+.rules-text li {
   color: var(--text-secondary);
   line-height: 1.6;
   font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.rules-text li:last-child {
+  margin-bottom: 0;
+}
+
+.rules-text li strong {
+  color: var(--accent);
+  font-size: 1rem;
 }
 
 /* ============================================ */
-/* OVERLAYS (pauza, restart, odpojenie)         */
+/* OVERLAYS (pause, restart, disconnect)        */
 /* ============================================ */
 
 .overlay {
@@ -479,11 +480,11 @@ input[type="text"]::placeholder {
 }
 
 /* ============================================ */
-/* RESPONZIVITA                                 */
-/* [ZADANIE: Hra musi byt responzivna]          */
+/* RESPONSIVENESS                               */
+/* [ASSIGNMENT: Game must be responsive]        */
 /* ============================================ */
 
-/* Tablety */
+/* Tablets */
 @media (max-width: 768px) {
   h1 { font-size: 2rem; }
   h2 { font-size: 1.4rem; }
@@ -500,7 +501,7 @@ input[type="text"]::placeholder {
   .turn-indicator { font-size: 0.85rem; }
 }
 
-/* Mobily */
+/* Mobiles */
 @media (max-width: 480px) {
   h1 { font-size: 1.6rem; }
   h2 { font-size: 1.2rem; }
@@ -520,17 +521,13 @@ input[type="text"]::placeholder {
     padding: 0.2rem 0.4rem;
   }
 
-  #game-footer {
+  .game-controls-inline .btn-small {
     padding: 0.3rem 0.5rem;
-  }
-
-  #game-footer .btn-small {
-    padding: 0.4rem 0.6rem;
     font-size: 0.75rem;
   }
 }
 
-/* Landscape na mobile — maximalizujeme canvas */
+/* Landscape on mobile — maximizing canvas */
 @media (max-height: 500px) and (orientation: landscape) {
   #game-header {
     padding: 0.2rem 0.5rem;
@@ -539,12 +536,12 @@ input[type="text"]::placeholder {
   .player-name { font-size: 0.75rem; }
   .turn-indicator { font-size: 0.8rem; }
 
-  #game-footer {
-    padding: 0.2rem 0.5rem;
+  .game-controls-inline .btn-small {
+    padding: 0.2rem 0.4rem;
   }
 }
 
-/* Touch zariadenia — vacsie hit targets */
+/* Touch devices — larger hit targets */
 @media (hover: none) and (pointer: coarse) {
   .btn {
     min-height: 44px;

@@ -1,159 +1,164 @@
 // ============================================================
-// NETWORK.JS — Socket.io klient pre komunikaciu so serverom
-// [ZADANIE: WebSocket synchronizacia — klient posiela serveru
-//  vektor vystrelu, server preposiela druhemu klientovi]
+// NETWORK.JS — Socket.io client for communication with server
+// [ASSIGNMENT: WebSocket synchronization — client sends server
+//  shot vector, server forwards it to the other client]
 // ============================================================
 
 const Network = (function () {
-  // Socket.io spojenie — pripojenie na server
+  // Socket.io connection — connect to server
   let socket = null;
 
-  // Callbacky — nastavia sa z main.js
+  // Callbacks — set from main.js
   let callbacks = {};
 
-  // --- Inicializacia spojenia ---
+  // --- Initialize connection ---
   function connect() {
-    // Vytvorenie WebSocket spojenia cez socket.io
-    // Na localhost sa pripajame priamo, na serveri cez reverse proxy
+    // Creating WebSocket connection via socket.io
+    // On localhost we connect directly, on server via reverse proxy
     socket = io();
 
-    // ---------- Lobby udalosti ----------
+    // ---------- Lobby events ----------
 
-    // Server nam povedal, ze cakame na supera
+    // Server told us we are waiting for opponent
     socket.on('waiting', () => {
       if (callbacks.onWaiting) callbacks.onWaiting();
     });
 
-    // Server sparoval dvoch hracov — hra sa moze zacat
+    // Server matched two players — game can start
     socket.on('game-matched', (data) => {
       if (callbacks.onMatched) callbacks.onMatched(data);
     });
 
-    // ---------- Herne udalosti ----------
+    // ---------- Game events ----------
 
-    // Cakame na to, kym druhy hrac stlaci "Start"
+    // Wait until second player presses "Start"
     socket.on('waiting-for-opponent-start', () => {
       if (callbacks.onWaitingStart) callbacks.onWaitingStart();
     });
 
-    // Oba hraci su pripraveni — hra zacina
+    // Second player pressed "Start" (we are not ready yet)
+    socket.on('opponent-ready', () => {
+      if (callbacks.onOpponentReady) callbacks.onOpponentReady();
+    });
+
+    // Both players are ready — game starts
     socket.on('game-start', (data) => {
       if (callbacks.onGameStart) callbacks.onGameStart(data);
     });
 
-    // Vystrel kamena — prijaty od servera (posielany OBOM hracom)
-    // [ZADANIE: Obaja klienti dostanu rovnake vstupne parametre]
+    // Shot fired — received from server (sent to BOTH players)
+    // [ASSIGNMENT: Both clients receive identical input parameters]
     socket.on('shot-fired', (data) => {
       if (callbacks.onShotFired) callbacks.onShotFired(data);
     });
 
-    // Zmena tahu — na tahu je dalsi hrac
+    // Turn change — next player's turn
     socket.on('turn-change', (data) => {
       if (callbacks.onTurnChange) callbacks.onTurnChange(data);
     });
 
-    // Vsetky kamene boli odhodene — koniec hry
+    // All stones were thrown — end of game
     socket.on('all-stones-thrown', () => {
       if (callbacks.onAllStonesThrown) callbacks.onAllStonesThrown();
     });
 
-    // ---------- Pauza ----------
+    // ---------- Pause ----------
 
-    // Hra bola pozastavena
+    // Game was paused
     socket.on('game-paused', (data) => {
       if (callbacks.onPaused) callbacks.onPaused(data);
     });
 
-    // Hra pokracuje
+    // Game continues
     socket.on('game-unpaused', () => {
       if (callbacks.onUnpaused) callbacks.onUnpaused();
     });
 
     // ---------- Restart ----------
 
-    // Supera ziada restart
+    // Opponent requests a restart
     socket.on('restart-requested', (data) => {
       if (callbacks.onRestartRequested) callbacks.onRestartRequested(data);
     });
 
-    // Restart bol schvaleny — nova hra
+    // Restart was accepted — new game
     socket.on('game-restart', () => {
       if (callbacks.onGameRestart) callbacks.onGameRestart();
     });
 
-    // Restart bol zamietnuty
+    // Restart was rejected
     socket.on('restart-rejected', () => {
       if (callbacks.onRestartRejected) callbacks.onRestartRejected();
     });
 
-    // ---------- Odpojenie ----------
+    // ---------- Disconnect ----------
 
-    // Supera sa odpojil
-    // [ZADANIE: Ak niektory hrac zatvori prehliadac, druhy je informovany]
+    // Opponent disconnected
+    // [ASSIGNMENT: If one player closes the browser, the other is informed]
     socket.on('opponent-disconnected', () => {
       if (callbacks.onOpponentDisconnected) callbacks.onOpponentDisconnected();
     });
   }
 
-  // --- Odosielanie sprav na server ---
+  // --- Sending messages to server ---
 
-  // Pripojenie do lobby s menom hraca
+  // Connect to lobby with player name
   function joinLobby(name) {
     socket.emit('join-lobby', { name });
   }
 
-  // Hrac je pripraveny zacat hru
+  // Player is ready to start the game
   function sendStartGame() {
     socket.emit('start-game');
   }
 
-  // Odoslanie vektora vystrelu (smer + sila)
-  // [ZADANIE: Klient posiela serveru vektor vystrelu]
+  // Sending shot vector (direction + power)
+  // [ASSIGNMENT: Client sends server the shot vector]
   function sendShoot(dx, dy) {
     socket.emit('shoot', { dx, dy });
   }
 
-  // Kamene sa zastavili — server moze prepnut tah
+  // Stones stopped — server can switch turn
   function sendStonesStop() {
     socket.emit('stones-stopped');
   }
 
-  // Pozastavenie hry
+  // Pause the game
   function sendPause() {
     socket.emit('pause');
   }
 
-  // Pokracovanie v hre
+  // Continue the game
   function sendUnpause() {
     socket.emit('unpause');
   }
 
-  // Ziadost o restart
+  // Request a restart
   function sendRestartRequest() {
     socket.emit('restart-request');
   }
 
-  // Suhlas s restartom
+  // Accept a restart
   function sendRestartAccept() {
     socket.emit('restart-accept');
   }
 
-  // Zamietnutie restartu
+  // Reject a restart
   function sendRestartReject() {
     socket.emit('restart-reject');
   }
 
-  // Odpojenie od servera
+  // Disconnect from server
   function disconnect() {
     if (socket) socket.disconnect();
   }
 
-  // Nastavenie callbackov
+  // Setup callbacks
   function on(event, callback) {
     callbacks[event] = callback;
   }
 
-  // --- Verejne API ---
+  // --- Public API ---
   return {
     connect,
     joinLobby,

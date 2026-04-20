@@ -1,31 +1,31 @@
 // ============================================================
-// MAIN.JS — Hlavna logika aplikacie (UI, prepinanie obrazoviek)
-// Spaja Network (WebSocket) a Game (Canvas + Matter.js)
+// MAIN.JS — Main application logic (UI, screen switching)
+// Connects Network (WebSocket) and Game (Canvas + Matter.js)
 // ============================================================
 
 (function () {
   // ============================================================
-  // PREMENNE
+  // VARIABLES
   // ============================================================
 
-  let myPlayerIndex = -1;     // Index tohto hraca (0 alebo 1)
-  let myName = '';            // Meno tohto hraca
-  let opponentName = '';      // Meno supera
-  let gameConfig = null;      // Herna konfiguracia (z servera)
-  let previousScreen = null;  // Pre "spat" tlacidlo z pravidiel
+  let myPlayerIndex = -1;     // Index of this player (0 or 1)
+  let myName = '';            // Name of this player
+  let opponentName = '';      // Name of opponent
+  let gameConfig = null;      // Game configuration (from server)
+  let previousScreen = null;  // For "back" button from rules
 
   // ============================================================
-  // POMOCNE FUNKCIE — prepinanie obrazoviek
+  // HELPER FUNCTIONS — screen switching
   // ============================================================
 
-  // Zobrazi jednu obrazovku a skryje vsetky ostatne
+  // Shows one screen and hides all others
   function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const screen = document.getElementById(screenId);
     if (screen) screen.classList.add('active');
   }
 
-  // Zobrazi/skryje overlay
+  // Shows/hides overlay
   function showOverlay(overlayId) {
     const overlay = document.getElementById(overlayId);
     if (overlay) overlay.style.display = 'flex';
@@ -40,50 +40,44 @@
     document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
   }
 
-  // Aktualizacia herneho UI (header) — mena, tah, kamene
+  // Update game UI (header) — names, turn, stones
   function updateGameUI() {
     const stonesThrown = Game.getStonesThrown();
     const stonesPerPlayer = Game.getStonesPerPlayer();
     const currentTurn = Game.getCurrentTurn();
 
-    // Mena hracov (nastavia sa len raz)
+    // Player names (set only once)
     document.getElementById('name-0').textContent =
       myPlayerIndex === 0 ? myName : opponentName;
     document.getElementById('name-1').textContent =
       myPlayerIndex === 1 ? myName : opponentName;
 
-    // Zostávajúce kamene
+    // Remaining stones
     const p0Left = stonesPerPlayer - stonesThrown[0];
     const p1Left = stonesPerPlayer - stonesThrown[1];
     document.getElementById('stones-0').textContent = `⚪ ${p0Left}`;
     document.getElementById('stones-1').textContent = `⚪ ${p1Left}`;
 
-    // Kto je na tahu — zvyraznime
+    // Who is on turn — highlight
     document.getElementById('player-info-0').classList.toggle('active-turn', currentTurn === 0);
     document.getElementById('player-info-1').classList.toggle('active-turn', currentTurn === 1);
 
-    // Text tahu
+    // Turn text
     const turnName = currentTurn === myPlayerIndex ? 'Ty' :
       (currentTurn === 0 ? (myPlayerIndex === 0 ? 'Ty' : opponentName) :
         (myPlayerIndex === 1 ? 'Ty' : opponentName));
     document.getElementById('turn-indicator').textContent = `Ťah: ${turnName}`;
 
-    // Status text
-    const statusEl = document.getElementById('game-status-text');
-    if (currentTurn === myPlayerIndex) {
-      statusEl.textContent = 'Si na ťahu — klikni na kameň a ťahaj!';
-    } else {
-      statusEl.textContent = 'Čakáš na súpera...';
-    }
+    // Status text odstraneny zo spodnej listy
   }
 
   // ============================================================
-  // INICIALIZACIA — pripojenie eventov
+  // INITIALIZATION — event binding
   // ============================================================
 
   function setupUI() {
-    // --- Login obrazovka ---
-    // [ZADANIE: Prihlasenie / lobby — hrac sa prihlasi menom]
+    // --- Login screen ---
+    // [ASSIGNMENT: Login / lobby — player logs in with name]
     document.getElementById('btn-join').addEventListener('click', () => {
       const nameInput = document.getElementById('input-name');
       myName = nameInput.value.trim();
@@ -92,24 +86,24 @@
         nameInput.focus();
         return;
       }
-      // Pripojime sa k serveru a do lobby
+      // Connect to server and lobby
       Network.connect();
       Network.joinLobby(myName);
     });
 
-    // Enter klaves v input poli
+    // Enter key in input field
     document.getElementById('input-name').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') document.getElementById('btn-join').click();
     });
 
-    // --- Cakacia obrazovka ---
+    // --- Waiting screen ---
     document.getElementById('btn-cancel-wait').addEventListener('click', () => {
       Network.disconnect();
       showScreen('screen-login');
     });
 
-    // --- Menu obrazovka ---
-    // [ZADANIE: Hlavne menu — spustit hru, pravidla, ukoncit spojenie]
+    // --- Menu screen ---
+    // [ASSIGNMENT: Main menu — start game, rules, disconnect]
     document.getElementById('btn-start').addEventListener('click', () => {
       Network.sendStartGame();
       document.getElementById('btn-start').disabled = true;
@@ -121,7 +115,7 @@
       showScreen('screen-login');
     });
 
-    // --- Pravidla ---
+    // --- Rules ---
     document.getElementById('btn-rules-login').addEventListener('click', () => {
       previousScreen = 'screen-login';
       showScreen('screen-rules');
@@ -136,21 +130,20 @@
       showScreen(previousScreen || 'screen-login');
     });
 
-    // --- Herná obrazovka ---
-    // [ZADANIE: Pauza — aktualny hrac moze hru kedykolvek pozastavit]
+    // --- Game screen ---
+    // [ASSIGNMENT: Pause — current player can pause game anytime]
     document.getElementById('btn-pause').addEventListener('click', () => {
       Network.sendPause();
     });
 
-    // [ZADANIE: Restart — mozne spustit novu hru]
+    // [ASSIGNMENT: Restart — possible to start new game]
     document.getElementById('btn-restart-ingame').addEventListener('click', () => {
       Network.sendRestartRequest();
-      document.getElementById('game-status-text').textContent =
-        'Čakáme na súhlas súpera s reštartom...';
+      // Waiting notification can be omitted since status panel was removed
     });
 
-    // --- Pauza overlay ---
-    // [ZADANIE: Pauzu moze zrusit ktorykolvek hrac]
+    // --- Pause overlay ---
+    // [ASSIGNMENT: Pause can be canceled by any player]
     document.getElementById('btn-unpause').addEventListener('click', () => {
       Network.sendUnpause();
     });
@@ -166,7 +159,7 @@
       hideOverlay('overlay-restart');
     });
 
-    // --- Vysledkova obrazovka ---
+    // --- Result screen ---
     document.getElementById('btn-play-again').addEventListener('click', () => {
       Network.sendRestartRequest();
     });
@@ -176,7 +169,7 @@
       showScreen('screen-login');
     });
 
-    // --- Odpojenie supera overlay ---
+    // --- Opponent disconnected overlay ---
     document.getElementById('btn-back-lobby').addEventListener('click', () => {
       hideAllOverlays();
       Network.disconnect();
@@ -185,95 +178,103 @@
   }
 
   // ============================================================
-  // SIETOVE CALLBACKY — reakcie na udalosti zo servera
+  // NETWORK CALLBACKS — reactions to server events
   // ============================================================
 
   function setupNetworkCallbacks() {
-    // Cakame na supera
+    // Waiting for opponent
     Network.on('onWaiting', () => {
       showScreen('screen-waiting');
     });
 
-    // Supera najdeny — zobrazi sa menu
-    // [ZADANIE: Server sparuje dvoch hracov do jednej miestnosti]
+    // Opponent found — menu is shown
+    // [ASSIGNMENT: Server pairs two players into one room]
     Network.on('onMatched', (data) => {
       myPlayerIndex = data.playerIndex;
       opponentName = data.opponentName;
       gameConfig = data.config;
 
-      // Nastavenie UI
+      // UI setup
       document.getElementById('opponent-name').textContent = opponentName;
       const badge = document.getElementById('player-color-badge');
       badge.className = 'color-badge ' + (myPlayerIndex === 0 ? 'red' : 'blue');
 
-      // Reset start button stavu
+      // Reset start button state
       document.getElementById('btn-start').disabled = false;
       document.getElementById('waiting-start-msg').style.display = 'none';
 
       showScreen('screen-menu');
     });
 
-    // Cakame na supera kym stlaci "Start"
+    // Waiting for opponent to press "Start"
     Network.on('onWaitingStart', () => {
-      document.getElementById('waiting-start-msg').textContent =
-        'Čakáme na súpera...';
+      const msg = document.getElementById('waiting-start-msg');
+      msg.textContent = 'Čakáme na súpera...';
+      msg.style.display = 'block';
+    });
+    
+    // Opponent pressed Start, waiting for us
+    Network.on('onOpponentReady', () => {
+      const msg = document.getElementById('waiting-start-msg');
+      msg.textContent = 'Súper chce začať hru, čaká sa na teba!';
+      msg.style.display = 'block';
     });
 
-    // Hra zacina!
+    // Game starts!
     Network.on('onGameStart', (data) => {
       showScreen('screen-game');
       hideAllOverlays();
 
-      // Pripravenie mien pre Game modul
+      // Prepare names for Game module
       const names = myPlayerIndex === 0
         ? [myName, opponentName]
         : [opponentName, myName];
 
-      // Inicializacia herneho enginu
+      // Initialize game engine
       const canvas = document.getElementById('game-canvas');
       Game.init(canvas, gameConfig, myPlayerIndex, names);
 
-      // Nastavenie callbackov z Game modulu
-      // Ked hrac vystreli — posleme vektor na server
+      // Setup Game module callbacks
+      // When player shoots — send vector to server
       Game.setOnShoot((dx, dy) => {
         Network.sendShoot(dx, dy);
       });
 
-      // Ked kamene zastanu — informujeme server
+      // When stones stop — inform server
       Game.setOnStonesStop(() => {
         Network.sendStonesStop();
       });
 
-      // Ked hra skonci — zobrazime vysledky
-      // [ZADANIE: Vysledok hry musi byt prehladne zobrazeny obom hracom]
+      // When game ends — show results
+      // [ASSIGNMENT: Game result must be clearly displayed to both players]
       Game.setOnGameOver((results) => {
         showResults(results);
       });
 
-      // Spustenie herneho loopu
+      // Start game loop
       Game.startGameLoop(data.firstPlayer);
       updateGameUI();
     });
 
-    // Vystrel kamena (od servera — oba klienti)
+    // Stone fired (from server — both clients)
     Network.on('onShotFired', (data) => {
       Game.handleShotFired(data);
       updateGameUI();
     });
 
-    // Zmena tahu
+    // Turn change
     Network.on('onTurnChange', (data) => {
       Game.handleTurnChange(data);
       updateGameUI();
     });
 
-    // Vsetky kamene odhodene — koniec hry
+    // All stones thrown — game over
     Network.on('onAllStonesThrown', () => {
       Game.handleAllStonesThrown();
     });
 
-    // Pauza
-    // [ZADANIE: Druhy hrac je o pauze informovany]
+    // Pause
+    // [ASSIGNMENT: Other player is informed of pause]
     Network.on('onPaused', (data) => {
       Game.pause();
       const pauseInfo = document.getElementById('pause-info');
@@ -281,21 +282,21 @@
       showOverlay('overlay-pause');
     });
 
-    // Koniec pauzy
+    // End of pause
     Network.on('onUnpaused', () => {
       Game.unpause();
       hideOverlay('overlay-pause');
     });
 
-    // Ziadost o restart
+    // Restart request
     Network.on('onRestartRequested', (data) => {
       document.getElementById('restart-info').textContent =
         `${data.fromName} chce reštartovať hru. Súhlasíš?`;
       showOverlay('overlay-restart');
     });
 
-    // Restart schvaleny — nova hra
-    // [ZADANIE: Restart bez nutnosti obnovovat stranku]
+    // Restart approved — new game
+    // [ASSIGNMENT: Restart without need to refresh page]
     Network.on('onGameRestart', () => {
       hideAllOverlays();
       Game.reset();
@@ -307,15 +308,14 @@
       showScreen('screen-menu');
     });
 
-    // Restart zamietnuty
+    // Restart rejected
     Network.on('onRestartRejected', () => {
-      const statusEl = document.getElementById('game-status-text');
-      if (statusEl) statusEl.textContent = 'Súper odmietol reštart.';
+      alert('Súper odmietol reštart.');
     });
 
-    // Supera sa odpojil
-    // [ZADANIE: Ak niektory hrac zatvori prehliadac,
-    //  druhy hrac je informovany a hra sa korektne ukonci]
+    // Opponent disconnected
+    // [ASSIGNMENT: If either player closes browser,
+    //  other player is informed and game ends correctly]
     Network.on('onOpponentDisconnected', () => {
       Game.pause();
       hideAllOverlays();
@@ -324,7 +324,7 @@
   }
 
   // ============================================================
-  // ZOBRAZENIE VYSLEDKOV
+  // DISPLAY RESULTS
   // ============================================================
 
   function showResults(results) {
@@ -334,12 +334,12 @@
     const distEl = document.getElementById('result-distances');
 
     if (results.winner === -1) {
-      // Remiza
+      // Draw
       titleEl.textContent = 'Remíza!';
       detailsEl.textContent = 'Obaja hráči majú kameň rovnako blízko k cieľu.';
       iconEl.textContent = '🤝';
     } else {
-      // Niekto vyhral
+      // Someone won
       const winnerName = results.winner === myPlayerIndex ? myName : opponentName;
       const isMyWin = results.winner === myPlayerIndex;
 
@@ -348,7 +348,7 @@
       iconEl.textContent = isMyWin ? '🏆' : '😔';
     }
 
-    // Zobrazenie vzdialenosti
+    // Display distances
     const name0 = myPlayerIndex === 0 ? myName : opponentName;
     const name1 = myPlayerIndex === 1 ? myName : opponentName;
     const d0 = Math.round(results.bestDistances[0]);
@@ -373,10 +373,10 @@
   }
 
   // ============================================================
-  // SPUSTENIE APLIKACIE
+  // START APPLICATION
   // ============================================================
 
-  // Po nacitani stranky inicializujeme vsetko
+  // After page load initialize everything
   document.addEventListener('DOMContentLoaded', () => {
     setupUI();
     setupNetworkCallbacks();

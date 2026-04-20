@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🥌 Online Curling</title>
+  <title>Online Curling</title>
   <meta name="description" content="Online curling hra pre dvoch hracov cez WebSockety">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,8 +12,8 @@
 <body>
 
   <!-- ============================================ -->
-  <!-- OBRAZOVKA 1: PRIHLASENIE / LOBBY             -->
-  <!-- [ZADANIE: Prihlasenie / lobby — hrac zada meno] -->
+  <!-- SCREEN 1: LOGIN / LOBBY                      -->
+  <!-- [ASSIGNMENT: Login / lobby — player enters name] -->
   <!-- ============================================ -->
   <div id="screen-login" class="screen active">
     <div class="screen-content">
@@ -24,14 +24,14 @@
         <input type="text" id="input-name" placeholder="Zadaj prezývku..." maxlength="20" autocomplete="off">
         <button id="btn-join" class="btn btn-primary">Pripojiť sa</button>
       </div>
-      <button id="btn-rules-login" class="btn btn-secondary">📖 Pravidlá</button>
+      <button id="btn-rules-login" class="btn btn-secondary">Pravidlá</button>
     </div>
   </div>
 
   <!-- ============================================ -->
-  <!-- OBRAZOVKA 2: CAKANIE NA SUPERA               -->
-  <!-- [ZADANIE: Pokial caka len jeden, zobrazi sa   -->
-  <!--  mu cakacia obrazovka]                        -->
+  <!-- SCREEN 2: WAITING FOR OPPONENT               -->
+  <!-- [ASSIGNMENT: If only one is waiting, show    -->
+  <!--  waiting screen]                             -->
   <!-- ============================================ -->
   <div id="screen-waiting" class="screen">
     <div class="screen-content">
@@ -43,9 +43,9 @@
   </div>
 
   <!-- ============================================ -->
-  <!-- OBRAZOVKA 3: HLAVNE MENU (po sparovani)       -->
-  <!-- [ZADANIE: Hlavne menu — uvodna obrazovka      -->
-  <!--  s moznostami spustit hru, pravidla, ukoncit] -->
+  <!-- SCREEN 3: MAIN MENU (after matching)         -->
+  <!-- [ASSIGNMENT: Main menu — initial screen      -->
+  <!--  with options to start game, rules, exit]    -->
   <!-- ============================================ -->
   <div id="screen-menu" class="screen">
     <div class="screen-content">
@@ -55,7 +55,7 @@
       <p class="player-info">Ty si: <span id="player-color-badge" class="color-badge"></span></p>
       <div class="menu-buttons">
         <button id="btn-start" class="btn btn-primary btn-large">▶ Začať hru</button>
-        <button id="btn-rules-menu" class="btn btn-secondary">📖 Pravidlá</button>
+        <button id="btn-rules-menu" class="btn btn-secondary">Pravidlá</button>
         <button id="btn-disconnect" class="btn btn-danger">✕ Odpojiť sa</button>
       </div>
       <p id="waiting-start-msg" class="subtitle" style="display:none;">Čakáme na súpera...</p>
@@ -63,18 +63,26 @@
   </div>
 
   <!-- ============================================ -->
-  <!-- OBRAZOVKA 4: HRA — Canvas + UI               -->
-  <!-- [ZADANIE: Hracia plocha, Ovladanie, Fyzika]   -->
+  <!-- SCREEN 4: GAME — Canvas + UI                 -->
+  <!-- [ASSIGNMENT: Game area, Controls, Physics]   -->
   <!-- ============================================ -->
   <div id="screen-game" class="screen">
-    <!-- Horny info panel -->
+    <!-- Top info panel with everything -->
     <div id="game-header">
       <div class="player-info-bar" id="player-info-0">
         <span class="player-dot" id="dot-0"></span>
         <span class="player-name" id="name-0"></span>
         <span class="stones-left" id="stones-0"></span>
       </div>
-      <div class="turn-indicator" id="turn-indicator">Ťah: —</div>
+      
+      <div class="center-controls">
+        <div class="turn-indicator" id="turn-indicator">Ťah: —</div>
+        <div class="game-controls-inline">
+          <button id="btn-pause" class="btn btn-small">⏸ Pauza</button>
+          <button id="btn-restart-ingame" class="btn btn-small">🔄 Reštart</button>
+        </div>
+      </div>
+
       <div class="player-info-bar" id="player-info-1">
         <span class="stones-left" id="stones-1"></span>
         <span class="player-name" id="name-1"></span>
@@ -82,23 +90,16 @@
       </div>
     </div>
 
-    <!-- Canvas kontajner — responzivny -->
+    <!-- Canvas container — responsive -->
     <div id="canvas-container">
       <canvas id="game-canvas"></canvas>
-    </div>
-
-    <!-- Spodny panel s tlacidlami -->
-    <div id="game-footer">
-      <button id="btn-pause" class="btn btn-small">⏸ Pauza</button>
-      <span id="game-status-text" class="status-text"></span>
-      <button id="btn-restart-ingame" class="btn btn-small">🔄 Reštart</button>
     </div>
   </div>
 
   <!-- ============================================ -->
-  <!-- OBRAZOVKA 5: VYSLEDOK                         -->
-  <!-- [ZADANIE: Vysledok hry musi byt prehladne     -->
-  <!--  zobrazeny obom hracom]                       -->
+  <!-- SCREEN 5: RESULT                             -->
+  <!-- [ASSIGNMENT: Game result must be clearly     -->
+  <!--  displayed to both players]                  -->
   <!-- ============================================ -->
   <div id="screen-result" class="screen">
     <div class="screen-content">
@@ -114,33 +115,29 @@
   </div>
 
   <!-- ============================================ -->
-  <!-- OBRAZOVKA 6: PRAVIDLA                         -->
+  <!-- SCREEN 6: RULES                              -->
   <!-- ============================================ -->
   <div id="screen-rules" class="screen">
     <div class="screen-content rules-content">
-      <h2>📖 Pravidlá hry</h2>
+      <h2>Pravidlá hry</h2>
       <div class="rules-text">
-        <h3>🎯 Cieľ hry</h3>
-        <p>Umiestni kameň čo najbližšie k cieľu (červený stredu). Hráč s najbližším kameňom vyhráva!</p>
-        <h3>🎮 Ovládanie</h3>
-        <p>Klikni na kameň a ťahaj myšou <strong>smerom od cieľa</strong> (dozadu). 
-        Čím ďalej potiahneš, tým silnejší bude výstrel. Po uvoľnení myši sa kameň vystrelí 
-        v opačnom smere (smerom k cieľu).</p>
-        <h3>🔄 Striedanie</h3>
-        <p>Hráči sa striedajú v hádzaní kameňov. Ďalší hráč hádže až keď sa všetky kamene zastavia.</p>
-        <h3>💥 Fyzika</h3>
-        <p>Kamene sa spomaľujú trením. Odrážajú sa od stien aj od seba navzájom.</p>
-        <h3>⏸ Pauza</h3>
-        <p>Hru môžeš kedykoľvek pozastaviť. Pauzu môže zrušiť ktorýkoľvek hráč.</p>
+        <ul>
+          <li><strong>Cieľ hry</strong><br>Umiestni kameň čo najbližšie k cieľu (červený stredu). Hráč s najbližším kameňom vyhráva!</li>
+          <li><strong>Ovládanie</strong><br>Klikni na kameň a ťahaj myšou <strong>smerom od cieľa</strong> (dozadu). 
+          Čím ďalej potiahneš, tým silnejší bude výstrel. Po uvoľnení myši sa kameň vystrelí v opačnom smere (smerom k cieľu).</li>
+          <li><strong>Striedanie</strong><br>Hráči sa striedajú v hádzaní kameňov. Ďalší hráč hádže až keď sa všetky kamene zastavia.</li>
+          <li><strong>Fyzika</strong><br>Kamene sa spomaľujú trením. Odrážajú sa od stien aj od seba navzájom.</li>
+          <li><strong>Pauza</strong><br>Hru môžeš kedykoľvek pozastaviť. Pauzu môže zrušiť ktorýkoľvek hráč.</li>
+        </ul>
       </div>
       <button id="btn-rules-back" class="btn btn-secondary">← Späť</button>
     </div>
   </div>
 
   <!-- ============================================ -->
-  <!-- OVERLAY: PAUZA                                -->
-  <!-- [ZADANIE: Pocas pauzy nie je mozne hadzat     -->
-  <!--  kamene. Druhy hrac je o pauze informovany.]  -->
+  <!-- OVERLAY: PAUSE                               -->
+  <!-- [ASSIGNMENT: During pause stones cannot be   -->
+  <!--  thrown. Other player is informed.]          -->
   <!-- ============================================ -->
   <div id="overlay-pause" class="overlay" style="display:none;">
     <div class="overlay-content">
@@ -165,9 +162,9 @@
   </div>
 
   <!-- ============================================ -->
-  <!-- OVERLAY: ODPOJENIE SUPERA                     -->
-  <!-- [ZADANIE: Ak niektory hrac zatvori prehliadac -->
-  <!--  druhy je informovany a hra sa ukonci]        -->
+  <!-- OVERLAY: OPPONENT DISCONNECTED               -->
+  <!-- [ASSIGNMENT: If a player closes browser      -->
+  <!--  other is informed and game ends]            -->
   <!-- ============================================ -->
   <div id="overlay-disconnected" class="overlay" style="display:none;">
     <div class="overlay-content">
@@ -177,13 +174,13 @@
     </div>
   </div>
 
-  <!-- Externé knižnice -->
-  <!-- Matter.js — fyzikalna kniznica (kolizie, trenie, odrazy) -->
+  <!-- External libraries -->
+  <!-- Matter.js — physics library (collisions, friction, bouncing) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-  <!-- Socket.io klient — automaticky servovany Socket.io serverom -->
+  <!-- Socket.io client — automatically served by Socket.io server -->
   <script src="/socket.io/socket.io.js"></script>
 
-  <!-- Nase skripty (poradie je dolezite!) -->
+  <!-- Our scripts (order matters!) -->
   <script src="js/network.js"></script>
   <script src="js/game.js"></script>
   <script src="js/main.js"></script>

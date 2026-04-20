@@ -1,8 +1,8 @@
 // ============================================================
-// SERVER.JS — WebSocket server pre online curling hru
-// Pouziva Express (servovanie statickych suborov) + Socket.io (WebSockety)
+// SERVER.JS — WebSocket server for online curling game
+// Uses Express (serves static files) + Socket.io (WebSockets)
 // ============================================================
-// [ZADANIE: WebSocket synchronizacia, Herna logika, Zakladne herne prvky]
+// [ASSIGNMENT: WebSocket synchronization, Game logic, Core game elements]
 
 const express = require('express');
 const http = require('http');
@@ -10,77 +10,77 @@ const { Server } = require('socket.io');
 const fs = require('fs');
 const path = require('path');
 
-// --- Nacitanie hernej konfiguracie z externeho JSON suboru ---
-// [ZADANIE: Konfiguracia - parametre hry z externeho suboru]
+// --- Load game configuration from external JSON file ---
+// [ASSIGNMENT: Configuration - game parameters from an external file]
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf-8'));
 
-// --- Inicializacia Express + HTTP servera ---
+// --- Initialization of Express + HTTP server ---
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Servovanie statickych suborov (HTML, CSS, JS) z priecinka 'public'
+// Serving static files (HTML, CSS, JS) from 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API endpoint — klient si stiahne konfiguraciu hry
+// API endpoint — client downloads game configuration
 app.get('/config', (req, res) => {
   res.json(config);
 });
 
 // ============================================================
-// HERNA LOGIKA NA SERVERI
+// SERVER-SIDE GAME LOGIC
 // ============================================================
-// [ZADANIE: Server plni ulohu autority nad stavom hry —
-//  riadi striedanie hracov a odosiela herne udalosti]
+// [ASSIGNMENT: Server acts as authority over game state —
+//  manages player turns and broadcasts game events]
 
-// Fronta cakajucich hracov (lobby)
+// Queue of waiting players (lobby)
 let waitingPlayer = null;
 
-// Aktivne herne miestnosti
+// Active game rooms
 const rooms = {};
 let roomCounter = 0;
 
-// --- WebSocket udalosti ---
+// --- WebSocket events ---
 io.on('connection', (socket) => {
   console.log(`[+] Hrac pripojeny: ${socket.id}`);
 
   // ----------------------------------------------------------
-  // PRIHLASENIE / LOBBY
-  // [ZADANIE: Pred zaciatkom hry sa hrac prihlasi menom.
-  //  Server sparuje dvoch cakajucich hracov do jednej miestnosti.
-  //  Pokial caka len jeden, zobrazi sa mu cakacia obrazovka.]
+  // LOGIN / LOBBY
+  // [ASSIGNMENT: Before starting the game, player logs in with a name.
+  //  Server pairs two waiting players into one room.
+  //  If only one is waiting, they see a waiting screen.]
   // ----------------------------------------------------------
   socket.on('join-lobby', (data) => {
     const playerName = data.name || 'Anonym';
     console.log(`[LOBBY] ${playerName} (${socket.id}) sa pripaja`);
 
-    // Ak uz niekto caka a nie je to ten isty hrac
+    // If someone is already waiting and it's not the same player
     if (waitingPlayer && waitingPlayer.id !== socket.id) {
-      // Sparujeme dvoch hracov do novej miestnosti
+      // Pair two players into a new room
       const roomId = `room-${++roomCounter}`;
       console.log(`[ROOM] Vytvorena miestnost ${roomId}: ${waitingPlayer.name} vs ${playerName}`);
 
-      // Struktura miestnosti — uchovava stav hry
+      // Room structure — holds game state
       rooms[roomId] = {
         players: [
           { id: waitingPlayer.id, name: waitingPlayer.name, index: 0 },
           { id: socket.id, name: playerName, index: 1 }
         ],
-        currentPlayer: 0,        // kto je na tahu (0 alebo 1)
-        stonesThrown: [0, 0],    // kolko kamenov uz kazdy hrac hodil
-        paused: false,           // ci je hra pozastavena
-        pausedBy: null,          // kto pozastavil
-        gameOver: false,         // ci hra skoncila
-        gameStarted: false,      // ci hra uz zacala
-        readyPlayers: new Set(), // hraci pripraveni zacat
-        restartRequests: new Set() // ziadosti o restart
+        currentPlayer: 0,        // whose turn it is (0 or 1)
+        stonesThrown: [0, 0],    // how many stones each player has thrown
+        paused: false,           // is game paused
+        pausedBy: null,          // who paused
+        gameOver: false,         // is game over
+        gameStarted: false,      // has game started
+        readyPlayers: new Set(), // players ready to start
+        restartRequests: new Set() // restart requests
       };
 
-      // Socket.io rooms — oba hraci sa pripoja do spolocnej miestnosti
+      // Socket.io rooms — both players join a shared room
       waitingPlayer.socket.join(roomId);
       socket.join(roomId);
 
-      // Ulozime roomId a index hraca na socket pre neskorsi pristup
+      // Save roomId and player index to socket for later access
       waitingPlayer.socket.data.roomId = roomId;
       waitingPlayer.socket.data.playerIndex = 0;
       waitingPlayer.socket.data.playerName = waitingPlayer.name;
@@ -88,7 +88,7 @@ io.on('connection', (socket) => {
       socket.data.playerIndex = 1;
       socket.data.playerName = playerName;
 
-      // Posleme obom hracom informaciu o sparovani
+      // Send pairing information to both players
       io.to(waitingPlayer.id).emit('game-matched', {
         roomId,
         playerIndex: 0,
@@ -102,11 +102,11 @@ io.on('connection', (socket) => {
         config
       });
 
-      // Vymazeme cakajuceho hraca
+      // Delete waiting player
       waitingPlayer = null;
 
     } else {
-      // Prvy hrac — caka na supera
+      // First player — waits for opponent
       waitingPlayer = { id: socket.id, name: playerName, socket };
       socket.emit('waiting');
       console.log(`[LOBBY] ${playerName} caka na supera...`);
@@ -114,8 +114,8 @@ io.on('connection', (socket) => {
   });
 
   // ----------------------------------------------------------
-  // ZACATIE HRY
-  // [ZADANIE: Hlavne menu — spustit hru po sparovani]
+  // START GAME
+  // [ASSIGNMENT: Main menu — start game after pairing]
   // ----------------------------------------------------------
   socket.on('start-game', () => {
     const roomId = socket.data.roomId;
@@ -125,27 +125,33 @@ io.on('connection', (socket) => {
     room.readyPlayers.add(socket.data.playerIndex);
     console.log(`[GAME] Hrac ${socket.data.playerIndex} pripraveny v ${roomId}`);
 
-    // Ked su obaja hraci pripraveni, hra zacina
+    // When both players are ready, game starts
     if (room.readyPlayers.size >= 2) {
       room.gameStarted = true;
       room.currentPlayer = 0;
       room.stonesThrown = [0, 0];
       room.gameOver = false;
       room.paused = false;
-      // Prvy hrac zacina
+      // First player starts
       io.to(roomId).emit('game-start', { firstPlayer: 0 });
       console.log(`[GAME] Hra zacala v ${roomId}`);
     } else {
-      // Informujeme hraca, ze cakame na druheho
+      // Inform player that we are waiting for the opponent
       socket.emit('waiting-for-opponent-start');
+      
+      // Inform other player that the opponent wants to start
+      const otherPlayer = room.players.find(p => p.index !== socket.data.playerIndex);
+      if (otherPlayer) {
+        io.to(otherPlayer.id).emit('opponent-ready');
+      }
     }
   });
 
   // ----------------------------------------------------------
-  // VYSTREL KAMENA
-  // [ZADANIE: Klient posiela serveru vektor vystrelu (smer a silu).
-  //  Server tieto data preposle druhemu klientovi.
-  //  Fyzikalna simulacia bezi na strane klientov.]
+  // SHOOT STONE
+  // [ASSIGNMENT: Client sends the server a shot vector (direction and power).
+  //  Server forwards this data to the other client.
+  //  Physics simulation runs on the clients' side.]
   // ----------------------------------------------------------
   socket.on('shoot', (data) => {
     const roomId = socket.data.roomId;
@@ -154,17 +160,17 @@ io.on('connection', (socket) => {
 
     const room = rooms[roomId];
 
-    // Kontrola ci je hrac na tahu a hra nie je pozastavena
+    // Check if it's the player's turn and the game is not paused
     if (room.currentPlayer !== playerIndex) return;
     if (room.paused || room.gameOver) return;
 
-    // Zvysime pocet odhozenych kamenov
+    // Increase thrown stones count
     room.stonesThrown[playerIndex]++;
 
     console.log(`[SHOOT] Hrac ${playerIndex} hodil kamen ${room.stonesThrown[playerIndex]} v ${roomId}`);
 
-    // Posielame OBOM klientom informaciu o vystrele
-    // Obaja dostanu rovnake vstupne parametre pre fyziku
+    // Send shot info to BOTH clients
+    // Both receive the same input parameters for physics
     io.to(roomId).emit('shot-fired', {
       playerIndex,
       stoneIndex: room.stonesThrown[playerIndex] - 1,
@@ -174,9 +180,9 @@ io.on('connection', (socket) => {
   });
 
   // ----------------------------------------------------------
-  // KAMENE SA ZASTAVILI — prepnutie tahu
-  // [ZADANIE: Dalsi hrac moze hadzat az vtedy, ked sa vsetky
-  //  kamene na ploche uplne zastavia.]
+  // STONES STOPPED — turn switch
+  // [ASSIGNMENT: Next player can throw only when all
+  //  stones on the board come to a complete stop.]
   // ----------------------------------------------------------
   socket.on('stones-stopped', () => {
     const roomId = socket.data.roomId;
@@ -184,7 +190,7 @@ io.on('connection', (socket) => {
     if (!roomId || !rooms[roomId]) return;
 
     const room = rooms[roomId];
-    // Len aktivny hrac reportuje zastavenie
+    // Only the active player reports stopping
     if (room.currentPlayer !== playerIndex) return;
 
     const totalThrown = room.stonesThrown[0] + room.stonesThrown[1];
@@ -193,12 +199,12 @@ io.on('connection', (socket) => {
     console.log(`[STOP] Kamene zastavene. Odhodene: ${totalThrown}/${totalStones}`);
 
     if (totalThrown >= totalStones) {
-      // Vsetky kamene boli odhodene — koniec hry
+      // All stones were thrown — game over
       room.gameOver = true;
       io.to(roomId).emit('all-stones-thrown');
       console.log(`[GAME] Koniec hry v ${roomId}`);
     } else {
-      // Zmena tahu na druheho hraca
+      // Change turn to the other player
       room.currentPlayer = room.currentPlayer === 0 ? 1 : 0;
       io.to(roomId).emit('turn-change', { currentPlayer: room.currentPlayer });
       console.log(`[TURN] Na tahu je hrac ${room.currentPlayer}`);
@@ -206,10 +212,10 @@ io.on('connection', (socket) => {
   });
 
   // ----------------------------------------------------------
-  // PAUZA
-  // [ZADANIE: Aktualny hrac moze hru kedykolvek pozastavit.
-  //  Druhy hrac je o pauze informovany. Pauzu moze zrusit
-  //  ktorykolvek hrac.]
+  // PAUSE
+  // [ASSIGNMENT: Current player can pause the game anytime.
+  //  Other player is informed of the pause. Pause can be canceled
+  //  by any player.]
   // ----------------------------------------------------------
   socket.on('pause', () => {
     const roomId = socket.data.roomId;
@@ -242,8 +248,8 @@ io.on('connection', (socket) => {
 
   // ----------------------------------------------------------
   // RESTART
-  // [ZADANIE: Po skonceni hry (alebo kedykolvek pocas nej
-  //  po vzajomnom suhlase) je mozne spustit novu hru.]
+  // [ASSIGNMENT: After the game ends (or anytime during
+  //  by mutual agreement) a new game can be started.]
   // ----------------------------------------------------------
   socket.on('restart-request', () => {
     const roomId = socket.data.roomId;
@@ -254,10 +260,10 @@ io.on('connection', (socket) => {
 
     console.log(`[RESTART] Ziadost od hraca ${socket.data.playerIndex} v ${roomId}`);
 
-    // Po skonceni hry staci ziadost jedneho hraca
-    // Pocas hry treba suhlas oboch
+    // After game over, one player's request is enough
+    // During game, both need to agree
     if (room.gameOver || room.restartRequests.size >= 2) {
-      // Reset stavu miestnosti
+      // Reset room state
       room.currentPlayer = 0;
       room.stonesThrown = [0, 0];
       room.gameOver = false;
@@ -270,7 +276,7 @@ io.on('connection', (socket) => {
       io.to(roomId).emit('game-restart');
       console.log(`[RESTART] Hra restartovana v ${roomId}`);
     } else {
-      // Informujeme druheho hraca o ziadosti
+      // Inform other player of request
       const otherPlayer = room.players.find(p => p.index !== socket.data.playerIndex);
       if (otherPlayer) {
         io.to(otherPlayer.id).emit('restart-requested', {
@@ -280,7 +286,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Suhlas s restartom (druhy hrac)
+  // Agree to restart (second player)
   socket.on('restart-accept', () => {
     const roomId = socket.data.roomId;
     if (!roomId || !rooms[roomId]) return;
@@ -303,7 +309,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Zamietnutie restartu
+  // Reject restart
   socket.on('restart-reject', () => {
     const roomId = socket.data.roomId;
     if (!roomId || !rooms[roomId]) return;
@@ -318,22 +324,22 @@ io.on('connection', (socket) => {
   });
 
   // ----------------------------------------------------------
-  // ODPOJENIE HRACA
-  // [ZADANIE: Ak niektory hrac zatvori prehliadac alebo prerusi
-  //  spojenie, druhy hrac je o tom informovany a hra sa
-  //  korektne ukonci.]
+  // PLAYER DISCONNECT
+  // [ASSIGNMENT: If any player closes the browser or loses
+  //  connection, other player is informed and game
+  //  ends gracefully.]
   // ----------------------------------------------------------
   socket.on('disconnect', () => {
     console.log(`[-] Hrac odpojeny: ${socket.id}`);
 
-    // Ak cakajuci hrac sa odpojil
+    // If waiting player disconnected
     if (waitingPlayer && waitingPlayer.id === socket.id) {
       waitingPlayer = null;
       console.log(`[LOBBY] Cakajuci hrac odisiel`);
       return;
     }
 
-    // Ak bol v aktivnej hre — informujeme supera
+    // If in active game — inform opponent
     const roomId = socket.data?.roomId;
     if (roomId && rooms[roomId]) {
       io.to(roomId).emit('opponent-disconnected');
@@ -343,7 +349,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- Spustenie servera ---
+// --- Start server ---
 const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`+------------------------------------------+`);
