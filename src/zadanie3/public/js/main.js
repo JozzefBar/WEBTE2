@@ -55,8 +55,8 @@
     // Remaining stones
     const p0Left = stonesPerPlayer - stonesThrown[0];
     const p1Left = stonesPerPlayer - stonesThrown[1];
-    document.getElementById('stones-0').textContent = `⚪ ${p0Left}`;
-    document.getElementById('stones-1').textContent = `⚪ ${p1Left}`;
+    document.getElementById('stones-0').innerHTML = `<i class="bi bi-circle-fill" style="font-size: 0.7rem;"></i> ${p0Left}`;
+    document.getElementById('stones-1').innerHTML = `<i class="bi bi-circle-fill" style="font-size: 0.7rem;"></i> ${p1Left}`;
 
     // Current score (closest distance)
     const currentScore = Game.getCurrentScore ? Game.getCurrentScore() : [Infinity, Infinity];
@@ -349,7 +349,7 @@
       const winnerName = Number(results.winner) === Number(myPlayerIndex) ? myName : opponentName;
       const isMyWin = Number(results.winner) === Number(myPlayerIndex);
 
-      titleEl.textContent = isMyWin ? 'Vyhral si!' : 'Prehral si';
+      titleEl.textContent = isMyWin ? 'Vyhral si!' : 'Prehral si!';
       detailsEl.textContent = `Víťaz: ${winnerName}`;
     }
 
@@ -368,10 +368,10 @@
       const isMyWin = Number(results.winner) === Number(myPlayerIndex);
       if (Number(myPlayerIndex) === 0) {
         w0 = isMyWin ? 'winner' : 'loser';
-        icon0 = isMyWin ? ' ⭐' : ' ❌';
+        icon0 = isMyWin ? ' <i class="bi bi-star-fill"></i>' : ' <i class="bi bi-x-circle-fill"></i>';
       } else if (Number(myPlayerIndex) === 1) {
         w1 = isMyWin ? 'winner' : 'loser';
-        icon1 = isMyWin ? ' ⭐' : ' ❌';
+        icon1 = isMyWin ? ' <i class="bi bi-star-fill"></i>' : ' <i class="bi bi-x-circle-fill"></i>';
       }
     }
 

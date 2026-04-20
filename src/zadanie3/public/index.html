@@ -7,6 +7,7 @@
   <meta name="description" content="Online curling hra pre dvoch hracov cez WebSockety">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -17,7 +18,7 @@
   <!-- ============================================ -->
   <div id="screen-login" class="screen active">
     <div class="screen-content">
-      <div class="logo">🥌</div>
+      <div class="logo"><i class="bi bi-record-circle"></i></div>
       <h1>Online Curling</h1>
       <p class="subtitle">Hra pre dvoch hráčov cez WebSocket</p>
       <div class="form-group">
@@ -49,14 +50,14 @@
   <!-- ============================================ -->
   <div id="screen-menu" class="screen">
     <div class="screen-content">
-      <div class="logo">🥌</div>
+      <div class="logo"><i class="bi bi-record-circle"></i></div>
       <h2>Súper nájdený!</h2>
       <p class="opponent-info">Hráš proti: <strong id="opponent-name"></strong></p>
       <p class="player-info">Ty si: <span id="player-color-badge" class="color-badge"></span></p>
       <div class="menu-buttons">
-        <button id="btn-start" class="btn btn-primary btn-large">▶ Začať hru</button>
+        <button id="btn-start" class="btn btn-primary btn-large"><i class="bi bi-play-fill"></i> Začať hru</button>
         <button id="btn-rules-menu" class="btn btn-secondary">Pravidlá</button>
-        <button id="btn-disconnect" class="btn btn-danger">✕ Odpojiť sa</button>
+        <button id="btn-disconnect" class="btn btn-danger"><i class="bi bi-x-lg"></i> Odpojiť sa</button>
       </div>
       <p id="waiting-start-msg" class="subtitle" style="display:none;">Čakáme na súpera...</p>
     </div>
@@ -110,7 +111,7 @@
       <div id="result-distances" class="result-distances"></div>
       <div class="menu-buttons">
         <button id="btn-play-again" class="btn btn-primary btn-large">Hrať znova</button>
-        <button id="btn-quit" class="btn btn-danger">✕ Odísť</button>
+        <button id="btn-quit" class="btn btn-danger"><i class="bi bi-x-lg"></i> Odísť</button>
       </div>
     </div>
   </div>
@@ -131,7 +132,7 @@
           <li><strong>Pauza</strong><br>Hru môžeš kedykoľvek pozastaviť. Pauzu môže zrušiť ktorýkoľvek hráč.</li>
         </ul>
       </div>
-      <button id="btn-rules-back" class="btn btn-secondary">← Späť</button>
+      <button id="btn-rules-back" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Späť</button>
     </div>
   </div>
 
@@ -142,9 +143,9 @@
   <!-- ============================================ -->
   <div id="overlay-pause" class="overlay" style="display:none;">
     <div class="overlay-content">
-      <h2>⏸ Hra pozastavená</h2>
+      <h2><i class="bi bi-pause-fill"></i> Hra pozastavená</h2>
       <p id="pause-info"></p>
-      <button id="btn-unpause" class="btn btn-primary">▶ Pokračovať</button>
+      <button id="btn-unpause" class="btn btn-primary"><i class="bi bi-play-fill"></i> Pokračovať</button>
     </div>
   </div>
 
@@ -153,11 +154,11 @@
   <!-- ============================================ -->
   <div id="overlay-restart" class="overlay" style="display:none;">
     <div class="overlay-content">
-      <h2>🔄 Žiadosť o reštart</h2>
+      <h2><i class="bi bi-arrow-clockwise"></i> Žiadosť o reštart</h2>
       <p id="restart-info">Súper chce reštartovať hru.</p>
       <div class="overlay-buttons">
-        <button id="btn-restart-accept" class="btn btn-primary">✓ Súhlasím</button>
-        <button id="btn-restart-reject" class="btn btn-danger">✕ Odmietam</button>
+        <button id="btn-restart-accept" class="btn btn-primary"><i class="bi bi-check-lg"></i> Súhlasím</button>
+        <button id="btn-restart-reject" class="btn btn-danger"><i class="bi bi-x-lg"></i> Odmietam</button>
       </div>
     </div>
   </div>
@@ -171,7 +172,7 @@
     <div class="overlay-content">
       <h2>Súper sa odpojil</h2>
       <p>Hra bola ukončená.</p>
-      <button id="btn-back-lobby" class="btn btn-primary">← Späť do lobby</button>
+      <button id="btn-back-lobby" class="btn btn-primary"><i class="bi bi-arrow-left"></i> Späť do lobby</button>
     </div>
   </div>
 
