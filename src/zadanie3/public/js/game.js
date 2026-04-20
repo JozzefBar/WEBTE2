@@ -428,6 +428,27 @@ const Game = (function () {
     };
   }
 
+  // Calculate current best distances for each player (live)
+  function getCurrentScore() {
+    if (!config) return [Infinity, Infinity];
+    const targetX = config.target.x;
+    const targetY = config.target.y;
+
+    let bestDist = [Infinity, Infinity];
+
+    allStones.forEach(s => {
+      const dx = s.body.position.x - targetX;
+      const dy = s.body.position.y - targetY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < bestDist[s.playerIndex]) {
+        bestDist[s.playerIndex] = dist;
+      }
+    });
+
+    return bestDist;
+  }
+
   // ============================================================
   // RENDERING (Canvas API)
   // [ASSIGNMENT: Rendering of the game board must be implemented
@@ -746,6 +767,7 @@ const Game = (function () {
     getIsPaused,
     setOnShoot,
     setOnStonesStop,
-    setOnGameOver
+    setOnGameOver,
+    getCurrentScore
   };
 })();

@@ -72,19 +72,21 @@
       <div class="player-info-bar" id="player-info-0">
         <span class="player-dot" id="dot-0"></span>
         <span class="player-name" id="name-0"></span>
+        <span class="score-badge" id="score-0">Najbližší: -</span>
         <span class="stones-left" id="stones-0"></span>
       </div>
       
       <div class="center-controls">
         <div class="turn-indicator" id="turn-indicator">Ťah: —</div>
         <div class="game-controls-inline">
-          <button id="btn-pause" class="btn btn-small">⏸ Pauza</button>
-          <button id="btn-restart-ingame" class="btn btn-small">🔄 Reštart</button>
+          <button id="btn-pause" class="btn btn-small">Pauza</button>
+          <button id="btn-restart-ingame" class="btn btn-small">Reštart</button>
         </div>
       </div>
 
       <div class="player-info-bar" id="player-info-1">
         <span class="stones-left" id="stones-1"></span>
+        <span class="score-badge" id="score-1">Najbližší: -</span>
         <span class="player-name" id="name-1"></span>
         <span class="player-dot" id="dot-1"></span>
       </div>
@@ -103,12 +105,11 @@
   <!-- ============================================ -->
   <div id="screen-result" class="screen">
     <div class="screen-content">
-      <div id="result-icon" class="result-icon">🏆</div>
-      <h2 id="result-title">Výsledok</h2>
+      <h2 id="result-title" class="animated-title">Výsledok</h2>
       <p id="result-details" class="subtitle"></p>
       <div id="result-distances" class="result-distances"></div>
       <div class="menu-buttons">
-        <button id="btn-play-again" class="btn btn-primary btn-large">🔄 Hrať znova</button>
+        <button id="btn-play-again" class="btn btn-primary btn-large">Hrať znova</button>
         <button id="btn-quit" class="btn btn-danger">✕ Odísť</button>
       </div>
     </div>
@@ -168,7 +169,7 @@
   <!-- ============================================ -->
   <div id="overlay-disconnected" class="overlay" style="display:none;">
     <div class="overlay-content">
-      <h2>😔 Súper sa odpojil</h2>
+      <h2>Súper sa odpojil</h2>
       <p>Hra bola ukončená.</p>
       <button id="btn-back-lobby" class="btn btn-primary">← Späť do lobby</button>
     </div>

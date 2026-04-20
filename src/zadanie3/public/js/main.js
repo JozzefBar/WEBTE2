@@ -58,6 +58,14 @@
     document.getElementById('stones-0').textContent = `⚪ ${p0Left}`;
     document.getElementById('stones-1').textContent = `⚪ ${p1Left}`;
 
+    // Current score (closest distance)
+    const currentScore = Game.getCurrentScore ? Game.getCurrentScore() : [Infinity, Infinity];
+    const d0 = currentScore[0] === Infinity ? '-' : `${Math.round(currentScore[0])} px`;
+    const d1 = currentScore[1] === Infinity ? '-' : `${Math.round(currentScore[1])} px`;
+    
+    document.getElementById('score-0').textContent = `Vzdialenosť: ${d0}`;
+    document.getElementById('score-1').textContent = `Vzdialenosť: ${d1}`;
+
     // Who is on turn — highlight
     document.getElementById('player-info-0').classList.toggle('active-turn', currentTurn === 0);
     document.getElementById('player-info-1').classList.toggle('active-turn', currentTurn === 1);
@@ -330,22 +338,19 @@
   function showResults(results) {
     const titleEl = document.getElementById('result-title');
     const detailsEl = document.getElementById('result-details');
-    const iconEl = document.getElementById('result-icon');
     const distEl = document.getElementById('result-distances');
 
     if (results.winner === -1) {
       // Draw
       titleEl.textContent = 'Remíza!';
       detailsEl.textContent = 'Obaja hráči majú kameň rovnako blízko k cieľu.';
-      iconEl.textContent = '🤝';
     } else {
       // Someone won
-      const winnerName = results.winner === myPlayerIndex ? myName : opponentName;
-      const isMyWin = results.winner === myPlayerIndex;
+      const winnerName = Number(results.winner) === Number(myPlayerIndex) ? myName : opponentName;
+      const isMyWin = Number(results.winner) === Number(myPlayerIndex);
 
-      titleEl.textContent = isMyWin ? 'Vyhral si! 🎉' : 'Prehral si 😔';
+      titleEl.textContent = isMyWin ? 'Vyhral si!' : 'Prehral si';
       detailsEl.textContent = `Víťaz: ${winnerName}`;
-      iconEl.textContent = isMyWin ? '🏆' : '😔';
     }
 
     // Display distances
@@ -353,19 +358,33 @@
     const name1 = myPlayerIndex === 1 ? myName : opponentName;
     const d0 = Math.round(results.bestDistances[0]);
     const d1 = Math.round(results.bestDistances[1]);
-    const w0 = results.winner === 0 ? 'winner' : '';
-    const w1 = results.winner === 1 ? 'winner' : '';
+    let w0 = '';
+    let w1 = '';
+    let icon0 = '';
+    let icon1 = '';
+
+    // Only highlight the current player's own row
+    if (results.winner !== -1) {
+      const isMyWin = Number(results.winner) === Number(myPlayerIndex);
+      if (Number(myPlayerIndex) === 0) {
+        w0 = isMyWin ? 'winner' : 'loser';
+        icon0 = isMyWin ? ' ⭐' : ' ❌';
+      } else if (Number(myPlayerIndex) === 1) {
+        w1 = isMyWin ? 'winner' : 'loser';
+        icon1 = isMyWin ? ' ⭐' : ' ❌';
+      }
+    }
 
     distEl.innerHTML = `
       <div class="dist-row ${w0}">
         <span class="dist-dot" style="background: #ef5350;"></span>
-        <span>${name0}: ${d0} px od cieľa</span>
-        ${results.winner === 0 ? ' ⭐' : ''}
+        <span>${name0}: ${d0 === Infinity ? '-' : d0 + ' px od cieľa'}</span>
+        ${icon0}
       </div>
       <div class="dist-row ${w1}">
         <span class="dist-dot" style="background: #42a5f5;"></span>
-        <span>${name1}: ${d1} px od cieľa</span>
-        ${results.winner === 1 ? ' ⭐' : ''}
+        <span>${name1}: ${d1 === Infinity ? '-' : d1 + ' px od cieľa'}</span>
+        ${icon1}
       </div>
     `;
 
