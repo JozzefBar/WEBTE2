@@ -40,6 +40,8 @@ npm install --omit=dev
 
 ### 2. Nginx konfigurácia
 
+Do `server { listen 443 ssl; ... }` bloku pridať:
+
 ```nginx
 location = /Z3 {
     return 301 /Z3/;
@@ -50,13 +52,42 @@ location ^~ /Z3/ {
     try_files $uri $uri/ /Z3/index.html;
     index index.html;
 }
+
+location /z3-ws/ {
+    proxy_pass http://localhost:3001/;
+
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+    proxy_set_header Host $host;
+}
 ```
 
-Blok `location /ws/ { proxy_pass http://localhost:3000/; ... }` je už nakonfigurovaný.
+Poznámka: Z3 používa port **3001** a vlastný WS endpoint `/z3-ws/`, pretože
+port 3000 a cestu `/ws/` už obsadzuje chat-app aplikácia zo cvičenia.
 
 ```sh
 sudo nginx -t
 sudo systemctl reload nginx
+```
+
+### 2a. Úprava portu a klient-side ciest
+
+V `/home/xbarcakj/z3-server/server.js` nastaviť port:
+```js
+const PORT = 3001;
+```
+
+V `/var/www/node26.webte.fei.stuba.sk/Z3/index.html`:
+```html
+<script src="/z3-ws/socket.io/socket.io.js"></script>
+```
+
+V `/var/www/node26.webte.fei.stuba.sk/Z3/js/network.js` — inicializácia socketu
+(auto-detect lokál vs. produkcia):
+```js
+const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+socket = isLocal ? io() : io({ path: '/z3-ws/socket.io' });
 ```
 
 ### 3. Systemd služba
@@ -92,23 +123,23 @@ sudo systemctl status z3-curling
 
 - https://node26.webte.fei.stuba.sk/Z3/ — hra sa načíta
 - Otvoriť DevTools → Network → WS: mala by byť aktívna socket.io connection
-  na `wss://node26.webte.fei.stuba.sk/ws/socket.io/...`
+  na `wss://node26.webte.fei.stuba.sk/z3-ws/socket.io/...`
 - Logy služby: `sudo journalctl -u z3-curling -f`
 
 ## Zmeny na VPS oproti default inštalácii
 
 - Nainštalovaný **Node.js 24.x** cez `nvm`
-- Pridaný **Nginx location blok `/Z3/`** (viď vyššie)
-- Pridaná **systemd služba `z3-curling`** pre Node WS server
-- Blok `location /ws/ { ... }` v Nginx (bol pridaný už v rámci cvičenia WebSockets)
+- Pridané **Nginx location bloky `/Z3/` a `/z3-ws/`**
+- Pridaná **systemd služba `z3-curling`** pre Node WS server na porte 3001
+- Blok `location /ws/ { ... }` (port 3000) z cvičenia ostal nedotknutý — patrí chat-app
 
 Žiadne ďalšie systémové balíky navyše.
 
 ## Ako hra komunikuje
 
-1. Klient otvorí `https://node26.../Z3/` → Nginx pošle statiku
-2. Prehliadač načíta `/ws/socket.io/socket.io.js` → Nginx proxuje na Node → Node vráti klient skript
-3. Klient spustí `io({ path: '/ws/socket.io' })` → WebSocket upgrade cez Nginx proxy → Node
+1. Klient otvorí `https://node26.../Z3/` → Nginx pošle statiku z `/var/www/.../Z3/`
+2. Prehliadač načíta `/z3-ws/socket.io/socket.io.js` → Nginx proxuje na Node (localhost:3001) → Node vráti klient skript
+3. Klient spustí `io({ path: '/z3-ws/socket.io' })` → WebSocket upgrade cez Nginx proxy → Node
 4. Server (autorita):
    - Páruje čakajúcich hráčov do miestností (`join-lobby` → `game-matched`)
    - Pri `shoot` prepošle vektor oboma klientom (`shot-fired`) — oba klienti robia rovnakú fyzikálnu simuláciu (determinizmus)
