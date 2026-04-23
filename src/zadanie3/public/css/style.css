@@ -1,7 +1,5 @@
-/* ============================================================
    STYLE.CSS — Styles for online curling game
    [ASSIGNMENT: Visual appearance of the application also sells]
-   ============================================================ */
 
 /* --- Reset and base settings --- */
 *, *::before, *::after {
@@ -262,9 +260,7 @@ input[type="text"]::placeholder {
   justify-content: center;
 }
 
-/* ============================================ */
 /* GAME SCREEN                                  */
-/* ============================================ */
 
 #screen-game {
   justify-content: space-between;
@@ -376,9 +372,7 @@ input[type="text"]::placeholder {
   gap: 0.5rem;
 }
 
-/* ============================================ */
 /* RESULT SCREEN                                */
-/* ============================================ */
 
 .animated-title {
   animation: float 2s ease-in-out infinite;
@@ -419,9 +413,7 @@ input[type="text"]::placeholder {
   color: var(--danger);
 }
 
-/* ============================================ */
 /* RULES                                        */
-/* ============================================ */
 
 .rules-content {
   max-width: 600px;
@@ -458,9 +450,7 @@ input[type="text"]::placeholder {
   font-size: 1rem;
 }
 
-/* ============================================ */
 /* OVERLAYS (pause, restart, disconnect)        */
-/* ============================================ */
 
 .overlay {
   position: fixed;
@@ -508,10 +498,8 @@ input[type="text"]::placeholder {
   flex-wrap: wrap;
 }
 
-/* ============================================ */
 /* RESPONSIVENESS                               */
 /* [ASSIGNMENT: Game must be responsive]        */
-/* ============================================ */
 
 /* Tablets */
 @media (max-width: 768px) {

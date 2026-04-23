@@ -1,6 +1,4 @@
-// ============================================================
 // GAME.JS — Game logic, physics (Matter.js) and rendering (Canvas)
-// ============================================================
 // [ASSIGNMENT: Game board and visualization — Canvas API]
 // [ASSIGNMENT: Controls — slingshot mechanic]
 // [ASSIGNMENT: Physics — Matter.js (collisions, friction, bouncing)]
@@ -58,9 +56,7 @@ const Game = (function () {
   // Player names (for display)
   let playerNames = ['Hráč 1', 'Hráč 2'];
 
-  // ============================================================
   // INITIALIZATION
-  // ============================================================
 
   // Initialize game engine and canvas
   function init(canvasElement, gameConfig, playerIndex, names) {
@@ -119,10 +115,8 @@ const Game = (function () {
     Composite.add(engine.world, walls);
   }
 
-  // ============================================================
   // INPUT EVENTS (mouse + touch)
   // [ASSIGNMENT: Controls — slingshot mechanic]
-  // ============================================================
 
   function setupInputEvents() {
     // --- Mouse ---
@@ -230,9 +224,7 @@ const Game = (function () {
     }
   }
 
-  // ============================================================
   // GAME LOOP — physics + rendering
-  // ============================================================
 
   function startGameLoop(firstPlayer) {
     gameActive = true;
@@ -311,9 +303,7 @@ const Game = (function () {
     }
   }
 
-  // ============================================================
   // STONE MANAGEMENT
-  // ============================================================
 
   // Place new stone at starting position
   function placeNewStone(playerIndex) {
@@ -339,10 +329,8 @@ const Game = (function () {
     console.log(`[GAME] Novy kamen pre hraca ${playerIndex} na [${x}, ${y}]`);
   }
 
-  // ============================================================
   // RECEIVED SHOT FROM SERVER
   // Both clients do the exact same thing — determinism
-  // ============================================================
 
   function handleShotFired(data) {
     // If stone hasn't been created yet (other player), create it
@@ -449,11 +437,9 @@ const Game = (function () {
     return bestDist;
   }
 
-  // ============================================================
   // RENDERING (Canvas API)
   // [ASSIGNMENT: Rendering of the game board must be implemented
   //  using Canvas API]
-  // ============================================================
 
   function render() {
     ctx.clearRect(0, 0, fieldW, fieldH);
@@ -689,9 +675,7 @@ const Game = (function () {
     }
   }
 
-  // ============================================================
   // PAUSE / RESTART
-  // ============================================================
 
   function pause() {
     isPaused = true;
@@ -731,9 +715,7 @@ const Game = (function () {
     console.log('[GAME] Hra resetovana');
   }
 
-  // ============================================================
   // GETTERS AND SETTERS
-  // ============================================================
 
   function getCurrentTurn() { return currentTurn; }
   function getMyPlayerIndex() { return myPlayerIndex; }
@@ -746,9 +728,7 @@ const Game = (function () {
   function setOnStonesStop(cb) { onStonesStopCallback = cb; }
   function setOnGameOver(cb) { onGameOverCallback = cb; }
 
-  // ============================================================
   // PUBLIC API
-  // ============================================================
 
   return {
     init,

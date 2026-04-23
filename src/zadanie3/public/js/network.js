@@ -1,8 +1,6 @@
-// ============================================================
 // NETWORK.JS — Socket.io client for communication with server
 // [ASSIGNMENT: WebSocket synchronization — client sends server
 //  shot vector, server forwards it to the other client]
-// ============================================================
 
 const Network = (function () {
   // Socket.io connection — connect to server

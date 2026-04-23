@@ -1,7 +1,5 @@
-// ============================================================
 // SERVER.JS — WebSocket server for online curling game
 // Uses Express (serves static files) + Socket.io (WebSockets)
-// ============================================================
 // [ASSIGNMENT: WebSocket synchronization, Game logic, Core game elements]
 
 const express = require('express');
@@ -27,9 +25,7 @@ app.get('/config', (req, res) => {
   res.json(config);
 });
 
-// ============================================================
 // SERVER-SIDE GAME LOGIC
-// ============================================================
 // [ASSIGNMENT: Server acts as authority over game state —
 //  manages player turns and broadcasts game events]
 
@@ -353,7 +349,7 @@ io.on('connection', (socket) => {
 const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`+------------------------------------------+`);
-  console.log(`|  🥌 Curling server bezi na porte ${PORT}      |`);
+  console.log(`|  [CURLING] Server bezi na porte 3000     |`);
   console.log(`|  http://localhost:${PORT}                   |`);
   console.log(`+------------------------------------------+`);
 });

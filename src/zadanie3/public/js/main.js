@@ -1,12 +1,8 @@
-// ============================================================
 // MAIN.JS — Main application logic (UI, screen switching)
 // Connects Network (WebSocket) and Game (Canvas + Matter.js)
-// ============================================================
 
 (function () {
-  // ============================================================
   // VARIABLES
-  // ============================================================
 
   let myPlayerIndex = -1;     // Index of this player (0 or 1)
   let myName = '';            // Name of this player
@@ -14,9 +10,7 @@
   let gameConfig = null;      // Game configuration (from server)
   let previousScreen = null;  // For "back" button from rules
 
-  // ============================================================
   // HELPER FUNCTIONS — screen switching
-  // ============================================================
 
   // Shows one screen and hides all others
   function showScreen(screenId) {
@@ -38,6 +32,13 @@
 
   function hideAllOverlays() {
     document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
+  }
+
+  // Shows a generic info message overlay
+  function showInfo(title, text) {
+    document.getElementById('info-title').textContent = title;
+    document.getElementById('info-text').textContent = text;
+    showOverlay('overlay-info');
   }
 
   // Update game UI (header) — names, turn, stones
@@ -79,9 +80,7 @@
     // Status text odstraneny zo spodnej listy
   }
 
-  // ============================================================
   // INITIALIZATION — event binding
-  // ============================================================
 
   function setupUI() {
     // --- Login screen ---
@@ -183,11 +182,14 @@
       Network.disconnect();
       showScreen('screen-login');
     });
+
+    // --- Info overlay ---
+    document.getElementById('btn-info-close').addEventListener('click', () => {
+      hideOverlay('overlay-info');
+    });
   }
 
-  // ============================================================
   // NETWORK CALLBACKS — reactions to server events
-  // ============================================================
 
   function setupNetworkCallbacks() {
     // Waiting for opponent
@@ -318,7 +320,7 @@
 
     // Restart rejected
     Network.on('onRestartRejected', () => {
-      alert('Súper odmietol reštart.');
+      showInfo('Reštart odmietnutý', 'Súper odmietol tvoju žiadosť o reštart.');
     });
 
     // Opponent disconnected
@@ -331,9 +333,7 @@
     });
   }
 
-  // ============================================================
   // DISPLAY RESULTS
-  // ============================================================
 
   function showResults(results) {
     const titleEl = document.getElementById('result-title');
@@ -391,9 +391,7 @@
     showScreen('screen-result');
   }
 
-  // ============================================================
   // START APPLICATION
-  // ============================================================
 
   // After page load initialize everything
   document.addEventListener('DOMContentLoaded', () => {

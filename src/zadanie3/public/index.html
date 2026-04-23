@@ -12,10 +12,8 @@
 </head>
 <body>
 
-  <!-- ============================================ -->
   <!-- SCREEN 1: LOGIN / LOBBY                      -->
   <!-- [ASSIGNMENT: Login / lobby — player enters name] -->
-  <!-- ============================================ -->
   <div id="screen-login" class="screen active">
     <div class="screen-content">
       <div class="logo"><i class="bi bi-record-circle"></i></div>
@@ -29,11 +27,9 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
   <!-- SCREEN 2: WAITING FOR OPPONENT               -->
   <!-- [ASSIGNMENT: If only one is waiting, show    -->
   <!--  waiting screen]                             -->
-  <!-- ============================================ -->
   <div id="screen-waiting" class="screen">
     <div class="screen-content">
       <div class="spinner"></div>
@@ -43,11 +39,9 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
   <!-- SCREEN 3: MAIN MENU (after matching)         -->
   <!-- [ASSIGNMENT: Main menu — initial screen      -->
   <!--  with options to start game, rules, exit]    -->
-  <!-- ============================================ -->
   <div id="screen-menu" class="screen">
     <div class="screen-content">
       <div class="logo"><i class="bi bi-record-circle"></i></div>
@@ -63,10 +57,8 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
   <!-- SCREEN 4: GAME — Canvas + UI                 -->
   <!-- [ASSIGNMENT: Game area, Controls, Physics]   -->
-  <!-- ============================================ -->
   <div id="screen-game" class="screen">
     <!-- Top info panel with everything -->
     <div id="game-header">
@@ -99,11 +91,9 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
   <!-- SCREEN 5: RESULT                             -->
   <!-- [ASSIGNMENT: Game result must be clearly     -->
   <!--  displayed to both players]                  -->
-  <!-- ============================================ -->
   <div id="screen-result" class="screen">
     <div class="screen-content">
       <h2 id="result-title" class="animated-title">Výsledok</h2>
@@ -116,9 +106,7 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
   <!-- SCREEN 6: RULES                              -->
-  <!-- ============================================ -->
   <div id="screen-rules" class="screen">
     <div class="screen-content rules-content">
       <h2>Pravidlá hry</h2>
@@ -136,11 +124,9 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
   <!-- OVERLAY: PAUSE                               -->
   <!-- [ASSIGNMENT: During pause stones cannot be   -->
   <!--  thrown. Other player is informed.]          -->
-  <!-- ============================================ -->
   <div id="overlay-pause" class="overlay" style="display:none;">
     <div class="overlay-content">
       <h2><i class="bi bi-pause-fill"></i> Hra pozastavená</h2>
@@ -149,9 +135,7 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
   <!-- OVERLAY: RESTART REQUEST                      -->
-  <!-- ============================================ -->
   <div id="overlay-restart" class="overlay" style="display:none;">
     <div class="overlay-content">
       <h2><i class="bi bi-arrow-clockwise"></i> Žiadosť o reštart</h2>
@@ -163,16 +147,23 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
   <!-- OVERLAY: OPPONENT DISCONNECTED               -->
   <!-- [ASSIGNMENT: If a player closes browser      -->
   <!--  other is informed and game ends]            -->
-  <!-- ============================================ -->
   <div id="overlay-disconnected" class="overlay" style="display:none;">
     <div class="overlay-content">
       <h2>Súper sa odpojil</h2>
       <p>Hra bola ukončená.</p>
       <button id="btn-back-lobby" class="btn btn-primary"><i class="bi bi-arrow-left"></i> Späť do lobby</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY: INFO MESSAGE                        -->
+  <div id="overlay-info" class="overlay" style="display:none;">
+    <div class="overlay-content">
+      <h2 id="info-title">Upozornenie</h2>
+      <p id="info-text"></p>
+      <button id="btn-info-close" class="btn btn-primary">Dobre</button>
     </div>
   </div>
 
