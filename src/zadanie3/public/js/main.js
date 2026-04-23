@@ -84,7 +84,6 @@
 
   function setupUI() {
     // --- Login screen ---
-    // [ASSIGNMENT: Login / lobby — player logs in with name]
     document.getElementById('btn-join').addEventListener('click', () => {
       const nameInput = document.getElementById('input-name');
       myName = nameInput.value.trim();
@@ -110,7 +109,6 @@
     });
 
     // --- Menu screen ---
-    // [ASSIGNMENT: Main menu — start game, rules, disconnect]
     document.getElementById('btn-start').addEventListener('click', () => {
       Network.sendStartGame();
       document.getElementById('btn-start').disabled = true;
@@ -138,19 +136,16 @@
     });
 
     // --- Game screen ---
-    // [ASSIGNMENT: Pause — current player can pause game anytime]
     document.getElementById('btn-pause').addEventListener('click', () => {
       Network.sendPause();
     });
 
-    // [ASSIGNMENT: Restart — possible to start new game]
     document.getElementById('btn-restart-ingame').addEventListener('click', () => {
       Network.sendRestartRequest();
       // Waiting notification can be omitted since status panel was removed
     });
 
     // --- Pause overlay ---
-    // [ASSIGNMENT: Pause can be canceled by any player]
     document.getElementById('btn-unpause').addEventListener('click', () => {
       Network.sendUnpause();
     });
@@ -198,7 +193,6 @@
     });
 
     // Opponent found — menu is shown
-    // [ASSIGNMENT: Server pairs two players into one room]
     Network.on('onMatched', (data) => {
       myPlayerIndex = data.playerIndex;
       opponentName = data.opponentName;
@@ -256,7 +250,6 @@
       });
 
       // When game ends — show results
-      // [ASSIGNMENT: Game result must be clearly displayed to both players]
       Game.setOnGameOver((results) => {
         showResults(results);
       });
@@ -284,7 +277,6 @@
     });
 
     // Pause
-    // [ASSIGNMENT: Other player is informed of pause]
     Network.on('onPaused', (data) => {
       Game.pause();
       const pauseInfo = document.getElementById('pause-info');
@@ -306,7 +298,6 @@
     });
 
     // Restart approved — new game
-    // [ASSIGNMENT: Restart without need to refresh page]
     Network.on('onGameRestart', () => {
       hideAllOverlays();
       Game.reset();
@@ -324,8 +315,6 @@
     });
 
     // Opponent disconnected
-    // [ASSIGNMENT: If either player closes browser,
-    //  other player is informed and game ends correctly]
     Network.on('onOpponentDisconnected', () => {
       Game.pause();
       hideAllOverlays();

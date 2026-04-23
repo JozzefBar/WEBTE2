@@ -1,9 +1,3 @@
-// GAME.JS — Game logic, physics (Matter.js) and rendering (Canvas)
-// [ASSIGNMENT: Game board and visualization — Canvas API]
-// [ASSIGNMENT: Controls — slingshot mechanic]
-// [ASSIGNMENT: Physics — Matter.js (collisions, friction, bouncing)]
-// [ASSIGNMENT: Game logic and turn switching]
-
 const Game = (function () {
   // --- Matter.js modules ---
   const Engine = Matter.Engine;
@@ -13,7 +7,6 @@ const Game = (function () {
   const Events = Matter.Events;
 
   // --- Color constants ---
-  // [ASSIGNMENT: Stones of both players must be color-distinguished]
   const PLAYER_COLORS = ['#ef5350', '#42a5f5'];       // red, blue
   const PLAYER_COLORS_DARK = ['#c62828', '#1565c0'];   // darker version (border)
   const PLAYER_COLORS_LIGHT = ['#ef9a9a', '#90caf9'];  // lighter version (highlight)
@@ -79,7 +72,6 @@ const Game = (function () {
     engine.gravity.y = 0;
 
     // Create walls (edges of the game board)
-    // [ASSIGNMENT: Stones bounce off the edges of the board]
     createWalls();
 
     // Setup mouse/touch events
@@ -116,7 +108,6 @@ const Game = (function () {
   }
 
   // INPUT EVENTS (mouse + touch)
-  // [ASSIGNMENT: Controls — slingshot mechanic]
 
   function setupInputEvents() {
     // --- Mouse ---
@@ -158,8 +149,6 @@ const Game = (function () {
   }
 
   // --- Clicking on a stone ---
-  // [ASSIGNMENT: Player clicks on a stone at the starting position
-  //  and drags the mouse away from the target]
   function onPointerDown(e) {
     if (!gameActive || isPaused || isGameOver) return;
     if (currentTurn !== myPlayerIndex) return; // not my turn
@@ -182,15 +171,12 @@ const Game = (function () {
   }
 
   // --- Mouse movement during aiming ---
-  // [ASSIGNMENT: While aiming, visual aid is displayed —
-  //  line or arrow from stone center to cursor]
   function onPointerMove(e) {
     if (!isAiming) return;
     mousePos = canvasToLogical(e.clientX, e.clientY);
   }
 
   // --- Mouse release — shoot ---
-  // [ASSIGNMENT: After mouse release, stone is fired]
   function onPointerUp() {
     if (!isAiming) return;
     isAiming = false;
@@ -198,7 +184,6 @@ const Game = (function () {
     const stone = activeStone.body;
 
     // Calculate shot vector (slingshot — opposite drag direction)
-    // [ASSIGNMENT: Shot power is proportional to drag distance]
     const pullDx = mousePos.x - stone.position.x;
     const pullDy = mousePos.y - stone.position.y;
     const pullDist = Math.sqrt(pullDx * pullDx + pullDy * pullDy);
@@ -248,9 +233,6 @@ const Game = (function () {
     if (!gameActive) return;
 
     // Physics — engine update with fixed step (determinism)
-    // [ASSIGNMENT: Physics simulation runs on clients' side,
-    //  while both clients receive the same input parameters
-    //  and simulate the same game state]
     if (!isPaused) {
       Engine.update(engine, 1000 / 60);
       checkStoneSpeeds();
@@ -265,7 +247,6 @@ const Game = (function () {
   }
 
   // Check and fully stop very slow moving stones
-  // [ASSIGNMENT: Stones slow down by friction and come to full stop]
   function checkStoneSpeeds() {
     const threshold = config.stopThreshold;
     allStones.forEach(s => {
@@ -311,7 +292,6 @@ const Game = (function () {
     const y = config.throwPosition.y;
 
     // Create physics body (circle)
-    // [ASSIGNMENT: Collisions between stones are physically correct (circle-circle bounce)]
     const body = Bodies.circle(x, y, config.stoneRadius, {
       friction: config.friction,
       frictionAir: config.frictionAir,
@@ -352,7 +332,6 @@ const Game = (function () {
   }
 
   // Turn change — new stone for the next player
-  // [ASSIGNMENT: Players take turns throwing stones]
   function handleTurnChange(data) {
     currentTurn = data.currentPlayer;
     activeStone = null;
@@ -365,8 +344,6 @@ const Game = (function () {
   }
 
   // All stones thrown — determine winner
-  // [ASSIGNMENT: After all stones are played, winner is determined —
-  //  the player whose stone is closest to the target wins]
   function handleAllStonesThrown() {
     isGameOver = true;
     activeStone = null;
@@ -438,8 +415,6 @@ const Game = (function () {
   }
 
   // RENDERING (Canvas API)
-  // [ASSIGNMENT: Rendering of the game board must be implemented
-  //  using Canvas API]
 
   function render() {
     ctx.clearRect(0, 0, fieldW, fieldH);
@@ -489,8 +464,6 @@ const Game = (function () {
   }
 
   // --- Target (concentric circles) ---
-  // [ASSIGNMENT: Target must be color-marked on the board
-  //  (e.g., concentric circles)]
   function drawTarget() {
     const { x, y, radius } = config.target;
     const rings = [
@@ -574,9 +547,6 @@ const Game = (function () {
   }
 
   // --- Aiming line (visual aid during drag) ---
-  // [ASSIGNMENT: Visual aid is shown during aiming —
-  //  line or arrow from stone center to cursor —
-  //  indicating direction and power of shot]
   function drawAimingLine() {
     if (!isAiming || !activeStone) return;
 

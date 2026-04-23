@@ -1,6 +1,4 @@
-// SERVER.JS — WebSocket server for online curling game
 // Uses Express (serves static files) + Socket.io (WebSockets)
-// [ASSIGNMENT: WebSocket synchronization, Game logic, Core game elements]
 
 const express = require('express');
 const http = require('http');
@@ -9,7 +7,6 @@ const fs = require('fs');
 const path = require('path');
 
 // --- Load game configuration from external JSON file ---
-// [ASSIGNMENT: Configuration - game parameters from an external file]
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf-8'));
 
 // --- Initialization of Express + HTTP server ---
@@ -26,8 +23,6 @@ app.get('/config', (req, res) => {
 });
 
 // SERVER-SIDE GAME LOGIC
-// [ASSIGNMENT: Server acts as authority over game state —
-//  manages player turns and broadcasts game events]
 
 // Queue of waiting players (lobby)
 let waitingPlayer = null;
@@ -40,12 +35,7 @@ let roomCounter = 0;
 io.on('connection', (socket) => {
   console.log(`[+] Hrac pripojeny: ${socket.id}`);
 
-  // ----------------------------------------------------------
   // LOGIN / LOBBY
-  // [ASSIGNMENT: Before starting the game, player logs in with a name.
-  //  Server pairs two waiting players into one room.
-  //  If only one is waiting, they see a waiting screen.]
-  // ----------------------------------------------------------
   socket.on('join-lobby', (data) => {
     const playerName = data.name || 'Anonym';
     console.log(`[LOBBY] ${playerName} (${socket.id}) sa pripaja`);
@@ -109,10 +99,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ----------------------------------------------------------
   // START GAME
-  // [ASSIGNMENT: Main menu — start game after pairing]
-  // ----------------------------------------------------------
   socket.on('start-game', () => {
     const roomId = socket.data.roomId;
     if (!roomId || !rooms[roomId]) return;
@@ -143,12 +130,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ----------------------------------------------------------
   // SHOOT STONE
-  // [ASSIGNMENT: Client sends the server a shot vector (direction and power).
-  //  Server forwards this data to the other client.
-  //  Physics simulation runs on the clients' side.]
-  // ----------------------------------------------------------
   socket.on('shoot', (data) => {
     const roomId = socket.data.roomId;
     const playerIndex = socket.data.playerIndex;
@@ -175,11 +157,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  // ----------------------------------------------------------
   // STONES STOPPED — turn switch
-  // [ASSIGNMENT: Next player can throw only when all
-  //  stones on the board come to a complete stop.]
-  // ----------------------------------------------------------
   socket.on('stones-stopped', () => {
     const roomId = socket.data.roomId;
     const playerIndex = socket.data.playerIndex;
@@ -207,12 +185,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ----------------------------------------------------------
   // PAUSE
-  // [ASSIGNMENT: Current player can pause the game anytime.
-  //  Other player is informed of the pause. Pause can be canceled
-  //  by any player.]
-  // ----------------------------------------------------------
   socket.on('pause', () => {
     const roomId = socket.data.roomId;
     if (!roomId || !rooms[roomId]) return;
@@ -242,11 +215,7 @@ io.on('connection', (socket) => {
     console.log(`[UNPAUSE] Hra pokracuje v ${roomId}`);
   });
 
-  // ----------------------------------------------------------
   // RESTART
-  // [ASSIGNMENT: After the game ends (or anytime during
-  //  by mutual agreement) a new game can be started.]
-  // ----------------------------------------------------------
   socket.on('restart-request', () => {
     const roomId = socket.data.roomId;
     if (!roomId || !rooms[roomId]) return;
@@ -319,12 +288,8 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ----------------------------------------------------------
   // PLAYER DISCONNECT
-  // [ASSIGNMENT: If any player closes the browser or loses
-  //  connection, other player is informed and game
-  //  ends gracefully.]
-  // ----------------------------------------------------------
+
   socket.on('disconnect', () => {
     console.log(`[-] Hrac odpojeny: ${socket.id}`);
 

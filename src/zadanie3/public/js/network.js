@@ -1,7 +1,3 @@
-// NETWORK.JS — Socket.io client for communication with server
-// [ASSIGNMENT: WebSocket synchronization — client sends server
-//  shot vector, server forwards it to the other client]
-
 const Network = (function () {
   // Socket.io connection — connect to server
   let socket = null;
@@ -45,7 +41,7 @@ const Network = (function () {
     });
 
     // Shot fired — received from server (sent to BOTH players)
-    // [ASSIGNMENT: Both clients receive identical input parameters]
+    // Both clients receive identical input parameters]
     socket.on('shot-fired', (data) => {
       if (callbacks.onShotFired) callbacks.onShotFired(data);
     });
@@ -92,7 +88,6 @@ const Network = (function () {
     // ---------- Disconnect ----------
 
     // Opponent disconnected
-    // [ASSIGNMENT: If one player closes the browser, the other is informed]
     socket.on('opponent-disconnected', () => {
       if (callbacks.onOpponentDisconnected) callbacks.onOpponentDisconnected();
     });
@@ -111,7 +106,6 @@ const Network = (function () {
   }
 
   // Sending shot vector (direction + power)
-  // [ASSIGNMENT: Client sends server the shot vector]
   function sendShoot(dx, dy) {
     socket.emit('shoot', { dx, dy });
   }

@@ -1,6 +1,3 @@
-   STYLE.CSS — Styles for online curling game
-   [ASSIGNMENT: Visual appearance of the application also sells]
-
 /* --- Reset and base settings --- */
 *, *::before, *::after {
   margin: 0;
@@ -334,8 +331,6 @@ input[type="text"]::placeholder {
 }
 
 /* Canvas container — takes up all free space */
-/* [ASSIGNMENT: Game must be responsive — game board must
-   adapt to browser window size] */
 #canvas-container {
   flex: 1;
   display: flex;
@@ -497,9 +492,6 @@ input[type="text"]::placeholder {
   justify-content: center;
   flex-wrap: wrap;
 }
-
-/* RESPONSIVENESS                               */
-/* [ASSIGNMENT: Game must be responsive]        */
 
 /* Tablets */
 @media (max-width: 768px) {
