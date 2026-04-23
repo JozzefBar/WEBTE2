@@ -9,6 +9,7 @@
   let opponentName = '';      // Name of opponent
   let gameConfig = null;      // Game configuration (from server)
   let previousScreen = null;  // For "back" button from rules
+  let playerSkins = ['classic', 'classic']; // Skin types for both players
 
   // HELPER FUNCTIONS — screen switching
 
@@ -92,9 +93,12 @@
         nameInput.focus();
         return;
       }
+      // Get selected skin
+      const selectedSkin = document.querySelector('input[name="stone-skin"]:checked').value;
+
       // Connect to server and lobby
       Network.connect();
-      Network.joinLobby(myName);
+      Network.joinLobby(myName, selectedSkin);
     });
 
     // Enter key in input field
@@ -197,6 +201,7 @@
       myPlayerIndex = data.playerIndex;
       opponentName = data.opponentName;
       gameConfig = data.config;
+      playerSkins = data.skins; // Store skins from server
 
       // UI setup
       document.getElementById('opponent-name').textContent = opponentName;
@@ -236,7 +241,7 @@
 
       // Initialize game engine
       const canvas = document.getElementById('game-canvas');
-      Game.init(canvas, gameConfig, myPlayerIndex, names);
+      Game.init(canvas, gameConfig, myPlayerIndex, names, playerSkins);
 
       // Setup Game module callbacks
       // When player shoots — send vector to server

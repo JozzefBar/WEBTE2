@@ -46,18 +46,20 @@ const Game = (function () {
   let onStonesStopCallback = null;
   let onGameOverCallback = null;
 
-  // Player names (for display)
+  // Player names and skins
   let playerNames = ['Hráč 1', 'Hráč 2'];
+  let playerSkins = ['classic', 'classic'];
 
   // INITIALIZATION
 
   // Initialize game engine and canvas
-  function init(canvasElement, gameConfig, playerIndex, names) {
+  function init(canvasElement, gameConfig, playerIndex, names, skins) {
     canvas = canvasElement;
     ctx = canvas.getContext('2d');
     config = gameConfig;
     myPlayerIndex = playerIndex;
     playerNames = names || playerNames;
+    playerSkins = skins || playerSkins;
     fieldW = config.field.width;
     fieldH = config.field.height;
 
@@ -522,17 +524,15 @@ const Game = (function () {
     ctx.fillStyle = stoneGrad;
     ctx.fill();
 
-    // Stone border
+    // Stone border (drawn before the skin pattern so patterns sit cleanly inside)
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.strokeStyle = PLAYER_COLORS_DARK[playerIndex];
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Stone handle (small circle in center)
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.35, 0, Math.PI * 2);
-    ctx.strokeStyle = PLAYER_COLORS_DARK[playerIndex];
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // Skin pattern on top of the base circle
+    StoneSkins.drawPattern(ctx, playerSkins[playerIndex], x, y, r);
 
     // Active stone blinks (highlight)
     if (isActive && currentTurn === myPlayerIndex && !waitingForStop && !isGameOver) {

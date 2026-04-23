@@ -38,19 +38,24 @@ io.on('connection', (socket) => {
   // LOGIN / LOBBY
   socket.on('join-lobby', (data) => {
     const playerName = data.name || 'Anonym';
-    console.log(`[LOBBY] ${playerName} (${socket.id}) sa pripaja`);
+    const playerSkin = data.skin || 'classic';
+    console.log(`[LOBBY] ${playerName} (${socket.id}) sa pripaja so skinom ${playerSkin}`);
+
+    const hrac = { id: socket.id, name: playerName, skin: playerSkin, socket };
 
     // If someone is already waiting and it's not the same player
     if (waitingPlayer && waitingPlayer.id !== socket.id) {
       // Pair two players into a new room
+      const hrac1 = waitingPlayer;
+      const hrac2 = hrac;
       const roomId = `room-${++roomCounter}`;
-      console.log(`[ROOM] Vytvorena miestnost ${roomId}: ${waitingPlayer.name} vs ${playerName}`);
+      console.log(`[ROOM] Vytvorena miestnost ${roomId}: ${hrac1.name} vs ${hrac2.name}`);
 
       // Room structure — holds game state
       rooms[roomId] = {
         players: [
-          { id: waitingPlayer.id, name: waitingPlayer.name, index: 0 },
-          { id: socket.id, name: playerName, index: 1 }
+          { id: hrac1.id, name: hrac1.name, index: 0 },
+          { id: hrac2.id, name: hrac2.name, index: 1 }
         ],
         currentPlayer: 0,        // whose turn it is (0 or 1)
         stonesThrown: [0, 0],    // how many stones each player has thrown
@@ -63,29 +68,31 @@ io.on('connection', (socket) => {
       };
 
       // Socket.io rooms — both players join a shared room
-      waitingPlayer.socket.join(roomId);
-      socket.join(roomId);
+      hrac1.socket.join(roomId);
+      hrac2.socket.join(roomId);
 
       // Save roomId and player index to socket for later access
-      waitingPlayer.socket.data.roomId = roomId;
-      waitingPlayer.socket.data.playerIndex = 0;
-      waitingPlayer.socket.data.playerName = waitingPlayer.name;
-      socket.data.roomId = roomId;
-      socket.data.playerIndex = 1;
-      socket.data.playerName = playerName;
+      hrac1.socket.data.roomId = roomId;
+      hrac1.socket.data.playerIndex = 0;
+      hrac1.socket.data.playerName = hrac1.name;
+      hrac2.socket.data.roomId = roomId;
+      hrac2.socket.data.playerIndex = 1;
+      hrac2.socket.data.playerName = hrac2.name;
 
       // Send pairing information to both players
-      io.to(waitingPlayer.id).emit('game-matched', {
+      io.to(hrac1.id).emit('game-matched', {
         roomId,
         playerIndex: 0,
-        opponentName: playerName,
-        config
+        opponentName: hrac2.name,
+        config: config,
+        skins: [hrac1.skin, hrac2.skin]
       });
-      io.to(socket.id).emit('game-matched', {
+      io.to(hrac2.id).emit('game-matched', {
         roomId,
         playerIndex: 1,
-        opponentName: waitingPlayer.name,
-        config
+        opponentName: hrac1.name,
+        config: config,
+        skins: [hrac1.skin, hrac2.skin]
       });
 
       // Delete waiting player
@@ -93,7 +100,7 @@ io.on('connection', (socket) => {
 
     } else {
       // First player — waits for opponent
-      waitingPlayer = { id: socket.id, name: playerName, socket };
+      waitingPlayer = { id: socket.id, name: playerName, skin: playerSkin, socket };
       socket.emit('waiting');
       console.log(`[LOBBY] ${playerName} caka na supera...`);
     }

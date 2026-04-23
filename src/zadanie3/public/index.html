@@ -23,7 +23,44 @@
         <input type="text" id="input-name" placeholder="Zadaj prezývku..." maxlength="20" autocomplete="off">
         <button id="btn-join" class="btn btn-primary">Pripojiť sa</button>
       </div>
-      <button id="btn-rules-login" class="btn btn-secondary">Pravidlá</button>
+
+      <div class="skin-selector">
+        <p class="skin-label">Vzor kameňa:</p>
+        <div class="skin-options">
+          <label class="skin-option">
+            <input type="radio" name="stone-skin" value="classic" checked>
+            <div class="skin-box"><div class="skin-preview skin-classic"></div></div>
+            <span>Klasik</span>
+          </label>
+          <label class="skin-option">
+            <input type="radio" name="stone-skin" value="stripes">
+            <div class="skin-box"><div class="skin-preview skin-stripes"></div></div>
+            <span>Pruhy</span>
+          </label>
+          <label class="skin-option">
+            <input type="radio" name="stone-skin" value="star">
+            <div class="skin-box"><div class="skin-preview skin-star"></div></div>
+            <span>Hviezda</span>
+          </label>
+          <label class="skin-option">
+            <input type="radio" name="stone-skin" value="dots">
+            <div class="skin-box"><div class="skin-preview skin-dots"></div></div>
+            <span>Bodky</span>
+          </label>
+          <label class="skin-option">
+            <input type="radio" name="stone-skin" value="bullseye">
+            <div class="skin-box"><div class="skin-preview skin-bullseye"></div></div>
+            <span>Terč</span>
+          </label>
+          <label class="skin-option">
+            <input type="radio" name="stone-skin" value="diamond">
+            <div class="skin-box"><div class="skin-preview skin-diamond"></div></div>
+            <span>Diamant</span>
+          </label>
+        </div>
+      </div>
+
+      <button id="btn-rules-login" class="btn btn-secondary" style="margin-top: 1rem;">Pravidlá</button>
     </div>
   </div>
 
@@ -175,6 +212,7 @@
 
   <!-- Our scripts (order matters!) -->
   <script src="js/network.js"></script>
+  <script src="js/skins.js"></script>
   <script src="js/game.js"></script>
   <script src="js/main.js"></script>
 

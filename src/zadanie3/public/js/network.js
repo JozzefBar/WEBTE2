@@ -20,7 +20,12 @@ const Network = (function () {
 
     // Server matched two players — game can start
     socket.on('game-matched', (data) => {
-      if (callbacks.onMatched) callbacks.onMatched(data);
+      if (callbacks.onMatched) callbacks.onMatched({
+        playerIndex: data.playerIndex,
+        opponentName: data.opponentName,
+        config: data.config,
+        skins: data.skins
+      });
     });
 
     // ---------- Game events ----------
@@ -95,9 +100,9 @@ const Network = (function () {
 
   // --- Sending messages to server ---
 
-  // Connect to lobby with player name
-  function joinLobby(name) {
-    socket.emit('join-lobby', { name });
+  // Join lobby with name and skin
+  function joinLobby(name, skin) {
+    socket.emit('join-lobby', { name, skin });
   }
 
   // Player is ready to start the game
