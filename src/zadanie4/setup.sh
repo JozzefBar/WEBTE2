@@ -22,5 +22,5 @@ php artisan db:seed --force
 # Set permissions
 chmod -R 777 storage bootstrap/cache
 
-echo "✅ Zadanie 4 setup complete!"
-echo "Visit: http://localhost:8080/zadanie4/public/"
+echo "Zadanie 4 setup complete!"
+echo "Visit: http://localhost:8080/zadanie4/"

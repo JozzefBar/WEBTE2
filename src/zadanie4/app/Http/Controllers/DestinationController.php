@@ -78,7 +78,7 @@ class DestinationController extends Controller
             return redirect()->back()->with('error', 'Destinácie neboli nájdené.');
         }
 
-        $comparisonData = $destinations->map(function ($dest) use ($month) {
+        $comparisonData = $destinations->map(function (Destination $dest) use ($month) {
             return [
                 'destination' => $dest,
                 'weather' => $dest->weatherForMonth($month),

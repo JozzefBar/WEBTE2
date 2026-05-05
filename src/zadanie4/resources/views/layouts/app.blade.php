@@ -13,12 +13,12 @@
 <body>
     <nav class="navbar">
         <div class="navbar-inner">
-            <a href="{{ route('home') }}" class="navbar-brand">
+            <a href="{{ route('home') }}/" class="navbar-brand">
                 <i class="fas fa-umbrella-beach"></i>
                 Kam na dovolenku?
             </a>
             <div class="navbar-links">
-                <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">
+                <a href="{{ route('home') }}/" class="{{ request()->routeIs('home') ? 'active' : '' }}">
                     <i class="fas fa-search"></i> Hľadať
                 </a>
                 <a href="{{ route('statistics') }}" class="{{ request()->routeIs('statistics') ? 'active' : '' }}">

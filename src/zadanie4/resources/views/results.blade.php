@@ -3,7 +3,7 @@
 @section('title', 'Výsledky vyhľadávania — Kam na dovolenku?')
 
 @section('content')
-<a href="{{ route('home') }}" class="back-link">
+<a href="{{ route('home') }}/" class="back-link">
     <i class="fas fa-arrow-left"></i> Späť na vyhľadávanie
 </a>
 
