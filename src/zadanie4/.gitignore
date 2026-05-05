@@ -1,0 +1,21 @@
+/vendor/
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Laravel 11
+/.env
+/.env.backup
+/.env.testing
+/.phpunit.result.cache
+/bootstrap/cache/
+/storage/app/public/
+/storage/framework/cache/data/
+/storage/framework/sessions/
+/storage/framework/testing/
+/storage/framework/views/
+/storage/logs/
+/public/build/
+/public/hot
+/public/storage
+.phpunit.cache
