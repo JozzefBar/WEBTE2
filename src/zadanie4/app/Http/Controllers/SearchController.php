@@ -42,7 +42,7 @@ class SearchController extends Controller
         $destinations = Destination::with(['destinationTypes', 'monthlyWeather'])->get();
 
         // Score each destination
-        $scored = $destinations->map(function ($dest) use ($month, $selectedTypes, $tempPref, $distPref) {
+        $scored = $destinations->map(function (Destination $dest) use ($month, $selectedTypes, $tempPref, $distPref) {
             $score = 0;
             $reasons = [];
 
@@ -53,7 +53,7 @@ class SearchController extends Controller
             $score += $typeScore;
             if (count($matchedTypes) > 0) {
                 $labels = array_map(fn($t) => DestinationType::label($t), $matchedTypes);
-                $reasons[] = '✓ ' . implode(', ', $labels);
+                $reasons[] = '<i class="fas fa-check" style="color: var(--success); margin-right: 4px;"></i> ' . implode(', ', $labels);
             }
 
             // 2. Temperature matching (max 25 pts)
@@ -61,7 +61,7 @@ class SearchController extends Controller
             if ($weather) {
                 if ($tempPref === 'any') {
                     $score += 15;
-                    $reasons[] = '🌡️ Priemerná teplota: ' . $weather->avg_temp . ' °C';
+                    $reasons[] = '<i class="fas fa-thermometer-half" style="color: var(--warning); margin-right: 4px;"></i> Priemerná teplota: ' . $weather->avg_temp . ' °C';
                 } elseif ($dest->matchesTemperature($tempPref, $month)) {
                     $score += 25;
                     $tempLabel = match ($tempPref) {
@@ -70,7 +70,7 @@ class SearchController extends Controller
                         'pleasant' => 'Príjemne (10–19°C)',
                         default => '',
                     };
-                    $reasons[] = "🌡️ {$tempLabel}: {$weather->avg_temp} °C";
+                    $reasons[] = "<i class=\"fas fa-thermometer-half\" style=\"color: var(--warning); margin-right: 4px;\"></i> {$tempLabel}: {$weather->avg_temp} °C";
                 } else {
                     // Partial temperature match — closer = more points
                     $diff = match ($tempPref) {
@@ -81,17 +81,17 @@ class SearchController extends Controller
                     };
                     $partial = max(0, 15 - $diff * 2);
                     $score += $partial;
-                    $reasons[] = "🌡️ Teplota: {$weather->avg_temp} °C";
+                    $reasons[] = "<i class=\"fas fa-thermometer-half\" style=\"color: var(--warning); margin-right: 4px;\"></i> Teplota: {$weather->avg_temp} °C";
                 }
             }
 
             // 3. Distance matching (max 20 pts)
             if ($dest->matchesDistance($distPref)) {
                 $score += 20;
-                $reasons[] = '✈️ Let z Viedne: ' . $dest->flight_hours_from_vienna . ' h';
+                $reasons[] = '<i class="fas fa-plane" style="color: var(--info); margin-right: 4px;"></i> Let z Viedne: ' . $dest->flight_hours_from_vienna . ' h';
             } else {
                 // Still show flight time but no bonus
-                $reasons[] = '✈️ Let z Viedne: ' . $dest->flight_hours_from_vienna . ' h (ďalej ako preferované)';
+                $reasons[] = '<i class="fas fa-plane" style="color: var(--info); margin-right: 4px;"></i> Let z Viedne: ' . $dest->flight_hours_from_vienna . ' h (ďalej ako preferované)';
             }
 
             // 4. Season bonus — if weather is good for the month

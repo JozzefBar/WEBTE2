@@ -62,18 +62,20 @@
                 <div class="radio-group">
                     @php
                         $temps = [
-                            'hot' => '🔥 Horúco (30 °C+)',
-                            'warm' => '☀️ Teplo (20–29 °C)',
-                            'pleasant' => '🌤️ Príjemne (10–19 °C)',
-                            'any' => '🤷 Jedno mi to',
+                            'hot' => ['icon' => 'fa-fire', 'label' => 'Horúco (30 °C+)'],
+                            'warm' => ['icon' => 'fa-sun', 'label' => 'Teplo (20–29 °C)'],
+                            'pleasant' => ['icon' => 'fa-cloud-sun', 'label' => 'Príjemne (10–19 °C)'],
+                            'any' => ['icon' => 'fa-random', 'label' => 'Jedno mi to'],
                         ];
                     @endphp
-                    @foreach($temps as $value => $label)
+                    @foreach($temps as $value => $info)
                         <div class="radio-item">
                             <input type="radio" name="temperature_pref" value="{{ $value }}"
                                    id="temp_{{ $value }}"
                                    {{ old('temperature_pref', 'any') === $value ? 'checked' : '' }}>
-                            <label for="temp_{{ $value }}">{{ $label }}</label>
+                            <label for="temp_{{ $value }}">
+                                <i class="fas {{ $info['icon'] }}"></i> {{ $info['label'] }}
+                            </label>
                         </div>
                     @endforeach
                 </div>
@@ -85,17 +87,19 @@
                 <div class="radio-group">
                     @php
                         $distances = [
-                            '3h' => '✈️ Do 3 hodín letu',
-                            '5h' => '✈️ Do 5 hodín letu',
-                            'anywhere' => '🌍 Kdekoľvek',
+                            '3h' => ['icon' => 'fa-plane-arrival', 'label' => 'Do 3 hodín letu'],
+                            '5h' => ['icon' => 'fa-plane', 'label' => 'Do 5 hodín letu'],
+                            'anywhere' => ['icon' => 'fa-globe-europe', 'label' => 'Kdekoľvek'],
                         ];
                     @endphp
-                    @foreach($distances as $value => $label)
+                    @foreach($distances as $value => $info)
                         <div class="radio-item">
                             <input type="radio" name="distance_pref" value="{{ $value }}"
                                    id="dist_{{ $value }}"
                                    {{ old('distance_pref', 'anywhere') === $value ? 'checked' : '' }}>
-                            <label for="dist_{{ $value }}">{{ $label }}</label>
+                            <label for="dist_{{ $value }}">
+                                <i class="fas {{ $info['icon'] }}"></i> {{ $info['label'] }}
+                            </label>
                         </div>
                     @endforeach
                 </div>

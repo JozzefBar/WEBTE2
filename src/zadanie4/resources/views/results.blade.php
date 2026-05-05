@@ -53,7 +53,7 @@
                     </div>
                     <ul class="result-reasons">
                         @foreach($item['reasons'] as $reason)
-                            <li>{{ $reason }}</li>
+                            <li>{!! $reason !!}</li>
                         @endforeach
                     </ul>
                 </div>
