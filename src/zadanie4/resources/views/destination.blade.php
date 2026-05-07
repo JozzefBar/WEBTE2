@@ -82,7 +82,7 @@
     <div class="detail-section">
         <h3><i class="fas fa-globe-europe"></i> Štát a základné informácie</h3>
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1rem;">
-            <img src="{{ $destination->flag_url }}" alt="{{ $destination->country }}" style="width: 64px; height: 48px; border-radius: 4px; border: 1px solid var(--border);">
+            <img src="{{ $destination->flag_url }}" alt="{{ $destination->country }}" style="width: 64px; height: 48px; border-radius: 4px; border: 1px solid var(--border-color);">
             <div>
                 <div style="font-size: 1.2rem; font-weight: 600;">{{ $destination->country }}</div>
                 <div style="color: var(--text-secondary);">{{ $destination->name }}</div>
@@ -96,7 +96,7 @@
             <p style="color: var(--text-secondary); font-size: 0.85rem;"><strong>Typ destinácie:</strong></p>
             <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">
                 @foreach($destination->destinationTypes as $dt)
-                    <span style="background: var(--accent-dim); color: var(--accent); padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
+                    <span style="background: var(--accent-dim); color: var(--accent-primary); padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
                         {{ \App\Models\DestinationType::label($dt->type) }}
                     </span>
                 @endforeach

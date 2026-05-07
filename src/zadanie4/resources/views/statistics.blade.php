@@ -23,18 +23,24 @@
 {{-- Visits by time of day --}}
 <div class="chart-container">
     <h3><i class="fas fa-clock"></i> Návštevnosť podľa dennej doby</h3>
-    <canvas id="timeSlotChart" height="100"></canvas>
+    <div style="position: relative; height: 350px;">
+        <canvas id="timeSlotChart"></canvas>
+    </div>
 </div>
 
 {{-- Preference charts --}}
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;" class="charts-grid-responsive">
     <div class="chart-container">
         <h3><i class="fas fa-tags"></i> Najhľadanejšie typy dovolenky</h3>
-        <canvas id="typeChart" height="150"></canvas>
+        <div style="position: relative; height: 300px;">
+            <canvas id="typeChart"></canvas>
+        </div>
     </div>
     <div class="chart-container">
         <h3><i class="fas fa-thermometer-half"></i> Klimatické preferencie</h3>
-        <canvas id="tempChart" height="150"></canvas>
+        <div style="position: relative; height: 300px;">
+            <canvas id="tempChart"></canvas>
+        </div>
     </div>
 </div>
 
@@ -44,38 +50,40 @@
     @if($searchedDestinations->isEmpty())
         <p style="color: var(--text-muted); text-align: center; padding: 2rem;">Zatiaľ žiadne vyhľadávania.</p>
     @else
-        <table class="data-table" id="searchTable">
-            <thead>
-                <tr>
-                    <th data-sort="name" id="sort-name">
-                        Destinácia <span class="sort-icon">⇕</span>
-                    </th>
-                    <th data-sort="country" id="sort-country">
-                        Štát <span class="sort-icon">⇕</span>
-                    </th>
-                    <th data-sort="count" id="sort-count">
-                        Počet vyhľadávaní <span class="sort-icon">⇕</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody id="searchTableBody">
-                @foreach($searchedDestinations as $item)
+        <div class="table-responsive">
+            <table class="data-table" id="searchTable">
+                <thead>
                     <tr>
-                        <td data-name="{{ $item['name'] }}">{{ $item['name'] }}</td>
-                        <td data-country="{{ $item['country'] }}">{{ $item['country'] }}</td>
-                        <td data-count="{{ $item['count'] }}">{{ $item['count'] }}</td>
+                        <th data-sort="name" id="sort-name">
+                            Destinácia <span class="sort-icon">⇕</span>
+                        </th>
+                        <th data-sort="country" id="sort-country">
+                            Štát <span class="sort-icon">⇕</span>
+                        </th>
+                        <th data-sort="count" id="sort-count">
+                            Počet vyhľadávaní <span class="sort-icon">⇕</span>
+                        </th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody id="searchTableBody">
+                    @foreach($searchedDestinations as $item)
+                        <tr>
+                            <td data-name="{{ $item['name'] }}">{{ $item['name'] }}</td>
+                            <td data-country="{{ $item['country'] }}">{{ $item['country'] }}</td>
+                            <td data-count="{{ $item['count'] }}">{{ $item['count'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     @endif
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Chart.js defaults for dark theme
-    Chart.defaults.color = '#8899aa';
-    Chart.defaults.borderColor = '#2a3a4a';
+    // Chart.js defaults for light theme
+    Chart.defaults.color = '#475569';
+    Chart.defaults.borderColor = '#e2e8f0';
 
     const chartColors = ['#00d4aa', '#4d96ff', '#ff6b6b', '#ffd93d', '#6bcb77', '#9b59b6'];
 
@@ -96,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
                     y: { beginAtZero: true, ticks: { stepSize: 1 } }
@@ -119,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'bottom', labels: { padding: 15 } }
                 }
@@ -141,6 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'bottom', labels: { padding: 15 } }
                 }
@@ -200,6 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <style>
     @media (max-width: 768px) {
+        .charts-grid-responsive,
         div[style*="grid-template-columns: 1fr 1fr"] {
             grid-template-columns: 1fr !important;
         }
